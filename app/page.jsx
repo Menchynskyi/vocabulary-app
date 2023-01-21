@@ -8,6 +8,8 @@ import { WordsList } from "./WordsList";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const revalidate = 3;
+
 export default function Home() {
   const setOfWords = use(getRandomSetOfWords());
 
