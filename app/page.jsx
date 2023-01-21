@@ -8,7 +8,7 @@ import { WordsList } from "./WordsList";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const revalidate = 3600; // revalidate every hour
+export const revalidate = 36000;
 
 export default function Home() {
   const setOfWords = use(getRandomSetOfWords());
