@@ -1,3 +1,5 @@
+import { use } from "react";
+
 import { Inter } from "@next/font/google";
 import { Suspense } from "react";
 import styles from "./page.module.css";
@@ -6,8 +8,8 @@ import { WordsList } from "./WordsList";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default async function Home() {
-  const setOfWords = await getRandomSetOfWords();
+export default function Home() {
+  const setOfWords = use(getRandomSetOfWords());
 
   return (
     <main className={styles.main}>
