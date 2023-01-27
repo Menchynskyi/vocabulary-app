@@ -59,4 +59,5 @@
   background: #00292e;
   color: white;
   transform: rotateY(180deg);
+  white-space: pre-line;
 }

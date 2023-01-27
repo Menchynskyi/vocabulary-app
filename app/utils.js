@@ -2,6 +2,10 @@ import { Client } from "@notionhq/client";
 
 const notionClient = new Client({ auth: process.env.NOTION_SECRET });
 const notionVocabularyPageId = process.env.NOTION_VOCABULARY_PAGE_ID;
+const vocabularySetLength = process.env.VOCABULARY_SET_LENGTH;
+
+const translationPrefix = "Translation:\n";
+const prefixReg = /(Explanation|Example|Translation):\n/g;
 
 function generateRandomSet(wordsArr, setLength) {
   const randomSet = [];
@@ -42,9 +46,16 @@ async function getWordTranslation(client, blockId) {
     block_id: blockId,
   });
   return response.results.reduce((translation, block) => {
-    const paragraphText = block.paragraph.rich_text
+    const withTranslation = block.paragraph.rich_text.some((block) =>
+      block.plain_text.includes(translationPrefix)
+    );
+    const paragraphContent = block.paragraph.rich_text.filter((block) =>
+      withTranslation ? block.plain_text.includes(translationPrefix) : true
+    );
+    const paragraphText = paragraphContent
       .map((block) => block.plain_text)
-      .join("");
+      .join("")
+      .replaceAll(prefixReg, "");
     return translation + paragraphText;
   }, "");
 }
@@ -52,7 +63,7 @@ async function getWordTranslation(client, blockId) {
 export async function getRandomSetOfWords() {
   const wordsArr = await getAllWords(notionClient, notionVocabularyPageId);
 
-  const randomSetOfWords = generateRandomSet(wordsArr, 10);
+  const randomSetOfWords = generateRandomSet(wordsArr, vocabularySetLength);
 
   const randomSetOfWordsTranslations = await Promise.all(
     randomSetOfWords.map((word) => getWordTranslation(notionClient, word.id))
