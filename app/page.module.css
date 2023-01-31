@@ -7,7 +7,7 @@
 }
 
 .title {
-  margin-bottom: 180px;
+  margin-bottom: 100px;
 }
 
 .wordBlock {
@@ -18,6 +18,10 @@
   width: 400px;
   height: 400px;
   perspective: 1000px;
+}
+
+.card:hover {
+  cursor: pointer;
 }
 
 .content {
@@ -60,6 +64,26 @@
   color: white;
   transform: rotateY(180deg);
   white-space: pre-line;
+}
+
+.cardContainer {
+  display: flex;
+}
+
+.cardButton {
+  width: 40px;
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+}
+
+.cardButton:focus {
+  outline: none;
+}
+
+.cardButtonNotActive {
+  pointer-events: none;
+  cursor: default;
 }
 
 @media screen and (max-width: 768px) {

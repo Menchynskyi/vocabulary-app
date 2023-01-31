@@ -4,24 +4,35 @@ import styles from "./page.module.css";
 
 export function WordCard({
   word,
-  translation,
+  isFirst,
   toggleCard,
+  translation,
+  switchWords,
   isTranslationVisible,
 }) {
   return (
-    <div className={styles.card} onClick={toggleCard}>
+    <div className={styles.cardContainer}>
       <div
-        className={`${styles.content} ${
-          isTranslationVisible ? styles.flipped : ""
+        onClick={() => switchWords(-1)}
+        className={`${styles.cardButton} ${
+          isFirst ? styles.cardButtonNotActive : ""
         }`}
-      >
-        <div className={styles.front}>
-          <span>{word}</span>
-        </div>
-        <div className={styles.back}>
-          <span>{translation}</span>
+      ></div>
+      <div className={styles.card} onClick={toggleCard}>
+        <div
+          className={`${styles.content} ${
+            isTranslationVisible ? styles.flipped : ""
+          }`}
+        >
+          <div className={styles.front}>
+            <span>{word}</span>
+          </div>
+          <div className={styles.back}>
+            <span>{translation}</span>
+          </div>
         </div>
       </div>
+      <div onClick={() => switchWords(1)} className={styles.cardButton}></div>
     </div>
   );
 }

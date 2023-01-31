@@ -17,6 +17,21 @@ export function WordsList({ words }) {
     setIsTranslationVisible((prev) => !prev);
   }, []);
 
+  const switchWords = useCallback(
+    (inc) => {
+      setIsTranslationVisible(false);
+
+      if (isTranslationVisible) {
+        setTimeout(() => {
+          setCurrentWordIndex((prev) => prev + inc);
+        }, 160);
+      } else {
+        setCurrentWordIndex((prev) => prev + inc);
+      }
+    },
+    [isTranslationVisible]
+  );
+
   const handleKeybordActions = useCallback(
     (event) => {
       if (event.keyCode === 32) {
@@ -24,27 +39,14 @@ export function WordsList({ words }) {
         return;
       }
 
-      setIsTranslationVisible(false);
       if (event.keyCode === 37 && currentWordIndex !== 0) {
-        if (isTranslationVisible) {
-          setTimeout(() => {
-            setCurrentWordIndex((prev) => prev - 1);
-          }, 160);
-        } else {
-          setCurrentWordIndex((prev) => prev - 1);
-        }
+        switchWords(-1);
       }
       if (event.keyCode === 39 && currentWordIndex < words.length) {
-        if (isTranslationVisible) {
-          setTimeout(() => {
-            setCurrentWordIndex((prev) => prev + 1);
-          }, 160);
-        } else {
-          setCurrentWordIndex((prev) => prev + 1);
-        }
+        switchWords(1);
       }
     },
-    [currentWordIndex, words.length, toggleCard, isTranslationVisible]
+    [currentWordIndex, words.length, toggleCard, switchWords]
   );
 
   useEffect(() => {
@@ -71,15 +73,14 @@ export function WordsList({ words }) {
           </div>
         ))
       ) : (
-        <>
-          <WordCard
-            word={currentWord.word}
-            toggleCard={toggleCard}
-            translation={currentWord.translation}
-            isTranslationVisible={isTranslationVisible}
-          />
-          <div className={styles.controlButtons}></div>
-        </>
+        <WordCard
+          word={currentWord.word}
+          toggleCard={toggleCard}
+          switchWords={switchWords}
+          isFirst={currentWordIndex === 0}
+          translation={currentWord.translation}
+          isTranslationVisible={isTranslationVisible}
+        />
       )}
     </div>
   );
