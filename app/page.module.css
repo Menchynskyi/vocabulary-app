@@ -7,7 +7,7 @@
 }
 
 .title {
-  margin-bottom: 40px;
+  margin-bottom: 180px;
 }
 
 .wordBlock {
@@ -60,4 +60,20 @@
   color: white;
   transform: rotateY(180deg);
   white-space: pre-line;
+}
+
+@media screen and (max-width: 768px) {
+  .main {
+    padding: 40px;
+  }
+
+  .title {
+    margin-bottom: 80px;
+  }
+
+  .card {
+    width: 300px;
+    height: 300px;
+    perspective: 1000px;
+  }
 }

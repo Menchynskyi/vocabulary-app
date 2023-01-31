@@ -13,10 +13,14 @@ export function WordsList({ words }) {
 
   const isCompleted = currentWordIndex >= words.length;
 
+  const toggleCard = useCallback(() => {
+    setIsTranslationVisible((prev) => !prev);
+  }, []);
+
   const handleKeybordActions = useCallback(
     (event) => {
       if (event.keyCode === 32) {
-        setIsTranslationVisible((prev) => !prev);
+        toggleCard();
         return;
       }
 
@@ -40,7 +44,7 @@ export function WordsList({ words }) {
         }
       }
     },
-    [currentWordIndex, words.length, isTranslationVisible]
+    [currentWordIndex, words.length, toggleCard, isTranslationVisible]
   );
 
   useEffect(() => {
@@ -67,11 +71,15 @@ export function WordsList({ words }) {
           </div>
         ))
       ) : (
-        <WordCard
-          word={currentWord.word}
-          translation={currentWord.translation}
-          isTranslationVisible={isTranslationVisible}
-        />
+        <>
+          <WordCard
+            word={currentWord.word}
+            toggleCard={toggleCard}
+            translation={currentWord.translation}
+            isTranslationVisible={isTranslationVisible}
+          />
+          <div className={styles.controlButtons}></div>
+        </>
       )}
     </div>
   );

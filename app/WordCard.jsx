@@ -2,9 +2,14 @@
 
 import styles from "./page.module.css";
 
-export function WordCard({ word, translation, isTranslationVisible }) {
+export function WordCard({
+  word,
+  translation,
+  toggleCard,
+  isTranslationVisible,
+}) {
   return (
-    <div className={styles.card}>
+    <div className={styles.card} onClick={toggleCard}>
       <div
         className={`${styles.content} ${
           isTranslationVisible ? styles.flipped : ""
