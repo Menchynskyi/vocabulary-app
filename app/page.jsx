@@ -14,7 +14,10 @@ const uri = `${
 
 async function getWords() {
   return await (
-    await fetch(`${uri}/api/words`, { next: { revalidate: 60 } })
+    await fetch(
+      `https://vocabulary-app-git-main-menchynskyi.vercel.app/api/words`,
+      { next: { revalidate: 60 } }
+    )
   ).json();
 }
 
