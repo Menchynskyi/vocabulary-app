@@ -6,6 +6,10 @@
   min-height: 100vh;
 }
 
+.loader {
+  margin: auto 0;
+}
+
 .title {
   margin-bottom: 100px;
 }
