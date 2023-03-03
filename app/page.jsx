@@ -7,6 +7,7 @@ import { WordsList } from "./WordsList";
 const inter = Inter({ subsets: ["latin"] });
 
 export const revalidate = 36000;
+
 const uri = `${
   process.env.NODE_ENV === "development"
     ? "http://localhost:3000"
@@ -14,7 +15,7 @@ const uri = `${
 }`;
 
 async function getWords() {
-  return await (await fetch(`${uri}/api/words`, { cache: "no-store" })).json();
+  return await (await fetch(`${uri}/api/words`)).json();
 }
 
 export default function Home() {
