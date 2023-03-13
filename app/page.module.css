@@ -12,6 +12,7 @@
 
 .title {
   margin-bottom: 100px;
+  cursor: pointer;
 }
 
 .wordBlock {

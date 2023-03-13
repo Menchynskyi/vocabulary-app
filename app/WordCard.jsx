@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 export function WordCard({
   word,
   isFirst,
+  isFlipped,
   toggleCard,
   translation,
   switchWords,
@@ -25,10 +26,10 @@ export function WordCard({
           }`}
         >
           <div className={styles.front}>
-            <span>{word}</span>
+            <span>{isFlipped ? translation : word}</span>
           </div>
           <div className={styles.back}>
-            <span>{translation}</span>
+            <span>{isFlipped ? word : translation}</span>
           </div>
         </div>
       </div>

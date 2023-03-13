@@ -10,12 +10,15 @@ const inter = Inter({ subsets: ["latin"] });
 export function WordsList({ words }) {
   const [isTranslationVisible, setIsTranslationVisible] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [isFlippedMode, setIsFlippedMode] = useState(false);
 
   const isCompleted = currentWordIndex >= words.length;
 
   const toggleCard = useCallback(() => {
     setIsTranslationVisible((prev) => !prev);
   }, []);
+
+  const toggleMode = () => setIsFlippedMode((prev) => !prev);
 
   const switchWords = useCallback(
     (inc) => {
@@ -60,28 +63,34 @@ export function WordsList({ words }) {
   const currentWord = words[currentWordIndex];
 
   return (
-    <div className={inter.className}>
-      {isCompleted ? (
-        words.map(({ id, word, translation }) => (
-          <div className={styles.wordBlock} key={id}>
-            <div>
-              <span>{word}</span>
+    <>
+      <div className={styles.title} onClick={toggleMode}>
+        <h1 className={inter.className}>Vocabulary</h1>
+      </div>
+      <div className={inter.className}>
+        {isCompleted ? (
+          words.map(({ id, word, translation }) => (
+            <div className={styles.wordBlock} key={id}>
+              <div>
+                <span>{word}</span>
+              </div>
+              <div>
+                <span>{translation}</span>
+              </div>
             </div>
-            <div>
-              <span>{translation}</span>
-            </div>
-          </div>
-        ))
-      ) : (
-        <WordCard
-          word={currentWord.word}
-          toggleCard={toggleCard}
-          switchWords={switchWords}
-          isFirst={currentWordIndex === 0}
-          translation={currentWord.translation}
-          isTranslationVisible={isTranslationVisible}
-        />
-      )}
-    </div>
+          ))
+        ) : (
+          <WordCard
+            word={currentWord.word}
+            toggleCard={toggleCard}
+            switchWords={switchWords}
+            isFlipped={isFlippedMode}
+            isFirst={currentWordIndex === 0}
+            translation={currentWord.translation}
+            isTranslationVisible={isTranslationVisible}
+          />
+        )}
+      </div>
+    </>
   );
 }
