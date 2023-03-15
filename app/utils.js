@@ -2,7 +2,7 @@ import { Client } from "@notionhq/client";
 
 const notionClient = new Client({ auth: process.env.NOTION_SECRET });
 const notionVocabularyPageId = process.env.NOTION_VOCABULARY_PAGE_ID;
-const vocabularySetLength = Number(process.env.VOCABULARY_SET_LENGTH || 10);
+const vocabularySetLength = Number(process.env.VOCABULARY_SET_LENGTH || 15);
 export const uri = "https://vocabulary-app-git-main-menchynskyi.vercel.app";
 
 const translationPrefix = "Translation:\n";
