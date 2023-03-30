@@ -1,6 +1,9 @@
 import { Client } from "@notionhq/client";
 
-export const uri = "http://localhost:3000";
+export const uri =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : process.env.VERCEL_URI;
 
 const notionClient = new Client({
   auth: process.env.NOTION_SECRET,
