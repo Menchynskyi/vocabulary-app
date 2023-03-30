@@ -1,81 +1,43 @@
 import { Client } from "@notionhq/client";
 
-const notionClient = new Client({ auth: process.env.NOTION_SECRET });
-const notionVocabularyPageId = process.env.NOTION_VOCABULARY_PAGE_ID;
-const vocabularySetLength = Number(process.env.VOCABULARY_SET_LENGTH || 15);
-export const uri = "https://vocabulary-app-git-main-menchynskyi.vercel.app";
+export const uri = "http://localhost:3000";
 
-const translationPrefix = "Translation:\n";
-const prefixReg = /(Explanation|Example|Translation):\n/g;
+const notionClient = new Client({
+  auth: process.env.NOTION_SECRET,
+});
 
-function generateRandomSet(wordsArr, setLength) {
-  const randomSet = [];
-  while (randomSet.length < setLength) {
-    const randomIndex = Math.floor(Math.random() * wordsArr.length - 1);
-    const randomWord = wordsArr[randomIndex];
-    if (randomSet.findIndex((block) => block.id === randomWord.id) === -1) {
-      randomSet.push(randomWord);
-    }
-  }
-  return randomSet;
-}
+const databaseId = process.env.NOTION_VOCABULARY_DATABASE_ID;
 
-async function getAllWords(client, pageId, accumWordsArr = []) {
-  const response = await client.blocks.children.list({
-    block_id: pageId,
-    page_size: 100,
-    start_cursor: accumWordsArr[accumWordsArr.length - 1]?.id,
+const numberOfWords = Number(process.env.VOCABULARY_SET_LENGTH || 15);
+
+export async function getWords() {
+  const response = await notionClient.databases.query({
+    database_id: databaseId,
+    sorts: [
+      {
+        property: "Word",
+        direction: "ascending",
+      },
+    ],
   });
 
-  const wordsArr = response.results
-    .filter((block) => block.type === "toggle")
-    .map((block) => ({
-      id: block.id,
-      word: block.toggle.rich_text[0].plain_text,
-    }));
-  const concatedWordsArr = [...accumWordsArr, ...wordsArr];
+  const words = response.results.map((result) => {
+    const properties = result.properties;
+    return {
+      word: properties.Word.title[0].text.content,
+      meaning:
+        properties.Translation.rich_text[0].text.content ||
+        properties.Meaning.rich_text[0].text.content ||
+        properties.Example.rich_text[0].text.content,
+    };
+  });
 
-  if (response.has_more) {
-    return getAllWords(client, pageId, concatedWordsArr);
+  const randomWords = [];
+
+  for (let i = 0; i < numberOfWords; i++) {
+    const randomIndex = Math.floor(Math.random() * words.length);
+    randomWords.push({ id: randomIndex, ...words[randomIndex] });
   }
 
-  return concatedWordsArr;
-}
-
-async function getWordTranslation(client, blockId) {
-  const response = await client.blocks.children.list({
-    block_id: blockId,
-  });
-  return response.results.reduce((translation, block) => {
-    const withTranslation = block.paragraph.rich_text.some((block) =>
-      block.plain_text.includes(translationPrefix)
-    );
-    const paragraphContent = block.paragraph.rich_text.filter((block) =>
-      withTranslation ? block.plain_text.includes(translationPrefix) : true
-    );
-    const paragraphText = paragraphContent
-      .map((block) => block.plain_text)
-      .join("")
-      .replaceAll(prefixReg, "");
-    return translation + paragraphText;
-  }, "");
-}
-
-export async function getRandomSetOfWords() {
-  const wordsArr = await getAllWords(notionClient, notionVocabularyPageId);
-
-  const randomSetOfWords = generateRandomSet(wordsArr, vocabularySetLength);
-
-  const randomSetOfWordsTranslations = await Promise.all(
-    randomSetOfWords.map((word) => getWordTranslation(notionClient, word.id))
-  );
-
-  const randomSetOfWordsWithTranslations = randomSetOfWords.map(
-    (word, index) => ({
-      ...word,
-      translation: randomSetOfWordsTranslations[index],
-    })
-  );
-
-  return randomSetOfWordsWithTranslations;
+  return randomWords;
 }

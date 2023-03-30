@@ -7,9 +7,9 @@ export function WordCard({
   isFirst,
   isFlipped,
   toggleCard,
-  translation,
+  meaning,
   switchWords,
-  isTranslationVisible,
+  isMeaningVisible,
 }) {
   return (
     <div className={styles.cardContainer}>
@@ -22,14 +22,14 @@ export function WordCard({
       <div className={styles.card} onClick={toggleCard}>
         <div
           className={`${styles.content} ${
-            isTranslationVisible ? styles.flipped : ""
+            isMeaningVisible ? styles.flipped : ""
           }`}
         >
           <div className={styles.front}>
-            <span>{isFlipped ? translation : word}</span>
+            <span>{isFlipped ? meaning : word}</span>
           </div>
           <div className={styles.back}>
-            <span>{isFlipped ? word : translation}</span>
+            <span>{isFlipped ? word : meaning}</span>
           </div>
         </div>
       </div>

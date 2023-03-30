@@ -8,23 +8,23 @@ import styles from "./page.module.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export function WordsList({ words }) {
-  const [isTranslationVisible, setIsTranslationVisible] = useState(false);
+  const [isMeaningVisible, setIsMeaningVisible] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isFlippedMode, setIsFlippedMode] = useState(false);
 
   const isCompleted = currentWordIndex >= words.length;
 
   const toggleCard = useCallback(() => {
-    setIsTranslationVisible((prev) => !prev);
+    setIsMeaningVisible((prev) => !prev);
   }, []);
 
   const toggleMode = () => setIsFlippedMode((prev) => !prev);
 
   const switchWords = useCallback(
     (inc) => {
-      setIsTranslationVisible(false);
+      setIsMeaningVisible(false);
 
-      if (isTranslationVisible) {
+      if (isMeaningVisible) {
         setTimeout(() => {
           setCurrentWordIndex((prev) => prev + inc);
         }, 160);
@@ -32,7 +32,7 @@ export function WordsList({ words }) {
         setCurrentWordIndex((prev) => prev + inc);
       }
     },
-    [isTranslationVisible]
+    [isMeaningVisible]
   );
 
   const handleKeybordActions = useCallback(
@@ -69,13 +69,13 @@ export function WordsList({ words }) {
       </div>
       <div className={inter.className}>
         {isCompleted ? (
-          words.map(({ id, word, translation }) => (
+          words.map(({ id, word, meaning }) => (
             <div className={styles.wordBlock} key={id}>
               <div>
                 <span>{word}</span>
               </div>
               <div>
-                <span>{translation}</span>
+                <span>{meaning}</span>
               </div>
             </div>
           ))
@@ -86,8 +86,8 @@ export function WordsList({ words }) {
             switchWords={switchWords}
             isFlipped={isFlippedMode}
             isFirst={currentWordIndex === 0}
-            translation={currentWord.translation}
-            isTranslationVisible={isTranslationVisible}
+            meaning={currentWord.meaning}
+            isMeaningVisible={isMeaningVisible}
           />
         )}
       </div>
