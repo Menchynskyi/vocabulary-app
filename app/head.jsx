@@ -3,7 +3,7 @@ export default function Head() {
     <>
       <title>Vocabulary App</title>
       <meta content="width=device-width, initial-scale=1" name="viewport" />
-      <link rel="icon" href="/favicon.png" />
+      <link rel="icon" href="/favicon.ico" />
     </>
   );
 }
