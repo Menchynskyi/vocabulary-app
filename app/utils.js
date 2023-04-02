@@ -13,16 +13,19 @@ const databaseId = process.env.NOTION_VOCABULARY_DATABASE_ID;
 
 const numberOfWords = Number(process.env.VOCABULARY_SET_LENGTH || 15);
 
-function generateRandomWords(wordsArr, setLength) {
-  const randomSet = [];
-  while (randomSet.length < setLength) {
-    const randomIndex = Math.floor(Math.random() * wordsArr.length - 1);
-    const randomWord = wordsArr[randomIndex];
-    if (randomSet.findIndex((block) => block.id === randomWord.id) === -1) {
-      randomSet.push(randomWord);
-    }
+function generateRandomWords(words, setLength) {
+  const randomWords = [];
+  const indexes = new Set();
+
+  while (indexes.size < setLength) {
+    indexes.add(Math.floor(Math.random() * words.length));
   }
-  return randomSet;
+
+  for (const index of indexes) {
+    randomWords.push({ id: index, ...words[index] });
+  }
+
+  return randomWords;
 }
 
 export async function getWords(startCursor = undefined, words = []) {
