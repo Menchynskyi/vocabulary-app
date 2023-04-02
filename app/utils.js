@@ -13,6 +13,18 @@ const databaseId = process.env.NOTION_VOCABULARY_DATABASE_ID;
 
 const numberOfWords = Number(process.env.VOCABULARY_SET_LENGTH || 15);
 
+function generateRandomWords(wordsArr, setLength) {
+  const randomSet = [];
+  while (randomSet.length < setLength) {
+    const randomIndex = Math.floor(Math.random() * wordsArr.length - 1);
+    const randomWord = wordsArr[randomIndex];
+    if (randomSet.findIndex((block) => block.id === randomWord.id) === -1) {
+      randomSet.push(randomWord);
+    }
+  }
+  return randomSet;
+}
+
 export async function getWords(startCursor = undefined, words = []) {
   const response = await notionClient.databases.query({
     database_id: databaseId,
@@ -41,12 +53,7 @@ export async function getWords(startCursor = undefined, words = []) {
 
   if (response.has_more) return getWords(response.next_cursor, words);
 
-  const randomWords = [];
-
-  for (let i = 0; i < numberOfWords; i++) {
-    const randomIndex = Math.floor(Math.random() * words.length);
-    randomWords.push({ id: randomIndex, ...words[randomIndex] });
-  }
+  const randomWords = generateRandomWords(words, numberOfWords);
 
   return randomWords;
 }
