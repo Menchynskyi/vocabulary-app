@@ -1,5 +1,4 @@
 import { Client } from "@notionhq/client";
-import fs from "fs";
 
 export const uri =
   process.env.NODE_ENV === "development"
@@ -62,46 +61,13 @@ export async function getWords(startCursor = undefined, words = []) {
   return randomWords;
 }
 
-const filePath = "words.json";
-
 export function getWordsFromFile() {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(
-      wordsFilePath,
-      JSON.stringify([
-        { id: 701, word: "eviction", meaning: "виселення" },
-        { id: 313, word: "scented candle", meaning: "арома свічка" },
-        { id: 567, word: "rust", meaning: "іржа" },
-        {
-          id: 390,
-          word: "make friends with someone",
-          meaning: "подружитися з кимось",
-        },
-        { id: 214, word: "holly", meaning: "падуб(різдвяна рослина)" },
-        { id: 414, word: "flooded", meaning: "затоплений" },
-        { id: 593, word: "so far", meaning: "досі, поки, до цього моменту" },
-        { id: 603, word: "reach", meaning: "дотягнутись" },
-        { id: 636, word: "established", meaning: "створений; встановлений" },
-        { id: 516, word: "clumsy", meaning: "незгарбний" },
-        { id: 640, word: "slip someone's mind", meaning: "вилетіло з голови" },
-        { id: 49, word: "shedding", meaning: "линька" },
-        {
-          id: 230,
-          word: "get expelled from uni",
-          meaning: "бути виключеним з універу",
-        },
-        { id: 585, word: "mortality", meaning: "смертність" },
-        {
-          id: 728,
-          word: "regret",
-          meaning: "жаліти, шкодувати за чимось, жаль, шкода",
-        },
-      ])
-    );
+  const words = process.env.WORDS;
+  if (!words) {
+    process.env.WORDS = JSON.stringify(words);
   }
 
-  const wordsFileContent = fs.readFileSync(filePath, "utf-8");
-  const words = JSON.parse(wordsFileContent);
+  const result = JSON.parse(process.env.WORDS);
 
-  return words;
+  return result;
 }
