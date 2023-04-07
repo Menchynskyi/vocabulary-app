@@ -1,4 +1,5 @@
 import { Client } from "@notionhq/client";
+import fs from "fs";
 
 export const uri =
   process.env.NODE_ENV === "development"
@@ -59,4 +60,11 @@ export async function getWords(startCursor = undefined, words = []) {
   const randomWords = generateRandomWords(words, numberOfWords);
 
   return randomWords;
+}
+
+export function getWordsFromFile() {
+  const wordsFileContent = fs.readFileSync("words.json", "utf-8");
+  const words = JSON.parse(wordsFileContent);
+
+  return words;
 }
