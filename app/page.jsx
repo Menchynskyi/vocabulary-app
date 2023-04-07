@@ -1,9 +1,13 @@
 import styles from "./page.module.css";
 import { WordsList } from "./WordsList";
-import { getWordsFromFile } from "./utils";
+import { uri } from "./utils";
 
-export default function Home() {
-  const setOfWords = getWordsFromFile();
+async function getWords() {
+  return await (await fetch(`${uri}/api/words`, { cache: "no-store" })).json();
+}
+
+export default async function Home() {
+  const setOfWords = await getWords();
 
   return (
     <main className={styles.main}>
