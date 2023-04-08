@@ -2,18 +2,16 @@ import styles from "./page.module.css";
 import { WordsList } from "./WordsList";
 import { uri } from "./utils";
 
-async function getAllWords() {
-  return await (
-    await fetch(`${uri}/api/words`, { next: { revalidate: 432000 } })
-  ).json();
+async function getWords() {
+  return await (await fetch(`${uri}/api/words`, { cache: "no-store" })).json();
 }
 
 export default async function Home() {
-  const allWords = await getAllWords();
+  const setOfWords = await getWords();
 
   return (
     <main className={styles.main}>
-      <WordsList allWords={allWords} />
+      <WordsList words={setOfWords} />
     </main>
   );
 }

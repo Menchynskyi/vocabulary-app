@@ -1,10 +1,32 @@
 import { Client } from "@notionhq/client";
 
+export const uri =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : process.env.VERCEL_URI;
+
 const notionClient = new Client({
   auth: process.env.NOTION_SECRET,
 });
 
 const databaseId = process.env.NOTION_VOCABULARY_DATABASE_ID;
+
+const numberOfWords = Number(process.env.VOCABULARY_SET_LENGTH || 15);
+
+function generateRandomWords(words, setLength) {
+  const randomWords = [];
+  const indexes = new Set();
+
+  while (indexes.size < setLength) {
+    indexes.add(Math.floor(Math.random() * words.length));
+  }
+
+  for (const index of indexes) {
+    randomWords.push({ id: index, ...words[index] });
+  }
+
+  return randomWords;
+}
 
 export async function getWords(startCursor = undefined, words = []) {
   const response = await notionClient.databases.query({
@@ -34,11 +56,13 @@ export async function getWords(startCursor = undefined, words = []) {
 
   if (response.has_more) return getWords(response.next_cursor, words);
 
-  return words;
+  const randomWords = generateRandomWords(words, numberOfWords);
+
+  return randomWords;
 }
 
 export default async function handler(req, res) {
-  const allWords = await getWords();
+  const randomWords = await getWords();
 
-  res.status(200).json(allWords);
+  res.status(200).json(randomWords);
 }
