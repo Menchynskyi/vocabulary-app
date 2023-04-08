@@ -2,18 +2,18 @@ import styles from "./page.module.css";
 import { WordsList } from "./WordsList";
 import { uri } from "./utils";
 
-async function getRandomWords() {
+async function getAllWords() {
   return await (
-    await fetch(`${uri}/api/randomWords`, { cache: "no-store" })
+    await fetch(`${uri}/api/words`, { next: { revalidate: 432000 } })
   ).json();
 }
 
 export default async function Home() {
-  const randomWords = await getRandomWords();
+  const allWords = await getAllWords();
 
   return (
     <main className={styles.main}>
-      <WordsList words={randomWords} />
+      <WordsList allWords={allWords} />
     </main>
   );
 }

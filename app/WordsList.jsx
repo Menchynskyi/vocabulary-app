@@ -1,13 +1,15 @@
 "use client";
 
 import { Inter } from "@next/font/google";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { WordCard } from "./WordCard";
 import styles from "./page.module.css";
+import { generateRandomWords } from "./utils";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export function WordsList({ words }) {
+export function WordsList({ allWords }) {
+  const words = useMemo(() => generateRandomWords(allWords), [allWords]);
   const [isMeaningVisible, setIsMeaningVisible] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isFlippedMode, setIsFlippedMode] = useState(false);
