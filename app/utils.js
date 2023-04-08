@@ -54,7 +54,7 @@ export async function getWords(startCursor = undefined, words = []) {
     }),
   ];
 
-  if (response.has_more) return getWords(response.next_cursor, words);
+  // if (response.has_more) return getWords(response.next_cursor, words);
   console.log(words);
   const randomWords = generateRandomWords(words, numberOfWords);
 
