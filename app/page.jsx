@@ -8,6 +8,8 @@ async function getWords() {
   ).json();
 }
 
+export const revalidate = 0;
+
 export default async function Home() {
   const allWords = await getWords();
   const randomWords = generateRandomWords(allWords);
