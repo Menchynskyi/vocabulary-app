@@ -1,18 +1,15 @@
 import styles from "./page.module.css";
 import { WordsList } from "./WordsList";
-import { generateRandomWords, uri } from "./utils";
+import { uri } from "./utils";
 
-async function getWords() {
+async function getRandomWords() {
   return await (
-    await fetch(`${uri}/api/words`, { next: { revalidate: 72000 } })
+    await fetch(`${uri}/api/randomWords`, { cache: "no-store" })
   ).json();
 }
 
-export const revalidate = 0;
-
 export default async function Home() {
-  const allWords = await getWords();
-  const randomWords = generateRandomWords(allWords);
+  const randomWords = await getRandomWords();
 
   return (
     <main className={styles.main}>
