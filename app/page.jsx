@@ -3,9 +3,7 @@ import { WordsList } from "./WordsList";
 import { uri } from "./utils";
 
 async function getWords() {
-  return await (
-    await fetch(`${uri}/api/words`, { next: { revalidate: 60 } })
-  ).json();
+  return await (await fetch(`${uri}/api/words`)).json();
 }
 
 export const revalidate = 60;
