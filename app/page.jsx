@@ -4,9 +4,11 @@ import { uri } from "./utils";
 
 async function getWords() {
   return await (
-    await fetch(`${uri}/api/words`, { next: { revalidate: 36000 } })
+    await fetch(`${uri}/api/words`, { next: { revalidate: 60 } })
   ).json();
 }
+
+export const revalidate = 60;
 
 export default async function Home() {
   const setOfWords = await getWords();
