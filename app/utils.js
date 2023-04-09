@@ -31,12 +31,6 @@ function generateRandomWords(words, setLength) {
 export async function getWords(startCursor = undefined, words = []) {
   const response = await notionClient.databases.query({
     database_id: databaseId,
-    sorts: [
-      {
-        property: "Created date",
-        direction: "descending",
-      },
-    ],
     start_cursor: startCursor,
   });
 
