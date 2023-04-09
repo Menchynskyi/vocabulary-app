@@ -46,9 +46,9 @@ function generateFilter(property, length = 5) {
       property: property,
       rich_text: {
         starts_with:
-          property === "Word"
-            ? getRandomEnglishLetter()
-            : randomUkrainianLetter(),
+          property === "Translation"
+            ? randomUkrainianLetter()
+            : getRandomEnglishLetter(),
       },
     });
   }
@@ -59,7 +59,11 @@ async function getWords() {
   const response = await notionClient.databases.query({
     database_id: databaseId,
     filter: {
-      or: [...generateFilter("Word"), ...generateFilter("Translation")],
+      or: [
+        ...generateFilter("Word"),
+        ...generateFilter("Translation"),
+        ...generateFilter("Meaning"),
+      ],
     },
   });
 
