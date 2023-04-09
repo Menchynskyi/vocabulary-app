@@ -27,6 +27,27 @@ function generateRandomWords(words, setLength) {
   return randomWords;
 }
 
+function getRandomOrder() {
+  const orders = ["ascending", "descending", undefined];
+  const randomIndex = Math.floor(Math.random() * orders.length);
+  return orders[randomIndex];
+}
+
+function generateSorts() {
+  const sorts = [];
+  const properties = ["Word", "Translation", "Meaning"];
+  for (let i = 0; i < properties.length; i++) {
+    const direction = getRandomOrder();
+    if (direction) {
+      sorts.push({
+        property: properties[i],
+        direction: direction,
+      });
+    }
+  }
+  return sorts;
+}
+
 function getRandomEnglishLetter() {
   const alphabet = "abcdefghijklmnopqrstuvwxyz";
   const randomIndex = Math.floor(Math.random() * alphabet.length);
@@ -65,6 +86,7 @@ async function getWords() {
         ...generateFilter("Meaning"),
       ],
     },
+    sorts: generateSorts(),
   });
 
   return generateRandomWords(
