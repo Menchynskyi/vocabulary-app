@@ -33,7 +33,7 @@ function getRandomEnglishLetter() {
   return alphabet[randomIndex];
 }
 
-function randomUkrainianLetter() {
+function getRandomUkrainianLetter() {
   const alphabet = "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя";
   const randomIndex = Math.floor(Math.random() * alphabet.length);
   return alphabet[randomIndex];
@@ -47,7 +47,7 @@ function generateFilter(property, length = 5) {
       rich_text: {
         starts_with:
           property === "Translation"
-            ? randomUkrainianLetter()
+            ? getRandomUkrainianLetter()
             : getRandomEnglishLetter(),
       },
     });
