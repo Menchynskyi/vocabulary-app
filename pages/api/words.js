@@ -35,7 +35,7 @@ function getRandomOrder() {
 
 function generateSorts() {
   const sorts = [];
-  const properties = ["Word", "Translation", "Meaning"];
+  const properties = ["Translation", "Word", "Meaning", "Created date"];
   for (let i = 0; i < properties.length; i++) {
     const direction = getRandomOrder();
     if (direction) {
@@ -60,18 +60,24 @@ function getRandomUkrainianLetter() {
   return alphabet[randomIndex];
 }
 
-function generateFilter(property, length = 5) {
+function generateFilter(length = 5) {
   const filters = [];
+  const properties = ["Translation", "Word"];
   for (let i = 0; i < length; i++) {
-    filters.push({
-      property: property,
-      rich_text: {
-        starts_with:
-          property === "Translation"
-            ? getRandomUkrainianLetter()
-            : getRandomEnglishLetter(),
-      },
-    });
+    for (const property of properties) {
+      if (Math.random() < 0.3) {
+        continue;
+      }
+      filters.push({
+        property: property,
+        rich_text: {
+          starts_with:
+            property === "Translation"
+              ? getRandomUkrainianLetter()
+              : getRandomEnglishLetter(),
+        },
+      });
+    }
   }
   return filters;
 }
@@ -80,14 +86,19 @@ async function getWords() {
   const response = await notionClient.databases.query({
     database_id: databaseId,
     filter: {
-      or: [
-        ...generateFilter("Word"),
-        ...generateFilter("Translation"),
-        ...generateFilter("Meaning"),
-      ],
+      or: generateFilter(),
     },
     sorts: generateSorts(),
   });
+  console.log(
+    JSON.stringify({
+      database_id: databaseId,
+      filter: {
+        or: generateFilter(),
+      },
+      sorts: generateSorts(),
+    })
+  );
 
   return generateRandomWords(
     response.results.map((result) => ({
