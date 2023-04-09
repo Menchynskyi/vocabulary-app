@@ -5,7 +5,7 @@ import { uri } from "./utils";
 export const revalidate = 60;
 
 async function getWords() {
-  return await (await fetch(`${uri}/api/words`)).json();
+  return await (await fetch(`${uri}/api/words`, { cache: "no-store" })).json();
 }
 
 export default async function Home() {
