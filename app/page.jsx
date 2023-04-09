@@ -2,10 +2,10 @@ import styles from "./page.module.css";
 import { WordsList } from "./WordsList";
 import { uri } from "./utils";
 
+export const revalidate = 60;
+
 async function getWords() {
-  return await (
-    await fetch(`${uri}/api/words`, { next: { revalidate: 10 } })
-  ).json();
+  return await (await fetch(`${uri}/api/words`, { cache: "no-store" })).json();
 }
 
 export default async function Home() {
