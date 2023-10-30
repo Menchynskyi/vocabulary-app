@@ -55,7 +55,10 @@ function getRandomEnglishLetter() {
 }
 
 function getRandomUkrainianLetter() {
-  const alphabet = "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя";
+  const alphabet =
+    process.env.TRANSLATION_LANGUAGE === "UA"
+      ? "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя"
+      : "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
   const randomIndex = Math.floor(Math.random() * alphabet.length);
   return alphabet[randomIndex];
 }
@@ -83,22 +86,20 @@ function generateFilter(length = 5) {
 }
 
 async function getWords() {
-  const response = await notionClient.databases.query({
+  let response = await notionClient.databases.query({
     database_id: databaseId,
     filter: {
       or: generateFilter(),
     },
     sorts: generateSorts(),
   });
-  console.log(
-    JSON.stringify({
+
+  if (response.results.length < numberOfWords) {
+    response = await notionClient.databases.query({
       database_id: databaseId,
-      filter: {
-        or: generateFilter(),
-      },
       sorts: generateSorts(),
-    })
-  );
+    });
+  }
 
   return generateRandomWords(
     response.results.map((result) => ({
