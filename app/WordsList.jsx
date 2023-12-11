@@ -7,7 +7,7 @@ import styles from "./page.module.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export function WordsList({ words }) {
+export function WordsList({ words, noWeekWords }) {
   const [isMeaningVisible, setIsMeaningVisible] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isFlippedMode, setIsFlippedMode] = useState(false);
@@ -68,6 +68,7 @@ export function WordsList({ words }) {
         <h1 className={inter.className}>Vocabulary</h1>
       </div>
       <div className={inter.className}>
+        {noWeekWords ? <span>{noWeekWords}</span> : null}
         {isCompleted ? (
           words.map(({ id, word, meaning }) => (
             <div className={styles.wordBlock} key={id}>

@@ -85,18 +85,43 @@ function generateFilter(length = 5) {
   return filters;
 }
 
-async function getWords() {
+async function getWords(isWeek) {
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
   let response = await notionClient.databases.query({
     database_id: databaseId,
-    filter: {
-      or: generateFilter(),
-    },
+    filter: isWeek
+      ? {
+          and: [
+            {
+              property: "Created date",
+              date: {
+                on_or_after: sevenDaysAgo,
+              },
+            },
+            {
+              or: generateFilter(),
+            },
+          ],
+        }
+      : {
+          or: generateFilter(),
+        },
     sorts: generateSorts(),
   });
 
   if (response.results.length < numberOfWords) {
     response = await notionClient.databases.query({
       database_id: databaseId,
+      filter: isWeek
+        ? {
+            property: "Created date",
+            date: {
+              on_or_after: sevenDaysAgo,
+            },
+          }
+        : undefined,
       sorts: generateSorts(),
     });
   }
@@ -114,7 +139,7 @@ async function getWords() {
 }
 
 export default async function handler(req, res) {
-  const randomWords = await getWords();
+  const randomWords = await getWords(req.query.mode === "week");
 
   res.status(200).json(randomWords);
 }
