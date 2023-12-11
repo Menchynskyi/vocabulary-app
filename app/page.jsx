@@ -16,7 +16,7 @@ export default async function Home({ searchParams }) {
       <WordsList
         words={setOfWords}
         noWeekWords={
-          searchParams?.mode === "week"
+          searchParams?.mode === "week" && !setOfWords.lenght
             ? "No words were added last week. Remove this mode please."
             : undefined
         }
