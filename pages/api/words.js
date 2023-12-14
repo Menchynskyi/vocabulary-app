@@ -7,6 +7,9 @@ const notionClient = new Client({
 const databaseId = process.env.NOTION_VOCABULARY_DATABASE_ID;
 
 const numberOfWords = Number(process.env.VOCABULARY_SET_LENGTH || 15);
+const numberOfWordsWeekMode = Number(
+  process.env.VOCABULARY_SET_LENGTH_WEEK_MODE || numberOfWords
+);
 
 function generateRandomWords(words, setLength) {
   if (setLength > words.length) {
@@ -89,6 +92,8 @@ async function getWords(isWeek) {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+  const _numberOfWords = isWeek ? numberOfWordsWeekMode : numberOfWords;
+
   let response = await notionClient.databases.query({
     database_id: databaseId,
     filter: isWeek
@@ -111,7 +116,7 @@ async function getWords(isWeek) {
     sorts: generateSorts(),
   });
 
-  if (response.results.length < numberOfWords) {
+  if (response.results.length < _numberOfWords) {
     response = await notionClient.databases.query({
       database_id: databaseId,
       filter: isWeek
@@ -134,7 +139,7 @@ async function getWords(isWeek) {
         result.properties.Meaning.rich_text[0].text.content ||
         result.properties.Example.rich_text[0].text.content,
     })),
-    numberOfWords
+    _numberOfWords
   );
 }
 
