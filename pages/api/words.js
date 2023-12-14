@@ -132,13 +132,16 @@ async function getWords(isWeek) {
   }
 
   return generateRandomWords(
-    response.results.map((result) => ({
-      word: result.properties.Word.title[0].text.content,
-      meaning:
-        result.properties.Translation.rich_text[0].text.content ||
-        result.properties.Meaning.rich_text[0].text.content ||
-        result.properties.Example.rich_text[0].text.content,
-    })),
+    response.results
+      .map((result) => ({
+        word: result.properties.Word.title[0]?.text.content || "",
+        meaning:
+          result.properties.Translation.rich_text[0]?.text.content ||
+          result.properties.Meaning.rich_text[0]?.text.content ||
+          result.properties.Example.rich_text[0]?.text.content ||
+          "",
+      }))
+      .filter((word) => word.word && word.meaning),
     _numberOfWords
   );
 }
