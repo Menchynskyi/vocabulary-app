@@ -23,6 +23,12 @@ async function transformTextToSpeech(text) {
   }
 }
 
+async function test() {
+  return await (
+    await fetch(`${uri}/api/words?mode=${mode}`, { cache: "no-store" })
+  ).json();
+}
+
 export function WordsList({ words, noWeekWords }) {
   const [isMeaningVisible, setIsMeaningVisible] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -43,6 +49,8 @@ export function WordsList({ words, noWeekWords }) {
     async (event) => {
       event.stopPropagation();
       try {
+        const test = await test();
+        console.log(test);
         let blob = wordsAudio[currentWordIndex];
 
         if (!blob) {
