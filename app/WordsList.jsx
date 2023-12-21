@@ -4,13 +4,32 @@ import { Inter } from "@next/font/google";
 import { useCallback, useEffect, useState } from "react";
 import { WordCard } from "./WordCard";
 import styles from "./page.module.css";
+import { uri } from "./utils";
 
 const inter = Inter({ subsets: ["latin"] });
+
+async function transformTextToSpeech(text) {
+  try {
+    const response = await fetch(`${uri}/api/textToSpeech?text=${text}`, {
+      cache: "no-store",
+    });
+    const buffer = await response.arrayBuffer();
+    const blob = new Blob([buffer], {
+      type: response.headers.get("content-type"),
+    });
+    return blob;
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 export function WordsList({ words, noWeekWords }) {
   const [isMeaningVisible, setIsMeaningVisible] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isFlippedMode, setIsFlippedMode] = useState(false);
+
+  const [audioLoading, setAudioLoading] = useState(false);
+  const [wordsAudio, setWordsAudio] = useState(Array(words.length).fill(null));
 
   const isCompleted = currentWordIndex >= words.length;
 
@@ -19,6 +38,32 @@ export function WordsList({ words, noWeekWords }) {
   }, []);
 
   const toggleMode = () => setIsFlippedMode((prev) => !prev);
+
+  const playWord = useCallback(
+    async (event) => {
+      event.stopPropagation();
+      try {
+        let blob = wordsAudio[currentWordIndex];
+
+        if (!blob) {
+          setAudioLoading(true);
+          blob = await transformTextToSpeech(words[currentWordIndex].word);
+          setWordsAudio((prev) => {
+            prev[currentWordIndex] = blob;
+            return prev;
+          });
+        }
+
+        const audio = new Audio(URL.createObjectURL(blob));
+        audio.play();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setAudioLoading(false);
+      }
+    },
+    [currentWordIndex, words, wordsAudio]
+  );
 
   const switchWords = useCallback(
     (inc) => {
@@ -82,6 +127,8 @@ export function WordsList({ words, noWeekWords }) {
           ))
         ) : (
           <WordCard
+            loading={audioLoading}
+            playWord={playWord}
             word={currentWord.word}
             toggleCard={toggleCard}
             switchWords={switchWords}

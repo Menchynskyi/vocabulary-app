@@ -45,6 +45,7 @@
 
 .front,
 .back {
+  position: relative;
   padding: 40px;
   display: flex;
   justify-content: center;
@@ -105,4 +106,39 @@
     height: 300px;
     perspective: 1000px;
   }
+}
+
+.soundButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  background-color: #00292e;
+  transition: all 0.3s ease-in-out;
+}
+
+.soundButton path {
+  stroke: white;
+}
+
+.soundButton:hover path,
+.soundButton:focus path {
+  stroke: #00292e;
+}
+
+.soundButton:hover,
+.soundButton:focus {
+  background-color: white;
+  color: #00292e;
+}
+
+.soundButton:disabled {
+  cursor: default;
 }

@@ -1,13 +1,17 @@
 "use client";
 
+import { SoundButton } from "./SoundIcon";
 import styles from "./page.module.css";
+import { isTextToSpeechEnabled } from "./utils";
 
 export function WordCard({
+  loading,
   word,
   isFirst,
   isFlipped,
   toggleCard,
   meaning,
+  playWord,
   switchWords,
   isMeaningVisible,
 }) {
@@ -26,6 +30,13 @@ export function WordCard({
           }`}
         >
           <div className={styles.front}>
+            {isTextToSpeechEnabled ? (
+              <SoundButton
+                onClick={playWord}
+                loading={loading}
+                disabled={loading}
+              />
+            ) : null}
             <span>{isFlipped ? meaning : word}</span>
           </div>
           <div className={styles.back}>

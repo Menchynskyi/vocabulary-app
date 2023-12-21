@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google-cloud/text-to-speech": "^5.0.1",
     "@next/font": "13.1.2",
     "@notionhq/client": "^2.2.3",
     "eslint": "8.32.0",
