@@ -23,7 +23,7 @@ async function transformTextToSpeech(text) {
   }
 }
 
-async function testFunc() {
+async function testFunc(mode) {
   return await (
     await fetch(`${uri}/api/words?mode=${mode}`, { cache: "no-store" })
   ).json();
