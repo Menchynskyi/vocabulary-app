@@ -17,16 +17,11 @@ async function transformTextToSpeech(text) {
     const blob = new Blob([buffer], {
       type: response.headers.get("content-type"),
     });
+    console.log(blob, "test");
     return blob;
   } catch (error) {
     console.error(error);
   }
-}
-
-async function testFunc(mode) {
-  return await (
-    await fetch(`${uri}/api/words?mode=${mode}`, { cache: "no-store" })
-  ).json();
 }
 
 export function WordsList({ words, noWeekWords }) {
@@ -49,8 +44,6 @@ export function WordsList({ words, noWeekWords }) {
     async (event) => {
       event.stopPropagation();
       try {
-        const test = await testFunc();
-        console.log(test);
         let blob = wordsAudio[currentWordIndex];
 
         if (!blob) {
