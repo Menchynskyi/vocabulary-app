@@ -55,7 +55,9 @@ export function WordsList({ words, noWeekWords }) {
         }
 
         const audio = new Audio(URL.createObjectURL(blob));
-        audio.play();
+        setTimeout(() => {
+          audio.play();
+        }, 0);
       } catch (error) {
         console.error(error);
       } finally {
