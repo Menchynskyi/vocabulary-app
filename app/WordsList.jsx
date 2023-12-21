@@ -17,7 +17,6 @@ async function transformTextToSpeech(text) {
     const blob = new Blob([buffer], {
       type: response.headers.get("content-type"),
     });
-    console.log(blob, "test");
     return blob;
   } catch (error) {
     console.error(error);
