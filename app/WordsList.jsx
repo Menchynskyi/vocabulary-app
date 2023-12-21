@@ -117,13 +117,13 @@ export function WordsList({ words, noWeekWords }) {
       <div className={inter.className}>
         {noWeekWords ? <span>{noWeekWords}</span> : null}
         {isCompleted ? (
-          words.map(({ id, word, meaning }) => (
+          words.map(({ id, word, translation, meaning, example }) => (
             <div className={styles.wordBlock} key={id}>
               <div>
                 <span>{word}</span>
               </div>
               <div>
-                <span>{meaning}</span>
+                <span>{translation || meaning || example}</span>
               </div>
             </div>
           ))
@@ -131,12 +131,11 @@ export function WordsList({ words, noWeekWords }) {
           <WordCard
             loading={audioLoading}
             playWord={playWord}
-            word={currentWord.word}
+            word={currentWord}
             toggleCard={toggleCard}
             switchWords={switchWords}
             isFlipped={isFlippedMode}
             isFirst={currentWordIndex === 0}
-            meaning={currentWord.meaning}
             isMeaningVisible={isMeaningVisible}
           />
         )}

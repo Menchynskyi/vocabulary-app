@@ -142,3 +142,50 @@
 .soundButton:disabled {
   cursor: default;
 }
+
+.meaningButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  background-color: white;
+  transition: all 0.3s ease-in-out;
+}
+
+.meaningButton path {
+  stroke: #00292e;
+}
+
+.meaningButton:hover path,
+.meaningButton:focus path {
+  stroke: white;
+}
+
+.meaningMode path {
+  stroke: #00292e;
+  fill: #00292e;
+}
+
+.meaningMode:hover path,
+.meaningMode:focus path {
+  stroke: white;
+  fill: white;
+}
+
+.meaningButton:hover,
+.meaningButton:focus {
+  background-color: #001215;
+  color: white;
+}
+
+.meaningButton:focus,
+.soundButton:focus {
+  outline: none;
+}
