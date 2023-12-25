@@ -4,6 +4,8 @@
   align-items: center;
   padding: 6rem;
   min-height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 .loader {
@@ -188,4 +190,9 @@
 .meaningButton:focus,
 .soundButton:focus {
   outline: none;
+}
+
+.wordsList {
+  overflow-y: auto;
+  padding-right: 20px;
 }

@@ -5,8 +5,11 @@ import { useCallback, useEffect, useState } from "react";
 import { WordCard } from "./WordCard";
 import styles from "./page.module.css";
 import { uri } from "./utils";
+import Snowfall from "react-snowfall";
 
 const inter = Inter({ subsets: ["latin"] });
+
+const isSnowing = process.env.NEXT_PUBLIC_IS_SNOWING === "true";
 
 async function transformTextToSpeech(text) {
   try {
@@ -111,10 +114,11 @@ export function WordsList({ words, noWeekWords }) {
 
   return (
     <>
+      {isSnowing && <Snowfall color="#fff" snowflakeCount={200} />}
       <div className={styles.title} onClick={toggleMode}>
         <h1 className={inter.className}>Vocabulary</h1>
       </div>
-      <div className={inter.className}>
+      <div className={`${inter.className} ${styles.wordsList}`}>
         {noWeekWords ? <span>{noWeekWords}</span> : null}
         {isCompleted ? (
           words.map(({ id, word, translation, meaning, example }) => (
