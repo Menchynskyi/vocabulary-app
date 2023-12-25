@@ -118,7 +118,11 @@ export function WordsList({ words, noWeekWords }) {
       <div className={styles.title} onClick={toggleMode}>
         <h1 className={inter.className}>Vocabulary</h1>
       </div>
-      <div className={`${inter.className} ${styles.wordsList}`}>
+      <div
+        className={`${inter.className}${
+          isCompleted ? ` ${styles.wordsList}` : ""
+        }`}
+      >
         {noWeekWords ? <span>{noWeekWords}</span> : null}
         {isCompleted ? (
           words.map(({ id, word, translation, meaning, example }) => (
