@@ -3,8 +3,8 @@
   flex-direction: column;
   align-items: center;
   padding: 6rem;
-  min-height: 100vh;
-  max-height: 100vh;
+  min-height: 100svh;
+  max-height: 100svh;
   overflow: hidden;
 }
 
@@ -195,4 +195,16 @@
 .wordsList {
   overflow-y: auto;
   padding-right: 20px;
+}
+
+.wordsList::-webkit-scrollbar,
+.wordsList::-webkit-scrollbar-thumb {
+  width: 26px;
+  border-radius: 13px;
+  background-clip: padding-box;
+  border: 10px solid transparent;
+}
+
+.wordsList::-webkit-scrollbar-thumb {
+  box-shadow: inset 0 0 0 10px;
 }
