@@ -1,4 +1,4 @@
-import styles from "./page.module.css";
+import styles from "../styles/page.module.css";
 
 export const SoundButton = ({ loading, ...props }) => {
   return (
@@ -64,9 +64,9 @@ export const SoundButton = ({ loading, ...props }) => {
           <path
             d="M3 11V13M6 8V16M9 10V14M12 7V17M15 4V20M18 9V15M21 11V13"
             stroke="rgb(205, 205, 205)"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </svg>
       )}

@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { SoundButton } from "./SoundIcon";
-import styles from "./page.module.css";
-import { isTextToSpeechEnabled } from "./utils";
+import styles from "../styles/page.module.css";
+import { isTextToSpeechEnabled } from "@/constants";
 import { MeaningModeButton } from "./MeaningModeButton";
 
 export function WordCard({

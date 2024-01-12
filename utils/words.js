@@ -88,7 +88,7 @@ function generateFilter(length = 5) {
   return filters;
 }
 
-async function getWords(isWeek) {
+export async function getWords(isWeek) {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -146,10 +146,4 @@ async function getWords(isWeek) {
       ),
     _numberOfWords
   );
-}
-
-export default async function handler(req, res) {
-  const randomWords = await getWords(req.query.mode === "week");
-
-  res.status(200).json(randomWords);
 }

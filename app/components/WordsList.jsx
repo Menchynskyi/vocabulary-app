@@ -1,10 +1,10 @@
 "use client";
 
-import { Inter } from "@next/font/google";
+import { Inter } from "next/font/google";
 import { useCallback, useEffect, useState } from "react";
 import { WordCard } from "./WordCard";
-import styles from "./page.module.css";
-import { uri } from "./utils";
+import styles from "../styles/page.module.css";
+import { uri } from "@/constants";
 import Snowfall from "react-snowfall";
 
 const inter = Inter({ subsets: ["latin"] });

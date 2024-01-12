@@ -1,11 +1,18 @@
-import styles from "./page.module.css";
-import { WordsList } from "./WordsList";
-import { uri } from "./utils";
+import styles from "./styles/page.module.css";
+import { WordsList } from "./components/WordsList";
+import { uri } from "@/constants";
 
 async function getWords(mode) {
-  return await (
-    await fetch(`${uri}/api/words?mode=${mode}`, { cache: "no-store" })
-  ).json();
+  try {
+    const response = await fetch(`${uri}/api/words?mode=${mode}`, {
+      cache: "no-store",
+    });
+    const { data } = await response.json();
+
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export default async function Home({ searchParams }) {

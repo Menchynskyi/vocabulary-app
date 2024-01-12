@@ -31,14 +31,3 @@ export async function synthesizeSpeech(text) {
     console.error(error);
   }
 }
-
-export default async function handler(req, res) {
-  try {
-    const { text } = req.query;
-    const audio = await synthesizeSpeech(text);
-    res.setHeader("Content-Type", "audio/mpeg");
-    res.status(200).send(audio);
-  } catch (error) {
-    console.error(error);
-  }
-}
