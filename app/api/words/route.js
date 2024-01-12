@@ -1,5 +1,7 @@
 import { getWords } from "@/utils/words";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
     const mode = request.nextUrl.searchParams.get("mode");

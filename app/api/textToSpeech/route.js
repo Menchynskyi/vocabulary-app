@@ -1,5 +1,7 @@
 import { synthesizeSpeech } from "@/utils/synthesizeSpeech";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
     const text = request.nextUrl.searchParams.get("text");
