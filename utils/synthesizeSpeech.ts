@@ -1,4 +1,4 @@
-const { TextToSpeechClient } = require("@google-cloud/text-to-speech");
+import { TextToSpeechClient } from "@google-cloud/text-to-speech";
 
 const client = new TextToSpeechClient({
   projectId: process.env.GOOGLE_PROJECT_ID,
@@ -8,9 +8,9 @@ const client = new TextToSpeechClient({
   },
 });
 
-export async function synthesizeSpeech(text) {
+export async function synthesizeSpeech(text: string) {
   try {
-    const request = {
+    const [response] = await client.synthesizeSpeech({
       audioConfig: {
         audioEncoding: "LINEAR16",
         pitch: 0,
@@ -23,9 +23,7 @@ export async function synthesizeSpeech(text) {
       input: {
         text,
       },
-    };
-
-    const [response] = await client.synthesizeSpeech(request);
+    });
     return response.audioContent;
   } catch (error) {
     console.error(error);

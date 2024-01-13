@@ -6,19 +6,20 @@ import { WordCard } from "./WordCard";
 import styles from "../styles/page.module.css";
 import { uri } from "@/constants";
 import Snowfall from "react-snowfall";
+import { Word } from "@/types";
 
 const inter = Inter({ subsets: ["latin"] });
 
 const isSnowing = process.env.NEXT_PUBLIC_IS_SNOWING === "true";
 
-async function transformTextToSpeech(text) {
+async function transformTextToSpeech(text: string) {
   try {
     const response = await fetch(`${uri}/api/textToSpeech?text=${text}`, {
       cache: "no-store",
     });
     const buffer = await response.arrayBuffer();
     const blob = new Blob([buffer], {
-      type: response.headers.get("content-type"),
+      type: response.headers.get("content-type") || "audio/mpeg",
     });
     return blob;
   } catch (error) {
@@ -26,7 +27,12 @@ async function transformTextToSpeech(text) {
   }
 }
 
-export function WordsList({ words, noWeekWords }) {
+type WordsListProps = {
+  words: Word[];
+  noWeekWords?: string;
+};
+
+export function WordsList({ words, noWeekWords }: WordsListProps) {
   const [isMeaningVisible, setIsMeaningVisible] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isFlippedMode, setIsFlippedMode] = useState(false);
@@ -43,7 +49,7 @@ export function WordsList({ words, noWeekWords }) {
   const toggleMode = () => setIsFlippedMode((prev) => !prev);
 
   const playWord = useCallback(
-    async (event) => {
+    async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       event.stopPropagation();
       try {
         let blob = wordsAudio[currentWordIndex];
@@ -71,7 +77,7 @@ export function WordsList({ words, noWeekWords }) {
   );
 
   const switchWords = useCallback(
-    (inc) => {
+    (inc: number) => {
       setIsMeaningVisible(false);
 
       if (isMeaningVisible) {
@@ -86,16 +92,16 @@ export function WordsList({ words, noWeekWords }) {
   );
 
   const handleKeybordActions = useCallback(
-    (event) => {
-      if (event.keyCode === 32) {
+    (event: KeyboardEvent) => {
+      if (event.key === " ") {
         toggleCard();
         return;
       }
 
-      if (event.keyCode === 37 && currentWordIndex !== 0) {
+      if (event.key === "ArrowLeft" && currentWordIndex !== 0) {
         switchWords(-1);
       }
-      if (event.keyCode === 39 && currentWordIndex < words.length) {
+      if (event.key === "ArrowRight" && currentWordIndex < words.length) {
         switchWords(1);
       }
     },

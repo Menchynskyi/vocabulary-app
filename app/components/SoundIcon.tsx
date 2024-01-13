@@ -1,6 +1,10 @@
 import styles from "../styles/page.module.css";
 
-export const SoundButton = ({ loading, ...props }) => {
+type SoundButtonProps = {
+  loading: boolean;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
+
+export const SoundButton = ({ loading, ...props }: SoundButtonProps) => {
   return (
     <button className={styles.soundButton} {...props}>
       {loading ? (

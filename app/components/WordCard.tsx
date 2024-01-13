@@ -5,6 +5,18 @@ import { SoundButton } from "./SoundIcon";
 import styles from "../styles/page.module.css";
 import { isTextToSpeechEnabled } from "@/constants";
 import { MeaningModeButton } from "./MeaningModeButton";
+import { Word, WordFields } from "@/types";
+
+type WordCardProps = {
+  loading: boolean;
+  word: Word;
+  isFirst: boolean;
+  isFlipped: boolean;
+  toggleCard: () => void;
+  playWord: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  switchWords: (direction: number) => void;
+  isMeaningVisible: boolean;
+};
 
 export function WordCard({
   loading,
@@ -15,8 +27,8 @@ export function WordCard({
   playWord,
   switchWords,
   isMeaningVisible,
-}) {
-  const [meaningMode, setMeaningMode] = useState("translation");
+}: WordCardProps) {
+  const [meaningMode, setMeaningMode] = useState<WordFields>("translation");
 
   useEffect(() => {
     setMeaningMode(() => {
@@ -27,6 +39,8 @@ export function WordCard({
           return "meaning";
         case !!word.example:
           return "example";
+        default:
+          return "translation";
       }
     });
   }, [word]);
@@ -35,19 +49,19 @@ export function WordCard({
 
   const avaialbleMeaningModes = Object.entries(word)
     .filter(([key, value]) => !!value && key !== "word" && key !== "id")
-    .map(([key]) => key);
+    .map(([key]) => key) as WordFields[];
   const isOnlyOneMeaningType = avaialbleMeaningModes.length === 1;
 
   const nextMeaningMode = useMemo(() => {
     const index = avaialbleMeaningModes.indexOf(meaningMode);
     if (index === -1) {
-      return;
+      return avaialbleMeaningModes[0];
     }
     const nextIndex = index + 1;
     return avaialbleMeaningModes[nextIndex] || avaialbleMeaningModes[0];
   }, [avaialbleMeaningModes, meaningMode]);
 
-  const handleChangeMeaningMode = (event) => {
+  const handleChangeMeaningMode = (event: React.MouseEvent) => {
     event.stopPropagation();
 
     setMeaningMode(nextMeaningMode);

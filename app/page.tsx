@@ -1,8 +1,9 @@
 import styles from "./styles/page.module.css";
 import { WordsList } from "./components/WordsList";
 import { uri } from "@/constants";
+import { VocabularyMode } from "@/types";
 
-async function getWords(mode) {
+async function getWords(mode: VocabularyMode) {
   try {
     const response = await fetch(`${uri}/api/words?mode=${mode}`, {
       cache: "no-store",
@@ -15,7 +16,13 @@ async function getWords(mode) {
   }
 }
 
-export default async function Home({ searchParams }) {
+type HomeProps = {
+  searchParams: {
+    mode: VocabularyMode;
+  };
+};
+
+export default async function Home({ searchParams }: HomeProps) {
   const setOfWords = await getWords(searchParams?.mode);
 
   return (
@@ -23,7 +30,7 @@ export default async function Home({ searchParams }) {
       <WordsList
         words={setOfWords}
         noWeekWords={
-          searchParams?.mode === "week" && !setOfWords.length
+          searchParams?.mode === VocabularyMode.week && !setOfWords.length
             ? "No words were added last week. Remove this mode please."
             : undefined
         }

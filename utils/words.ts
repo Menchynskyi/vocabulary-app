@@ -1,29 +1,43 @@
+import { Word } from "@/types";
 import { Client } from "@notionhq/client";
+import {
+  PageObjectResponse,
+  TextRichTextItemResponse,
+} from "@notionhq/client/build/src/api-endpoints";
+
+type Order = "ascending" | "descending";
+
+const alphabets = {
+  en: "abcdefghijklmnopqrstuvwxyz",
+  ua: "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя",
+  ru: "абвгдеёжзийклмнопрстуфхцчшщъыьэюя",
+};
+const isUkrainianTranslation = process.env.TRANSLATION_LANGUAGE === "UA";
 
 const notionClient = new Client({
   auth: process.env.NOTION_SECRET,
 });
 
-const databaseId = process.env.NOTION_VOCABULARY_DATABASE_ID;
+const databaseId = process.env.NOTION_VOCABULARY_DATABASE_ID || "";
 
 const numberOfWords = Number(process.env.VOCABULARY_SET_LENGTH || 15);
 const numberOfWordsWeekMode = Number(
   process.env.VOCABULARY_SET_LENGTH_WEEK_MODE || numberOfWords
 );
 
-function generateRandomWords(words, setLength) {
+function generateRandomWords(words: Omit<Word, "id">[], setLength: number) {
   if (setLength > words.length) {
     return words.map((word, index) => ({ id: index, ...word }));
   }
 
   const randomWords = [];
-  const indexes = new Set();
+  const indexes: Set<number> = new Set();
 
   while (indexes.size < setLength) {
     indexes.add(Math.floor(Math.random() * words.length));
   }
 
-  for (const index of indexes) {
+  for (const index of Array.from(indexes)) {
     randomWords.push({ id: index, ...words[index] });
   }
 
@@ -31,7 +45,7 @@ function generateRandomWords(words, setLength) {
 }
 
 function getRandomOrder() {
-  const orders = ["ascending", "descending", undefined];
+  const orders: (Order | undefined)[] = ["ascending", "descending", undefined];
   const randomIndex = Math.floor(Math.random() * orders.length);
   return orders[randomIndex];
 }
@@ -51,17 +65,12 @@ function generateSorts() {
   return sorts;
 }
 
-function getRandomEnglishLetter() {
-  const alphabet = "abcdefghijklmnopqrstuvwxyz";
+function getRandomEnglishLetter(alphabet: string) {
   const randomIndex = Math.floor(Math.random() * alphabet.length);
   return alphabet[randomIndex];
 }
 
-function getRandomUkrainianLetter() {
-  const alphabet =
-    process.env.TRANSLATION_LANGUAGE === "UA"
-      ? "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя"
-      : "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+function getRandomTranslationLetter(alphabet: string) {
   const randomIndex = Math.floor(Math.random() * alphabet.length);
   return alphabet[randomIndex];
 }
@@ -79,8 +88,10 @@ function generateFilter(length = 5) {
         rich_text: {
           starts_with:
             property === "Translation"
-              ? getRandomUkrainianLetter()
-              : getRandomEnglishLetter(),
+              ? getRandomTranslationLetter(
+                  isUkrainianTranslation ? alphabets.ua : alphabets.ru
+                )
+              : getRandomEnglishLetter(alphabets.en),
         },
       });
     }
@@ -88,7 +99,7 @@ function generateFilter(length = 5) {
   return filters;
 }
 
-export async function getWords(isWeek) {
+export async function getWords(isWeek: boolean) {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -102,7 +113,7 @@ export async function getWords(isWeek) {
             {
               property: "Created date",
               date: {
-                on_or_after: sevenDaysAgo,
+                on_or_after: sevenDaysAgo.toISOString(),
               },
             },
             {
@@ -117,13 +128,14 @@ export async function getWords(isWeek) {
   });
 
   if (response.results.length < _numberOfWords) {
+    console.log(sevenDaysAgo.toISOString());
     response = await notionClient.databases.query({
       database_id: databaseId,
       filter: isWeek
         ? {
             property: "Created date",
             date: {
-              on_or_after: sevenDaysAgo,
+              on_or_after: sevenDaysAgo.toISOString(),
             },
           }
         : undefined,
@@ -132,14 +144,41 @@ export async function getWords(isWeek) {
   }
 
   return generateRandomWords(
-    response.results
-      .map((result) => ({
-        word: result.properties.Word.title[0]?.text.content || "",
-        translation:
-          result.properties.Translation.rich_text[0]?.text.content || "",
-        meaning: result.properties.Meaning.rich_text[0]?.text.content || "",
-        example: result.properties.Example.rich_text[0]?.text.content || "",
-      }))
+    (response.results as PageObjectResponse[])
+      .map((result) => {
+        let word = "";
+        let translation = "";
+        let meaning = "";
+        let example = "";
+
+        if (result.properties.Word.type === "title") {
+          const wordResponse = result.properties.Word
+            .title[0] as TextRichTextItemResponse;
+          word = wordResponse?.text.content || "";
+        }
+        if (result.properties.Translation.type === "rich_text") {
+          const translationResponse = result.properties.Translation
+            .rich_text[0] as TextRichTextItemResponse;
+          translation = translationResponse?.text.content || "";
+        }
+        if (result.properties.Meaning.type === "rich_text") {
+          const meaningResponse = result.properties.Meaning
+            .rich_text[0] as TextRichTextItemResponse;
+          meaning = meaningResponse?.text.content || "";
+        }
+        if (result.properties.Example.type === "rich_text") {
+          const exampleResponse = result.properties.Example
+            .rich_text[0] as TextRichTextItemResponse;
+          example = exampleResponse?.text.content || "";
+        }
+
+        return {
+          word,
+          translation,
+          meaning,
+          example,
+        };
+      })
       .filter(
         (word) =>
           word.word && (word.translation || word.meaning || word.example)
