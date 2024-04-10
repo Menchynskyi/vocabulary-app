@@ -1,4 +1,4 @@
-export enum VocabularyMode {
+export enum DateRangeMode {
   week = "week",
 }
 

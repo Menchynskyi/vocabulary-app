@@ -1,4 +1,6 @@
-import "@/styles/globals.css";
+import "@/styles/global.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 type RootLayoutProps = {
   children: React.ReactNode;
@@ -7,7 +9,17 @@ type RootLayoutProps = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <body>
+          {children}
+          <Toaster />
+        </body>
+      </ThemeProvider>
     </html>
   );
 }

@@ -1,16 +1,13 @@
 "use client";
 
-import { Inter } from "next/font/google";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { WordCard } from "./WordCard";
-import styles from "../styles/page.module.css";
 import { uri } from "@/constants";
-import Snowfall from "react-snowfall";
 import { Word } from "@/types";
-
-const inter = Inter({ subsets: ["latin"] });
-
-const isSnowing = process.env.NEXT_PUBLIC_IS_SNOWING === "true";
+import { CardsContext } from "../layout";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { CompletedList } from "./CompletedList";
 
 async function transformTextToSpeech(text: string) {
   try {
@@ -33,9 +30,10 @@ type WordsListProps = {
 };
 
 export function WordsList({ words, noWeekWords }: WordsListProps) {
+  const { flippedMode } = useContext(CardsContext);
+
   const [isMeaningVisible, setIsMeaningVisible] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [isFlippedMode, setIsFlippedMode] = useState(false);
 
   const [audioLoading, setAudioLoading] = useState(false);
   const [wordsAudio, setWordsAudio] = useState(Array(words.length).fill(null));
@@ -45,8 +43,6 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
   const toggleCard = useCallback(() => {
     setIsMeaningVisible((prev) => !prev);
   }, []);
-
-  const toggleMode = () => setIsFlippedMode((prev) => !prev);
 
   const playWord = useCallback(
     async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -73,7 +69,7 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
         setAudioLoading(false);
       }
     },
-    [currentWordIndex, words, wordsAudio]
+    [currentWordIndex, words, wordsAudio],
   );
 
   const switchWords = useCallback(
@@ -88,7 +84,7 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
         setCurrentWordIndex((prev) => prev + inc);
       }
     },
-    [isMeaningVisible]
+    [isMeaningVisible],
   );
 
   const handleKeybordActions = useCallback(
@@ -105,7 +101,7 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
         switchWords(1);
       }
     },
-    [currentWordIndex, words.length, toggleCard, switchWords]
+    [currentWordIndex, words.length, toggleCard, switchWords],
   );
 
   useEffect(() => {
@@ -120,40 +116,40 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
 
   return (
     <>
-      {isSnowing && <Snowfall color="#fff" snowflakeCount={200} />}
-      <div className={styles.title} onClick={toggleMode}>
-        <h1 className={inter.className}>Vocabulary</h1>
-      </div>
-      <div
-        className={`${inter.className}${
-          isCompleted ? ` ${styles.wordsList}` : ""
-        }`}
-      >
-        {noWeekWords ? <span>{noWeekWords}</span> : null}
-        {isCompleted ? (
-          words.map(({ id, word, translation, meaning, example }) => (
-            <div className={styles.wordBlock} key={id}>
-              <div>
-                <span>{word}</span>
-              </div>
-              <div>
-                <span>{translation || meaning || example}</span>
-              </div>
-            </div>
-          ))
-        ) : (
+      {noWeekWords ? <span>{noWeekWords}</span> : null}
+
+      {isCompleted ? (
+        <CompletedList words={words} />
+      ) : (
+        <div className="flex items-center">
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => switchWords(-1)}
+            disabled={currentWordIndex === 0}
+            className="mb-[45px] mr-4 rounded-full"
+          >
+            <ArrowLeft />
+          </Button>
           <WordCard
             loading={audioLoading}
             playWord={playWord}
             word={currentWord}
             toggleCard={toggleCard}
-            switchWords={switchWords}
-            isFlipped={isFlippedMode}
-            isFirst={currentWordIndex === 0}
+            isFlipped={flippedMode}
             isMeaningVisible={isMeaningVisible}
           />
-        )}
-      </div>
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => switchWords(1)}
+            disabled={currentWordIndex >= words.length}
+            className="mb-[45px] ml-4 rounded-full"
+          >
+            <ArrowRight />
+          </Button>
+        </div>
+      )}
     </>
   );
 }
