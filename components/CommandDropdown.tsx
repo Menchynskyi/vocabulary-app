@@ -10,8 +10,15 @@ import {
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { CardCommandsConfig } from "@/types";
 
-export function CommandDropdown({ isPrimary }: { isPrimary?: boolean }) {
+export function CommandDropdown({
+  isPrimary,
+  cardCommands,
+}: {
+  isPrimary?: boolean;
+  cardCommands: CardCommandsConfig;
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -23,10 +30,6 @@ export function CommandDropdown({ isPrimary }: { isPrimary?: boolean }) {
               className={
                 isPrimary ? "text-primary-foreground" : "text-foreground"
               }
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
             >
               <Command className="h-3 w-3" />
             </Button>
@@ -41,46 +44,33 @@ export function CommandDropdown({ isPrimary }: { isPrimary?: boolean }) {
         align="end"
         sideOffset={14}
         alignOffset={-5}
-        className="w-56"
+        className="w-64"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
       >
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            Flip card
-            <DropdownMenuShortcut>Space</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Next card
-            <DropdownMenuShortcut>→</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Previous card
-            <DropdownMenuShortcut>←</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Pronounce
-            <DropdownMenuShortcut>⌘+P</DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-
-        <DropdownMenuSeparator />
-
-        <DropdownMenuGroup>
-          <DropdownMenuItem>
-            Edit
-            <DropdownMenuShortcut>⌘+E</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Copy
-            <DropdownMenuShortcut>⌘+C</DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-
-        <DropdownMenuGroup>
-          <DropdownMenuItem>Open in Notion</DropdownMenuItem>
-          <DropdownMenuItem>Open in Reverso Context</DropdownMenuItem>
-          <DropdownMenuItem>Open in Cambridge Dictionary</DropdownMenuItem>
-        </DropdownMenuGroup>
+        {cardCommands.map((group, groupIndex) => (
+          <>
+            <DropdownMenuGroup key={groupIndex}>
+              {group.map((command, commandIndex) => (
+                <DropdownMenuItem
+                  key={commandIndex}
+                  onSelect={command.onSelect}
+                  disabled={command.disabled}
+                >
+                  {command.label}
+                  {command.shortcut && (
+                    <DropdownMenuShortcut>
+                      {command.shortcut}
+                    </DropdownMenuShortcut>
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+            {groupIndex < cardCommands.length - 1 && <DropdownMenuSeparator />}
+          </>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

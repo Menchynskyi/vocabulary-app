@@ -8,6 +8,7 @@ import { CardsContext } from "../layout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { CompletedList } from "./CompletedList";
+import { toast } from "sonner";
 
 async function transformTextToSpeech(text: string) {
   try {
@@ -32,7 +33,7 @@ type WordsListProps = {
 export function WordsList({ words, noWeekWords }: WordsListProps) {
   const { flippedMode } = useContext(CardsContext);
 
-  const [isMeaningVisible, setIsMeaningVisible] = useState(false);
+  const [isMeaningVisible, setIsMeaningVisible] = useState(flippedMode);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
   const [audioLoading, setAudioLoading] = useState(false);
@@ -44,9 +45,13 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
     setIsMeaningVisible((prev) => !prev);
   }, []);
 
+  useEffect(() => {
+    setIsMeaningVisible(flippedMode);
+  }, [flippedMode]);
+
   const playWord = useCallback(
-    async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-      event.stopPropagation();
+    async (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      event?.stopPropagation();
       try {
         let blob = wordsAudio[currentWordIndex];
 
@@ -74,17 +79,24 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
 
   const switchWords = useCallback(
     (inc: number) => {
-      setIsMeaningVisible(false);
+      setIsMeaningVisible(flippedMode);
+      const isNext = inc > 0;
 
       if (isMeaningVisible) {
         setTimeout(() => {
-          setCurrentWordIndex((prev) => prev + inc);
+          setCurrentWordIndex((prev) =>
+            isNext
+              ? Math.min(prev + inc, words.length)
+              : Math.max(prev + inc, 0),
+          );
         }, 160);
       } else {
-        setCurrentWordIndex((prev) => prev + inc);
+        setCurrentWordIndex((prev) =>
+          isNext ? Math.min(prev + inc, words.length) : Math.max(prev + inc, 0),
+        );
       }
     },
-    [isMeaningVisible],
+    [isMeaningVisible, flippedMode, words.length],
   );
 
   const handleKeybordActions = useCallback(
@@ -100,8 +112,22 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
       if (event.key === "ArrowRight" && currentWordIndex < words.length) {
         switchWords(1);
       }
+
+      if (event.key === "p" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        playWord();
+      }
+
+      if (event.key === "c" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        const text = `${words[currentWordIndex].word} - ${words[currentWordIndex].translation || words[currentWordIndex].meaning || words[currentWordIndex].example}`;
+        navigator.clipboard.writeText(text);
+        toast("Copied to clipboard", {
+          description: text,
+        });
+      }
     },
-    [currentWordIndex, words.length, toggleCard, switchWords],
+    [currentWordIndex, toggleCard, switchWords, playWord, words],
   );
 
   useEffect(() => {
@@ -119,7 +145,11 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
       {noWeekWords ? <span>{noWeekWords}</span> : null}
 
       {isCompleted ? (
-        <CompletedList words={words} />
+        <CompletedList
+          words={words}
+          goBack={() => setCurrentWordIndex((prev) => prev - 1)}
+          startOver={() => setCurrentWordIndex(0)}
+        />
       ) : (
         <div className="flex items-center">
           <Button
@@ -132,11 +162,12 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
             <ArrowLeft />
           </Button>
           <WordCard
+            nextCard={() => switchWords(1)}
+            prevCard={() => switchWords(-1)}
             loading={audioLoading}
             playWord={playWord}
             word={currentWord}
             toggleCard={toggleCard}
-            isFlipped={flippedMode}
             isMeaningVisible={isMeaningVisible}
           />
           <Button

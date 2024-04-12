@@ -62,7 +62,7 @@ export function CommandMenu() {
     [],
   );
 
-  const toggleDateRangeMode = () => {
+  const toggleVocabularMode = () => {
     const params = new URLSearchParams(searchParams);
     const isWeekMode = params.get("mode") === DateRangeMode.week;
 
@@ -73,6 +73,10 @@ export function CommandMenu() {
     }
 
     replace(`${pathname}?${params.toString()}`);
+
+    toast("Vocabulary mode toggled", {
+      description: `Changed to ${isWeekMode ? "random" : "last week"}`,
+    });
   };
 
   const changeTheme = (theme: string) => {
@@ -108,11 +112,19 @@ export function CommandMenu() {
       if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         toggleTheme();
+        setOpen(false);
       }
 
       if (e.key === "f" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         toggleFlippedMode();
+        setOpen(false);
+      }
+
+      if (e.key === "v" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        toggleVocabularMode();
+        setOpen(false);
       }
     };
 
@@ -149,10 +161,11 @@ export function CommandMenu() {
                   <CommandShortcut>⌘F</CommandShortcut>
                 </CommandItem>
                 <CommandItem
-                  onSelect={closeAfterDecorator(toggleDateRangeMode)}
+                  onSelect={closeAfterDecorator(toggleVocabularMode)}
                 >
                   <Calendar className="mr-2 h-4 w-4" />
-                  <span>Toggle date range mode</span>
+                  <span>Toggle vocabulary mode</span>
+                  <CommandShortcut>⌘V</CommandShortcut>
                 </CommandItem>
               </>
             )}
@@ -174,31 +187,34 @@ export function CommandMenu() {
               <span>{isCardsPage ? "Matchup" : "Cards"}</span>
             </CommandItem>
             <CommandItem
-              onSelect={() =>
+              onSelect={closeAfterDecorator(() =>
                 window.open(
                   "https://www.notion.so/menchynskyi/Words-and-expressions-beab3c4d95a44f5fb55e49040ec2c314?pvs=4",
                   "_blank",
-                )
-              }
+                ),
+              )}
             >
               <NotionIcon className="mr-2 h-5 w-5" />
               <span>Notion vocabulary</span>
             </CommandItem>
             <CommandItem
-              onSelect={() =>
+              onSelect={closeAfterDecorator(() =>
                 window.open(
                   "https://vercel.com/menchynskyis-projects/vocabulary-app",
                   "_blank",
-                )
-              }
+                ),
+              )}
             >
               <Triangle className="mr-2 h-4 w-4" />
               <span>Vercel</span>
             </CommandItem>
             <CommandItem
-              onSelect={() =>
-                push("https://github.com/Menchynskyi/vocabulary-app")
-              }
+              onSelect={closeAfterDecorator(() =>
+                window.open(
+                  "https://github.com/Menchynskyi/vocabulary-app",
+                  "_blank",
+                ),
+              )}
             >
               <GithubIcon className="mr-2 h-3 w-3" />
               <span>GitHub</span>

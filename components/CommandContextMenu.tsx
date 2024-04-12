@@ -7,55 +7,46 @@ import {
   ContextMenuGroup,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { CardCommandsConfig } from "@/types";
 
 export function CommandContextMenu({
   children,
+  cardCommands,
 }: {
   children: React.ReactNode;
+  cardCommands: CardCommandsConfig;
 }) {
   return (
-    <ContextMenu>
+    <ContextMenu modal>
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
-      <ContextMenuContent className="w-64">
-        <ContextMenuGroup>
-          <ContextMenuItem>
-            Flip card
-            <ContextMenuShortcut>Space</ContextMenuShortcut>
-          </ContextMenuItem>
-          <ContextMenuItem>
-            Next card
-            <ContextMenuShortcut>→</ContextMenuShortcut>
-          </ContextMenuItem>
-          <ContextMenuItem>
-            Previous card
-            <ContextMenuShortcut>←</ContextMenuShortcut>
-          </ContextMenuItem>
-          <ContextMenuItem>
-            Pronounce
-            <ContextMenuShortcut>⌘+P</ContextMenuShortcut>
-          </ContextMenuItem>
-        </ContextMenuGroup>
-
-        <ContextMenuSeparator />
-
-        <ContextMenuGroup>
-          <ContextMenuItem>
-            Edit
-            <ContextMenuShortcut>⌘+E</ContextMenuShortcut>
-          </ContextMenuItem>
-          <ContextMenuItem>
-            Copy
-            <ContextMenuShortcut>⌘+C</ContextMenuShortcut>
-          </ContextMenuItem>
-        </ContextMenuGroup>
-
-        <ContextMenuSeparator />
-
-        <ContextMenuGroup>
-          <ContextMenuItem>Open in Notion</ContextMenuItem>
-          <ContextMenuItem>Open in Reverso Context</ContextMenuItem>
-          <ContextMenuItem>Open in Cambridge Dictionary</ContextMenuItem>
-        </ContextMenuGroup>
+      <ContextMenuContent
+        className="w-64"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+      >
+        {cardCommands.map((group, groupIndex) => (
+          <>
+            <ContextMenuGroup key={groupIndex}>
+              {group.map((command, commandIndex) => (
+                <ContextMenuItem
+                  key={commandIndex}
+                  onSelect={command.onSelect}
+                  disabled={command.disabled}
+                >
+                  {command.label}
+                  {command.shortcut && (
+                    <ContextMenuShortcut>
+                      {command.shortcut}
+                    </ContextMenuShortcut>
+                  )}
+                </ContextMenuItem>
+              ))}
+            </ContextMenuGroup>
+            {groupIndex < cardCommands.length - 1 && <ContextMenuSeparator />}
+          </>
+        ))}
       </ContextMenuContent>
     </ContextMenu>
   );

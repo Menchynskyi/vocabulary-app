@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { isTextToSpeechEnabled } from "@/constants";
-import { Word, WordFields } from "@/types";
+import { CardCommandsConfig, Word, WordFields } from "@/types";
 import { cn } from "@/utils/tailwind";
 import { Button } from "@/components/ui/button";
 import { AudioLines, Languages, Sparkle, Lightbulb } from "lucide-react";
@@ -14,23 +14,26 @@ import {
 } from "@/components/ui/tooltip";
 import { CommandDropdown } from "@/components/CommandDropdown";
 import { CommandContextMenu } from "@/components/CommandContextMenu";
+import { toast } from "sonner";
 
 type WordCardProps = {
   loading: boolean;
   word: Word;
-  isFlipped: boolean;
   toggleCard: () => void;
   playWord: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   isMeaningVisible: boolean;
+  nextCard: () => void;
+  prevCard: () => void;
 };
 
 export function WordCard({
   loading,
   word,
-  isFlipped,
   toggleCard,
   playWord,
   isMeaningVisible,
+  nextCard,
+  prevCard,
 }: WordCardProps) {
   const [meaningMode, setMeaningMode] = useState<WordFields>("translation");
 
@@ -52,7 +55,10 @@ export function WordCard({
   const meaning = word[meaningMode];
 
   const avaialbleMeaningModes = Object.entries(word)
-    .filter(([key, value]) => !!value && key !== "word" && key !== "id")
+    .filter(
+      ([key, value]) =>
+        !!value && key !== "word" && key !== "id" && key !== "url",
+    )
     .map(([key]) => key) as WordFields[];
   const isOnlyOneMeaningType = avaialbleMeaningModes.length === 1;
 
@@ -66,7 +72,7 @@ export function WordCard({
   }, [avaialbleMeaningModes, meaningMode]);
 
   const nextMeaningButton = useMemo(() => {
-    const data: Record<string, { tooltip: string; icon: JSX.Element }> = {
+    const buttonData: Record<string, { tooltip: string; icon: JSX.Element }> = {
       translation: {
         tooltip: "Show translation",
         icon: <Languages className="h-4 w-4" />,
@@ -81,7 +87,7 @@ export function WordCard({
       },
     };
 
-    return data[nextMeaningMode];
+    return buttonData[nextMeaningMode];
   }, [nextMeaningMode]);
 
   const handleChangeMeaningMode = (event: React.MouseEvent) => {
@@ -90,9 +96,78 @@ export function WordCard({
     setMeaningMode(nextMeaningMode);
   };
 
+  const cardCommands: CardCommandsConfig = [
+    [
+      {
+        label: "Flip card",
+        shortcut: "Space",
+        onSelect: toggleCard,
+      },
+      {
+        label: "Next card",
+        shortcut: "→",
+        onSelect: nextCard,
+      },
+      {
+        label: "Previous card",
+        shortcut: "←",
+        onSelect: prevCard,
+      },
+      {
+        label: "Pronounce",
+        shortcut: "⌘+P",
+        onSelect: playWord as () => void,
+      },
+    ],
+    [
+      {
+        label: "Edit",
+        shortcut: "⌘+E",
+        disabled: true,
+      },
+      {
+        label: "Copy",
+        shortcut: "⌘+C",
+        onSelect: () => {
+          const text = `${word.word} - ${meaning}`;
+          navigator.clipboard.writeText(text);
+          toast("Copied to clipboard", {
+            description: text,
+          });
+        },
+      },
+    ],
+    [
+      {
+        label: "Open in Notion",
+        onSelect: () => {
+          window.open(word.url, "_blank");
+        },
+      },
+      {
+        label: "Open in Reverso Context",
+        onSelect: () => {
+          window.open(
+            `https://context.reverso.net/translation/english-ukrainian/${word.word}`,
+            "_blank",
+          );
+        },
+      },
+      {
+        label: "Open in Cambridge Dictionary",
+        onSelect: () => {
+          window.open(
+            `https://dictionary.cambridge.org/dictionary/english/${word.word}`,
+            "_blank",
+          );
+        },
+      },
+    ],
+  ];
+
   return (
     <TooltipProvider delayDuration={200}>
-      <CommandContextMenu>
+      <CommandContextMenu cardCommands={cardCommands}>
         <div
           className="h-[400px] w-[400px] perspective-1000 hover:cursor-pointer"
           onClick={toggleCard}
@@ -107,10 +182,10 @@ export function WordCard({
           >
             <div className="absolute flex h-full w-full flex-col rounded-md border bg-background text-center text-[1rem] text-secondary-foreground backface-hidden">
               <div className="flex	h-full items-center justify-center p-[40px] text-2xl">
-                <span>{isFlipped ? meaning : word.word}</span>
+                <span>{word.word}</span>
               </div>
               <div className="flex rounded-b-md  border-t px-2 py-1">
-                <CommandDropdown />
+                <CommandDropdown cardCommands={cardCommands} />
 
                 {isTextToSpeechEnabled && (
                   <Tooltip>
@@ -137,11 +212,11 @@ export function WordCard({
             </div>
             <div className="absolute flex h-full w-full flex-col whitespace-pre-line rounded-md border bg-primary/100 from-black text-center text-[1rem] text-primary-foreground backface-hidden rotate-y-180">
               <div className="flex h-full items-center justify-center p-[40px] text-2xl">
-                <span>{isFlipped ? word.word : meaning}</span>
+                <span>{meaning}</span>
               </div>
 
               <div className="flex rounded-b-md border-t bg-primary/30 px-2 py-1">
-                <CommandDropdown isPrimary />
+                <CommandDropdown isPrimary cardCommands={cardCommands} />
 
                 {!isOnlyOneMeaningType && (
                   <Tooltip>

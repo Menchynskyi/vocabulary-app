@@ -22,7 +22,7 @@ const databaseId = process.env.NOTION_VOCABULARY_DATABASE_ID || "";
 
 const numberOfWords = Number(process.env.VOCABULARY_SET_LENGTH || 15);
 const numberOfWordsWeekMode = Number(
-  process.env.VOCABULARY_SET_LENGTH_WEEK_MODE || numberOfWords
+  process.env.VOCABULARY_SET_LENGTH_WEEK_MODE || numberOfWords,
 );
 
 function generateRandomWords(words: Omit<Word, "id">[], setLength: number) {
@@ -89,7 +89,7 @@ function generateFilter(length = 5) {
           starts_with:
             property === "Translation"
               ? getRandomTranslationLetter(
-                  isUkrainianTranslation ? alphabets.ua : alphabets.ru
+                  isUkrainianTranslation ? alphabets.ua : alphabets.ru,
                 )
               : getRandomEnglishLetter(alphabets.en),
         },
@@ -128,7 +128,6 @@ export async function getWords(isWeek: boolean) {
   });
 
   if (response.results.length < _numberOfWords) {
-    console.log(sevenDaysAgo.toISOString());
     response = await notionClient.databases.query({
       database_id: databaseId,
       filter: isWeek
@@ -177,12 +176,13 @@ export async function getWords(isWeek: boolean) {
           translation,
           meaning,
           example,
+          url: result.url,
         };
       })
       .filter(
         (word) =>
-          word.word && (word.translation || word.meaning || word.example)
+          word.word && (word.translation || word.meaning || word.example),
       ),
-    _numberOfWords
+    _numberOfWords,
   );
 }

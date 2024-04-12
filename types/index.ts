@@ -8,6 +8,16 @@ export type Word = {
   translation: string;
   meaning: string;
   example: string;
+  url: string;
 };
 
 export type WordFields = keyof Word;
+
+export type CardCommandsConfig = Array<
+  Array<{
+    label: string;
+    shortcut?: string;
+    onSelect?: () => void;
+    disabled?: boolean;
+  }>
+>;
