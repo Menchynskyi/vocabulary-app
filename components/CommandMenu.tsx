@@ -40,8 +40,6 @@ import {
 } from "@/constants/voice";
 import { getCookie, setCookie } from "cookies-next";
 
-const customVoiceChangeEvent = new CustomEvent(voiceChangeCustomEventName);
-
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -121,6 +119,7 @@ export function CommandMenu() {
       return;
     }
 
+    const customVoiceChangeEvent = new CustomEvent(voiceChangeCustomEventName);
     document.dispatchEvent(customVoiceChangeEvent);
 
     setCookie(voiceNameCookie, voiceName);
