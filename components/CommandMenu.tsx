@@ -10,6 +10,8 @@ import {
   Layers3,
   RefreshCcw,
   Search,
+  AudioWaveform,
+  AudioLines,
 } from "lucide-react";
 import {
   CommandDialog,
@@ -30,6 +32,15 @@ import { DateRangeMode } from "@/types";
 import { toast } from "sonner";
 import { GithubIcon } from "./icons/GithubIcon";
 import { NotionIcon } from "./icons/NotionIcon";
+import {
+  VoiceName,
+  voiceChangeCustomEventName,
+  voiceNameCookie,
+  voiceOptions,
+} from "@/constants/voice";
+import { getCookie, setCookie } from "cookies-next";
+
+const customVoiceChangeEvent = new CustomEvent(voiceChangeCustomEventName);
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
@@ -104,6 +115,28 @@ export function CommandMenu() {
     setOpen(false);
   };
 
+  const changeVoice = (voiceName: VoiceName) => () => {
+    const currentVoiceName = getCookie(voiceNameCookie) as VoiceName;
+    if (currentVoiceName === voiceName) {
+      return;
+    }
+
+    document.dispatchEvent(customVoiceChangeEvent);
+
+    setCookie(voiceNameCookie, voiceName);
+    const voice = voiceOptions.find((item) => item.name === voiceName);
+    toast("Voice changed", {
+      description: `Changed to ${voice?.languageCode === "en-GB" ? "British" : "American"} ${voice?.type} voice`,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          setCookie(voiceNameCookie, currentVoiceName);
+          document.dispatchEvent(customVoiceChangeEvent);
+        },
+      },
+    });
+  };
+
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
       if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/") {
@@ -133,7 +166,7 @@ export function CommandMenu() {
     document.addEventListener("keydown", handleKeydown);
     return () => document.removeEventListener("keydown", handleKeydown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [theme]);
+  }, []);
 
   return (
     <>
@@ -184,6 +217,34 @@ export function CommandMenu() {
           </CommandGroup>
 
           <CommandSeparator />
+          <CommandGroup heading="Voice">
+            <CommandItem
+              onSelect={closeAfterDecorator(changeVoice("en-US-Journey-D"))}
+            >
+              <AudioWaveform className="mr-2 h-4 w-4" />
+              <span>Set American English male voice</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={closeAfterDecorator(changeVoice("en-US-Journey-F"))}
+            >
+              <AudioWaveform className="mr-2 h-4 w-4" />
+              <span>Set American English female voice</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={closeAfterDecorator(changeVoice("en-GB-Studio-B"))}
+            >
+              <AudioLines className="mr-2 h-4 w-4" />
+              <span>Set British English male voice</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={closeAfterDecorator(changeVoice("en-GB-Studio-C"))}
+            >
+              <AudioLines className="mr-2 h-4 w-4" />
+              <span>Set British English female voice</span>
+            </CommandItem>
+          </CommandGroup>
+
+          <CommandSeparator />
           <CommandGroup heading="Links">
             <CommandItem onSelect={() => push(isCardsPage ? "/matchup" : "/")}>
               {isCardsPage ? (
@@ -198,7 +259,7 @@ export function CommandMenu() {
                 window.open(process.env.NEXT_PUBLIC_NOTION_PAGE_URL, "_blank"),
               )}
             >
-              <NotionIcon className="mr-2 h-5 w-5" />
+              <NotionIcon className="mr-2" />
               <span>Notion vocabulary</span>
             </CommandItem>
             <CommandItem
@@ -220,7 +281,7 @@ export function CommandMenu() {
                 ),
               )}
             >
-              <GithubIcon className="mr-2 h-3 w-3" />
+              <GithubIcon className="mr-2 !h-[1.125rem] !w-[1.125rem]" />
               <span>GitHub</span>
             </CommandItem>
           </CommandGroup>

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { CompletedList } from "./CompletedList";
 import { toast } from "sonner";
+import { voiceChangeCustomEventName } from "@/constants/voice";
 
 async function transformTextToSpeech(text: string) {
   try {
@@ -47,6 +48,19 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
   useEffect(() => {
     setIsMeaningVisible(flippedMode);
   }, [flippedMode]);
+
+  useEffect(() => {
+    const handleVoiceChange = () => {
+      setWordsAudio(Array(words.length).fill(null));
+    };
+    document.addEventListener(voiceChangeCustomEventName, handleVoiceChange);
+    return () => {
+      document.removeEventListener(
+        voiceChangeCustomEventName,
+        handleVoiceChange,
+      );
+    };
+  }, [words.length]);
 
   const playWord = useCallback(
     async (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

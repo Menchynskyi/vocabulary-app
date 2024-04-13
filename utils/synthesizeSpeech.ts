@@ -1,3 +1,4 @@
+import { VoiceName, voiceOptions } from "@/constants/voice";
 import { TextToSpeechClient } from "@google-cloud/text-to-speech";
 
 const client = new TextToSpeechClient({
@@ -8,7 +9,9 @@ const client = new TextToSpeechClient({
   },
 });
 
-export async function synthesizeSpeech(text: string) {
+export async function synthesizeSpeech(text: string, voiceName?: VoiceName) {
+  const { languageCode, name } =
+    voiceOptions.find((item) => item.name === voiceName) || voiceOptions[0];
   try {
     const [response] = await client.synthesizeSpeech({
       audioConfig: {
@@ -17,8 +20,8 @@ export async function synthesizeSpeech(text: string) {
         speakingRate: 1,
       },
       voice: {
-        languageCode: "en-US",
-        name: "en-US-Journey-D",
+        languageCode,
+        name,
       },
       input: {
         text,
