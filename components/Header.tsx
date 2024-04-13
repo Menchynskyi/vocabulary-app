@@ -8,31 +8,33 @@ import { buttonVariants } from "./ui/button";
 
 export function Header() {
   return (
-    <header className="flex w-full max-w-screen-2xl justify-between border-b px-4 py-2">
-      <a
-        href={process.env.NEXT_PUBLIC_NOTION_PAGE_URL}
-        className={buttonVariants({ variant: "ghost", size: "icon" })}
-        target="_blank"
-        rel="noreferrer"
-      >
-        <NotionIcon className="h-[1.4rem] w-[1.4rem] transition-all" />
-      </a>
-      <Navigation />
-
-      <div className="flex items-center">
-        <CommandMenu />
+    <header className="flex justify-center border-b px-4 py-2">
+      <div className="flex w-full max-w-screen-2xl justify-between">
         <a
-          href="https://github.com/Menchynskyi/vocabulary-app"
-          className={cn(
-            buttonVariants({ variant: "ghost", size: "icon" }),
-            "hidden sm:inline-flex",
-          )}
+          href={process.env.NEXT_PUBLIC_NOTION_PAGE_URL}
+          className={buttonVariants({ variant: "ghost", size: "icon" })}
           target="_blank"
           rel="noreferrer"
         >
-          <GithubIcon className="h-[1.2rem] w-[1.2rem]" />
+          <NotionIcon className="h-[1.4rem] w-[1.4rem] transition-all" />
         </a>
-        <ThemeToggleButton />
+        <Navigation />
+
+        <div className="flex items-center">
+          <CommandMenu />
+          <a
+            href="https://github.com/Menchynskyi/vocabulary-app"
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "icon" }),
+              "hidden sm:inline-flex",
+            )}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <GithubIcon className="h-[1.2rem] w-[1.2rem]" />
+          </a>
+          <ThemeToggleButton />
+        </div>
       </div>
     </header>
   );
