@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Cards as CardsView } from "./components/Cards";
 import { DateRangeMode } from "@/types";
-import { Skeleton } from "@/components/ui/skeleton";
+import { CardsSkeleton } from "./components/CardsSkeleton";
 
 type CardsProps = {
   searchParams: {
@@ -12,9 +12,7 @@ type CardsProps = {
 export default async function Cards({ searchParams }: CardsProps) {
   return (
     <main className="mt-16 flex justify-center sm:mt-36">
-      <Suspense
-        fallback={<Skeleton className="h-[400px] w-[90vw] sm:w-[400px]" />}
-      >
+      <Suspense fallback={<CardsSkeleton />}>
         <CardsView dateRangeMode={searchParams?.mode} />
       </Suspense>
     </main>
