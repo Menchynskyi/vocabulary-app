@@ -24,7 +24,7 @@ import {
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
 import { Button } from "./ui/button";
-import { CardsDispatchContext } from "@/app/(cards)/layout";
+import { CardsDispatchContext } from "@/app/(cards)/components/CardsContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { DateRangeMode } from "@/types";
 import { toast } from "sonner";

@@ -4,7 +4,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { WordCard } from "./WordCard";
 import { uri } from "@/constants";
 import { Word } from "@/types";
-import { CardsContext } from "../layout";
+import { CardsContext } from "./CardsContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { CompletedList } from "./CompletedList";
