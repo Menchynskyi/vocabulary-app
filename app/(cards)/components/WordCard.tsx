@@ -148,7 +148,7 @@ export function WordCard({
         label: "Open in Reverso Context",
         onSelect: () => {
           window.open(
-            `https://context.reverso.net/translation/english-ukrainian/${word.word}`,
+            `https://context.reverso.net/translation/english-${process.env.NEXT_PUBLIC_TRANSLATION_LANGUAGE === "UA" ? "ukrainian" : "russian"}/${word.word}`,
             "_blank",
           );
         },
@@ -169,7 +169,7 @@ export function WordCard({
     <TooltipProvider delayDuration={200}>
       <CommandContextMenu cardCommands={cardCommands}>
         <div
-          className="h-[400px] w-[400px] perspective-1000 hover:cursor-pointer"
+          className="h-[400px] w-[90vw] perspective-1000 hover:cursor-pointer sm:w-[400px]"
           onClick={toggleCard}
         >
           <div

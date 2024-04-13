@@ -9,6 +9,7 @@ import {
   Wand,
   Layers3,
   RefreshCcw,
+  Search,
 } from "lucide-react";
 import {
   CommandDialog,
@@ -34,6 +35,7 @@ export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const dispatch = useContext(CardsDispatchContext);
+
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace, push } = useRouter();
@@ -62,7 +64,7 @@ export function CommandMenu() {
     [],
   );
 
-  const toggleVocabularMode = () => {
+  const toggleVocabularyMode = () => {
     const params = new URLSearchParams(searchParams);
     const isWeekMode = params.get("mode") === DateRangeMode.week;
 
@@ -103,8 +105,8 @@ export function CommandMenu() {
   };
 
   useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+    const handleKeydown = (e: KeyboardEvent) => {
+      if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/") {
         e.preventDefault();
         setOpen((open) => !open);
       }
@@ -123,13 +125,13 @@ export function CommandMenu() {
 
       if (e.key === "v" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        toggleVocabularMode();
+        toggleVocabularyMode();
         setOpen(false);
       }
     };
 
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
+    document.addEventListener("keydown", handleKeydown);
+    return () => document.removeEventListener("keydown", handleKeydown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme]);
 
@@ -141,12 +143,13 @@ export function CommandMenu() {
         size="sm"
         className="mr-2"
       >
-        <span className="pr-2 text-sm text-muted-foreground">
+        <span className="hidden pr-2 text-sm text-muted-foreground sm:inline">
           Search commands...
         </span>
-        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+        <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 sm:inline-flex">
           <span className="text-xs">⌘</span>K
         </kbd>
+        <Search className="h-4 w-4 sm:hidden" />
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
@@ -158,21 +161,25 @@ export function CommandMenu() {
                 <CommandItem onSelect={closeAfterDecorator(toggleFlippedMode)}>
                   <RefreshCcw className="mr-2 h-4 w-4" />
                   <span>Toggle flipped mode</span>
-                  <CommandShortcut>⌘F</CommandShortcut>
+                  <CommandShortcut className="hidden sm:block">
+                    ⌘F
+                  </CommandShortcut>
                 </CommandItem>
                 <CommandItem
-                  onSelect={closeAfterDecorator(toggleVocabularMode)}
+                  onSelect={closeAfterDecorator(toggleVocabularyMode)}
                 >
                   <Calendar className="mr-2 h-4 w-4" />
                   <span>Toggle vocabulary mode</span>
-                  <CommandShortcut>⌘V</CommandShortcut>
+                  <CommandShortcut className="hidden sm:block">
+                    ⌘V
+                  </CommandShortcut>
                 </CommandItem>
               </>
             )}
             <CommandItem onSelect={closeAfterDecorator(toggleTheme)}>
               {themeIcon}
               <span>{`Toggle theme`}</span>
-              <CommandShortcut>⌘S</CommandShortcut>
+              <CommandShortcut className="hidden sm:block">⌘S</CommandShortcut>
             </CommandItem>
           </CommandGroup>
 
@@ -188,10 +195,7 @@ export function CommandMenu() {
             </CommandItem>
             <CommandItem
               onSelect={closeAfterDecorator(() =>
-                window.open(
-                  "https://www.notion.so/menchynskyi/Words-and-expressions-beab3c4d95a44f5fb55e49040ec2c314?pvs=4",
-                  "_blank",
-                ),
+                window.open(process.env.NEXT_PUBLIC_NOTION_PAGE_URL, "_blank"),
               )}
             >
               <NotionIcon className="mr-2 h-5 w-5" />

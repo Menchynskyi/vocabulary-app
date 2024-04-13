@@ -9,18 +9,20 @@ import {
 } from "@/components/ui/context-menu";
 import { CardCommandsConfig } from "@/types";
 
+type CommandContextMenuProps = {
+  children: React.ReactNode;
+  cardCommands: CardCommandsConfig;
+};
+
 export function CommandContextMenu({
   children,
   cardCommands,
-}: {
-  children: React.ReactNode;
-  cardCommands: CardCommandsConfig;
-}) {
+}: CommandContextMenuProps) {
   return (
     <ContextMenu modal>
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
       <ContextMenuContent
-        className="w-64"
+        className="w-64 max-sm:hidden"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();

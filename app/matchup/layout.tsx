@@ -1,10 +1,10 @@
 import { Header } from "@/components/Header";
 
-export default function MatchupLayout({
-  children,
-}: {
+type MatchupLayoutProps = {
   children: React.ReactNode;
-}) {
+};
+
+export default function MatchupLayout({ children }: MatchupLayoutProps) {
   return (
     <>
       <Header />

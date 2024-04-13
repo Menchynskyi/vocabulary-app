@@ -11,8 +11,10 @@ type CardsProps = {
 
 export default async function Cards({ searchParams }: CardsProps) {
   return (
-    <main className="mt-36 flex justify-center">
-      <Suspense fallback={<Skeleton className="h-[400px] w-[400px]" />}>
+    <main className="mt-16 flex justify-center sm:mt-36">
+      <Suspense
+        fallback={<Skeleton className="h-[400px] w-[90vw] sm:w-[400px]" />}
+      >
         <CardsView dateRangeMode={searchParams?.mode} />
       </Suspense>
     </main>

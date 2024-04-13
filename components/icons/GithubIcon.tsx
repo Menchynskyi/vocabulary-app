@@ -1,4 +1,6 @@
-export const GithubIcon = ({ className }: { className?: string }) => {
+type GithubIconProps = { className?: string };
+
+export const GithubIcon = ({ className }: GithubIconProps) => {
   return (
     <svg viewBox="0 0 438.549 438.549" className={className}>
       <path

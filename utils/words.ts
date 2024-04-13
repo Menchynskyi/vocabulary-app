@@ -12,7 +12,8 @@ const alphabets = {
   ua: "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя",
   ru: "абвгдеёжзийклмнопрстуфхцчшщъыьэюя",
 };
-const isUkrainianTranslation = process.env.TRANSLATION_LANGUAGE === "UA";
+const isUkrainianTranslation =
+  process.env.NEXT_PUBLIC_TRANSLATION_LANGUAGE === "UA";
 
 const notionClient = new Client({
   auth: process.env.NOTION_SECRET,

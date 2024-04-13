@@ -1,4 +1,6 @@
-export const NotionIcon = ({ className }: { className?: string }) => {
+type NotionIconProps = { className?: string };
+
+export const NotionIcon = ({ className }: NotionIconProps) => {
   return (
     <svg
       viewBox="0 0 24 24"

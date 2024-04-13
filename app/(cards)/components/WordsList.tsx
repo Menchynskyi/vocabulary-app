@@ -35,7 +35,6 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
 
   const [isMeaningVisible, setIsMeaningVisible] = useState(flippedMode);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
-
   const [audioLoading, setAudioLoading] = useState(false);
   const [wordsAudio, setWordsAudio] = useState(Array(words.length).fill(null));
 
@@ -113,12 +112,20 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
         switchWords(1);
       }
 
-      if (event.key === "p" && (event.metaKey || event.ctrlKey)) {
+      if (
+        event.key === "p" &&
+        (event.metaKey || event.ctrlKey) &&
+        !isCompleted
+      ) {
         event.preventDefault();
         playWord();
       }
 
-      if (event.key === "c" && (event.metaKey || event.ctrlKey)) {
+      if (
+        event.key === "c" &&
+        (event.metaKey || event.ctrlKey) &&
+        !isCompleted
+      ) {
         event.preventDefault();
         const text = `${words[currentWordIndex].word} - ${words[currentWordIndex].translation || words[currentWordIndex].meaning || words[currentWordIndex].example}`;
         navigator.clipboard.writeText(text);
@@ -127,7 +134,7 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
         });
       }
     },
-    [currentWordIndex, toggleCard, switchWords, playWord, words],
+    [currentWordIndex, toggleCard, switchWords, playWord, words, isCompleted],
   );
 
   useEffect(() => {
@@ -142,7 +149,9 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
 
   return (
     <>
-      {noWeekWords ? <span>{noWeekWords}</span> : null}
+      {noWeekWords ? (
+        <span className="text-2xl sm:text-4xl">{noWeekWords}</span>
+      ) : null}
 
       {isCompleted ? (
         <CompletedList
@@ -151,13 +160,13 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
           startOver={() => setCurrentWordIndex(0)}
         />
       ) : (
-        <div className="flex items-center">
+        <div className="flex flex-col items-center sm:flex-row">
           <Button
             size="icon"
             variant="outline"
             onClick={() => switchWords(-1)}
             disabled={currentWordIndex === 0}
-            className="mb-[45px] mr-4 rounded-full"
+            className="mb-[45px] mr-4 hidden rounded-full sm:flex"
           >
             <ArrowLeft />
           </Button>
@@ -175,10 +184,30 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
             variant="outline"
             onClick={() => switchWords(1)}
             disabled={currentWordIndex >= words.length}
-            className="mb-[45px] ml-4 rounded-full"
+            className="mb-[45px] ml-4 hidden rounded-full sm:flex"
           >
             <ArrowRight />
           </Button>
+          <div className="mt-10 flex w-full justify-between sm:hidden">
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-16 w-16"
+              onClick={() => switchWords(-1)}
+              disabled={currentWordIndex === 0}
+            >
+              <ArrowLeft className="h-8 w-8" />
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-16 w-16"
+              onClick={() => switchWords(1)}
+              disabled={currentWordIndex >= words.length}
+            >
+              <ArrowRight className="h-8 w-8" />
+            </Button>
+          </div>
         </div>
       )}
     </>

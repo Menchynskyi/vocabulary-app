@@ -1,3 +1,4 @@
+import { cn } from "@/utils/tailwind";
 import { CommandMenu } from "./CommandMenu";
 import { Navigation } from "./Navigation";
 import { ThemeToggleButton } from "./ThemeToggleButton";
@@ -9,7 +10,7 @@ export function Header() {
   return (
     <header className="flex w-full max-w-screen-2xl justify-between border-b px-4 py-2">
       <a
-        href="https://www.notion.so/menchynskyi/Words-and-expressions-beab3c4d95a44f5fb55e49040ec2c314?pvs=4" // TODO: move to .env
+        href={process.env.NEXT_PUBLIC_NOTION_PAGE_URL}
         className={buttonVariants({ variant: "ghost", size: "icon" })}
         target="_blank"
         rel="noreferrer"
@@ -21,8 +22,11 @@ export function Header() {
       <div className="flex items-center">
         <CommandMenu />
         <a
-          href="https://github.com/Menchynskyi/vocabulary-app" // TODO: move to .env
-          className={buttonVariants({ variant: "ghost", size: "icon" })}
+          href="https://github.com/Menchynskyi/vocabulary-app"
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "icon" }),
+            "hidden sm:inline-flex",
+          )}
           target="_blank"
           rel="noreferrer"
         >
