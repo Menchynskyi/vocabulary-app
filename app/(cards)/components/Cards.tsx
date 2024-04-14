@@ -1,11 +1,15 @@
 import { WordsList } from "./WordsList";
 import { uri } from "@/constants";
 import { DateRangeMode } from "@/types";
+import { cookies } from "next/headers";
 
 async function getWords(mode: DateRangeMode) {
   try {
     const response = await fetch(`${uri}/api/words?mode=${mode}`, {
       cache: "no-store",
+      headers: {
+        Cookie: cookies().toString(),
+      },
     });
     const { data } = await response.json();
 

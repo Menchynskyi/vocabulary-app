@@ -1,3 +1,7 @@
+import {
+  defaultCardsListLength,
+  defaultCardsListWeekModeLength,
+} from "@/constants/cards";
 import { Word } from "@/types";
 import { Client } from "@notionhq/client";
 import {
@@ -20,11 +24,6 @@ const notionClient = new Client({
 });
 
 const databaseId = process.env.NOTION_VOCABULARY_DATABASE_ID || "";
-
-const numberOfWords = Number(process.env.VOCABULARY_SET_LENGTH || 15);
-const numberOfWordsWeekMode = Number(
-  process.env.VOCABULARY_SET_LENGTH_WEEK_MODE || numberOfWords,
-);
 
 function generateRandomWords(words: Omit<Word, "id">[], setLength: number) {
   if (setLength > words.length) {
@@ -100,15 +99,24 @@ function generateFilter(length = 5) {
   return filters;
 }
 
-export async function getWords(isWeek: boolean) {
+export type GetWordsParams = {
+  isWeekMode?: boolean;
+  wordsLength?: number;
+};
+
+export async function getWords({ isWeekMode, wordsLength }: GetWordsParams) {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  const _numberOfWords = isWeek ? numberOfWordsWeekMode : numberOfWords;
+  const fallbackLength = isWeekMode
+    ? defaultCardsListWeekModeLength
+    : defaultCardsListLength;
+
+  const _numberOfWords = wordsLength || fallbackLength;
 
   let response = await notionClient.databases.query({
     database_id: databaseId,
-    filter: isWeek
+    filter: isWeekMode
       ? {
           and: [
             {
@@ -131,7 +139,7 @@ export async function getWords(isWeek: boolean) {
   if (response.results.length < _numberOfWords) {
     response = await notionClient.databases.query({
       database_id: databaseId,
-      filter: isWeek
+      filter: isWeekMode
         ? {
             property: "Created date",
             date: {

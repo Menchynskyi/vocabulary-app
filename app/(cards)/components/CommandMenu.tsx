@@ -83,7 +83,7 @@ export function CommandMenu() {
     replace(`${pathname}?${params.toString()}`);
 
     toast("Vocabulary mode toggled", {
-      description: `Changed to ${isWeekMode ? "random" : "last week"}`,
+      description: `Changed to ${isWeekMode ? "random" : "week"} mode`,
     });
   };
 

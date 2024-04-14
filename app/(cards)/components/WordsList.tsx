@@ -50,6 +50,9 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
   }, [flippedMode]);
 
   useEffect(() => {
+    setCurrentWordIndex(0);
+    setWordsAudio(Array(words.length).fill(null));
+
     const handleVoiceChange = () => {
       setWordsAudio(Array(words.length).fill(null));
     };

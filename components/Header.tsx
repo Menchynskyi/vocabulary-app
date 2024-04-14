@@ -25,6 +25,7 @@ export function Header({ children }: HeaderProps) {
 
         <div className="flex items-center">
           {children}
+          <ThemeToggleButton />
           <a
             href="https://github.com/Menchynskyi/vocabulary-app"
             className={cn(
@@ -36,7 +37,6 @@ export function Header({ children }: HeaderProps) {
           >
             <GithubIcon className="h-[1.2rem] w-[1.2rem]" />
           </a>
-          <ThemeToggleButton />
         </div>
       </div>
     </header>
