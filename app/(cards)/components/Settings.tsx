@@ -66,6 +66,7 @@ export function Settings() {
     );
     const currentVoiceName = getCookie(voiceNameCookie);
 
+    let isVoiceChanged = false;
     let isSettingsChanged = false;
 
     const newCardsListLength = cardsListLength.toString();
@@ -89,11 +90,14 @@ export function Settings() {
       document.dispatchEvent(customVoiceChangeEvent);
 
       setCookie(voiceNameCookie, newVoiceName);
-      isSettingsChanged = true;
+      isVoiceChanged = true;
+    }
+
+    if (isSettingsChanged || isVoiceChanged) {
+      toast("Settings saved successfully");
     }
 
     if (isSettingsChanged) {
-      toast("Settings saved successfully");
       refresh();
     }
   };
