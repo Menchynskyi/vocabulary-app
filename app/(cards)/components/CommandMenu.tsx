@@ -7,7 +7,6 @@ import {
   Laptop,
   Triangle,
   Wand,
-  Layers3,
   RefreshCcw,
   Search,
   AudioWaveform,
@@ -25,13 +24,13 @@ import {
 } from "@/components/ui/command";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
-import { Button } from "./ui/button";
+import { Button } from "../../../components/ui/button";
 import { CardsDispatchContext } from "@/app/(cards)/components/CardsContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { DateRangeMode } from "@/types";
 import { toast } from "sonner";
-import { GithubIcon } from "./icons/GithubIcon";
-import { NotionIcon } from "./icons/NotionIcon";
+import { GithubIcon } from "../../../components/icons/GithubIcon";
+import { NotionIcon } from "../../../components/icons/NotionIcon";
 import {
   VoiceName,
   voiceChangeCustomEventName,
@@ -48,8 +47,6 @@ export function CommandMenu() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace, push } = useRouter();
-
-  const isCardsPage = pathname === "/";
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -188,26 +185,16 @@ export function CommandMenu() {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Suggestions">
-            {isCardsPage && (
-              <>
-                <CommandItem onSelect={closeAfterDecorator(toggleFlippedMode)}>
-                  <RefreshCcw className="mr-2 h-4 w-4" />
-                  <span>Toggle flipped mode</span>
-                  <CommandShortcut className="hidden sm:block">
-                    ⌘F
-                  </CommandShortcut>
-                </CommandItem>
-                <CommandItem
-                  onSelect={closeAfterDecorator(toggleVocabularyMode)}
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  <span>Toggle vocabulary mode</span>
-                  <CommandShortcut className="hidden sm:block">
-                    ⌘V
-                  </CommandShortcut>
-                </CommandItem>
-              </>
-            )}
+            <CommandItem onSelect={closeAfterDecorator(toggleFlippedMode)}>
+              <RefreshCcw className="mr-2 h-4 w-4" />
+              <span>Toggle flipped mode</span>
+              <CommandShortcut className="hidden sm:block">⌘F</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={closeAfterDecorator(toggleVocabularyMode)}>
+              <Calendar className="mr-2 h-4 w-4" />
+              <span>Toggle vocabulary mode</span>
+              <CommandShortcut className="hidden sm:block">⌘V</CommandShortcut>
+            </CommandItem>
             <CommandItem onSelect={closeAfterDecorator(toggleTheme)}>
               {themeIcon}
               <span>{`Toggle theme`}</span>
@@ -245,13 +232,9 @@ export function CommandMenu() {
 
           <CommandSeparator />
           <CommandGroup heading="Links">
-            <CommandItem onSelect={() => push(isCardsPage ? "/matchup" : "/")}>
-              {isCardsPage ? (
-                <Wand className="mr-2 h-4 w-4" />
-              ) : (
-                <Layers3 className="mr-2 h-4 w-4" />
-              )}
-              <span>{isCardsPage ? "Matchup" : "Cards"}</span>
+            <CommandItem onSelect={() => push("/matchup")}>
+              <Wand className="mr-2 h-4 w-4" />
+              <span>Matchup</span>
             </CommandItem>
             <CommandItem
               onSelect={closeAfterDecorator(() =>

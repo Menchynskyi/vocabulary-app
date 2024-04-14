@@ -1,4 +1,5 @@
 import { Header } from "@/components/Header";
+import { CommandMenu } from "./components/CommandMenu";
 
 type MatchupLayoutProps = {
   children: React.ReactNode;
@@ -7,7 +8,9 @@ type MatchupLayoutProps = {
 export default function MatchupLayout({ children }: MatchupLayoutProps) {
   return (
     <>
-      <Header />
+      <Header>
+        <CommandMenu />
+      </Header>
       {children}
     </>
   );

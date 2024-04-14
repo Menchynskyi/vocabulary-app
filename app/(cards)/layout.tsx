@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/Header";
 import { CardsProvider } from "./components/CardsContext";
+import { CommandMenu } from "./components/CommandMenu";
 
 type CardsLayoutProps = {
   children: React.ReactNode;
@@ -10,7 +11,9 @@ type CardsLayoutProps = {
 export default function CardsLayout({ children }: CardsLayoutProps) {
   return (
     <CardsProvider>
-      <Header />
+      <Header>
+        <CommandMenu />
+      </Header>
       {children}
     </CardsProvider>
   );

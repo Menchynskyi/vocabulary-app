@@ -1,12 +1,15 @@
 import { cn } from "@/utils/tailwind";
-import { CommandMenu } from "./CommandMenu";
 import { Navigation } from "./Navigation";
 import { ThemeToggleButton } from "./ThemeToggleButton";
 import { GithubIcon } from "./icons/GithubIcon";
 import { NotionIcon } from "./icons/NotionIcon";
 import { buttonVariants } from "./ui/button";
 
-export function Header() {
+type HeaderProps = {
+  children?: React.ReactNode;
+};
+
+export function Header({ children }: HeaderProps) {
   return (
     <header className="flex justify-center border-b px-4 py-2">
       <div className="flex w-full max-w-screen-2xl justify-between">
@@ -21,7 +24,7 @@ export function Header() {
         <Navigation />
 
         <div className="flex items-center">
-          <CommandMenu />
+          {children}
           <a
             href="https://github.com/Menchynskyi/vocabulary-app"
             className={cn(
