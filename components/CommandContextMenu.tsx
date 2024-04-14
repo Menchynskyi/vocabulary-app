@@ -8,6 +8,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { CardCommandsConfig } from "@/types";
+import { Fragment } from "react";
 
 type CommandContextMenuProps = {
   children: React.ReactNode;
@@ -29,8 +30,8 @@ export function CommandContextMenu({
         }}
       >
         {cardCommands.map((group, groupIndex) => (
-          <>
-            <ContextMenuGroup key={groupIndex}>
+          <Fragment key={groupIndex}>
+            <ContextMenuGroup>
               {group.map((command, commandIndex) => (
                 <ContextMenuItem
                   key={commandIndex}
@@ -47,7 +48,7 @@ export function CommandContextMenu({
               ))}
             </ContextMenuGroup>
             {groupIndex < cardCommands.length - 1 && <ContextMenuSeparator />}
-          </>
+          </Fragment>
         ))}
       </ContextMenuContent>
     </ContextMenu>

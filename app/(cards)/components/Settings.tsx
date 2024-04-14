@@ -133,9 +133,9 @@ export function Settings() {
           );
         }}
       >
-        <DrawerTrigger>
-          <Tooltip>
-            <TooltipTrigger asChild>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DrawerTrigger asChild>
               <Button
                 id={settingsButtonId}
                 ref={ref}
@@ -144,17 +144,17 @@ export function Settings() {
               >
                 <SettingsIcon className="h-4 w-4" />
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              <p>
-                Settings
-                <kbd className="pointer-events-none ml-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 sm:inline-flex">
-                  <span className="text-xs">⌘</span>X
-                </kbd>
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </DrawerTrigger>
+            </DrawerTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <p>
+              Settings
+              <kbd className="pointer-events-none ml-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 sm:inline-flex">
+                <span className="text-xs">⌘</span>X
+              </kbd>
+            </p>
+          </TooltipContent>
+        </Tooltip>
         <DrawerContent>
           <div className="mx-auto w-full max-w-sm">
             <DrawerHeader>

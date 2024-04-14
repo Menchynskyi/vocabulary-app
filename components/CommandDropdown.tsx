@@ -12,6 +12,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { CardCommandsConfig } from "@/types";
 import { useMediaQuery } from "@/utils/useMediaQuery";
+import { Fragment } from "react";
 
 type CommandDropdownProps = {
   isPrimary?: boolean;
@@ -26,9 +27,9 @@ export function CommandDropdown({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
             <Button
               size="icon"
               variant="ghost"
@@ -38,12 +39,12 @@ export function CommandDropdown({
             >
               <Command className="h-3 w-3" />
             </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            <p>Commands</p>
-          </TooltipContent>
-        </Tooltip>
-      </DropdownMenuTrigger>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          <p>Commands</p>
+        </TooltipContent>
+      </Tooltip>
       <DropdownMenuContent
         align="end"
         side={isMobile ? "right" : "left"}
@@ -61,8 +62,8 @@ export function CommandDropdown({
           }
 
           return (
-            <>
-              <DropdownMenuGroup key={groupIndex}>
+            <Fragment key={groupIndex}>
+              <DropdownMenuGroup>
                 {group.map((command, commandIndex) => (
                   <DropdownMenuItem
                     key={commandIndex}
@@ -81,7 +82,7 @@ export function CommandDropdown({
               {groupIndex < cardCommands.length - 1 && (
                 <DropdownMenuSeparator />
               )}
-            </>
+            </Fragment>
           );
         })}
       </DropdownMenuContent>
