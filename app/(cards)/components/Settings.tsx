@@ -29,6 +29,16 @@ import { Settings as SettingsIcon } from "lucide-react";
 import { getCookie, setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { voiceNameCookie, voiceOptions } from "@/constants/voice";
 
 export function Settings() {
   const { refresh } = useRouter();
@@ -41,17 +51,22 @@ export function Settings() {
       defaultCardsListWeekModeLength
     );
   });
+  const [selectedVoice, setSelectedVoice] = useState(() => {
+    return getCookie(voiceNameCookie) || voiceOptions[0].name;
+  });
 
   const handleSaveSettings = () => {
     const currentCardsListLength = getCookie(cardsListLengthCookie);
     const currentCardsListWeekModeLength = getCookie(
       cardsListWeekModeLengthCookie,
     );
+    const currentVoiceName = getCookie(voiceNameCookie);
 
     let isSettingsChanged = false;
 
     const newCardsListLength = cardsListLength.toString();
     const newCardsListWeekModeLength = cardsListWeekModeLength.toString();
+    const newVoiceName = selectedVoice;
 
     if (currentCardsListLength !== newCardsListLength) {
       setCookie(cardsListLengthCookie, newCardsListLength);
@@ -60,6 +75,11 @@ export function Settings() {
 
     if (currentCardsListWeekModeLength !== newCardsListWeekModeLength) {
       setCookie(cardsListWeekModeLengthCookie, newCardsListWeekModeLength);
+      isSettingsChanged = true;
+    }
+
+    if (currentVoiceName !== newVoiceName) {
+      setCookie(voiceNameCookie, newVoiceName);
       isSettingsChanged = true;
     }
 
@@ -80,6 +100,7 @@ export function Settings() {
             Number(getCookie(cardsListWeekModeLengthCookie)) ||
               defaultCardsListWeekModeLength,
           );
+          setSelectedVoice(getCookie(voiceNameCookie) || voiceOptions[0].name);
         }}
       >
         <DrawerTrigger>
@@ -101,42 +122,73 @@ export function Settings() {
               <DrawerDescription>Customize cards behavior</DrawerDescription>
             </DrawerHeader>
             <div className="space-y-4 p-4">
-              <p className="text-sm">
-                Random mode card limit: {cardsListLength}
-              </p>
-              <Slider
-                onPointerMove={(e) => {
-                  e.stopPropagation();
-                }}
-                defaultValue={[defaultCardsListLength]}
-                min={5}
-                max={50}
-                step={1}
-                value={[cardsListLength]}
-                onValueChange={(value) => {
-                  if (value?.[0]) {
-                    setCardsListLength(value[0]);
-                  }
-                }}
-              />
-              <p className="text-sm">
-                Week mode card limit: {cardsListWeekModeLength}
-              </p>
-              <Slider
-                onPointerMove={(e) => {
-                  e.stopPropagation();
-                }}
-                defaultValue={[defaultCardsListWeekModeLength]}
-                min={5}
-                max={50}
-                step={1}
-                value={[cardsListWeekModeLength]}
-                onValueChange={(value) => {
-                  if (value?.[0]) {
-                    setCardsListWeekModeLength(value[0]);
-                  }
-                }}
-              />
+              <div>
+                <Label htmlFor="voice">Voice</Label>
+                <Select
+                  value={selectedVoice}
+                  onValueChange={(value) => {
+                    setSelectedVoice(value);
+                  }}
+                >
+                  <SelectTrigger id="voice" className="mt-2 w-full">
+                    <SelectValue placeholder="Select a voice" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-48">
+                    <SelectGroup>
+                      {voiceOptions.map((voice) => (
+                        <SelectItem key={voice.name} value={voice.name}>
+                          {voice.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="random-mode-card-limit">
+                  Random mode card limit: {cardsListLength}
+                </Label>
+                <Slider
+                  className="mt-2"
+                  id="random-mode-card-limit"
+                  onPointerMove={(e) => {
+                    e.stopPropagation();
+                  }}
+                  defaultValue={[defaultCardsListLength]}
+                  min={5}
+                  max={50}
+                  step={1}
+                  value={[cardsListLength]}
+                  onValueChange={(value) => {
+                    if (value?.[0]) {
+                      setCardsListLength(value[0]);
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <Label htmlFor="week-mode-card-limit">
+                  Week mode card limit: {cardsListWeekModeLength}
+                </Label>
+                <Slider
+                  className="mt-2"
+                  id="week-mode-card-limit"
+                  onPointerMove={(e) => {
+                    e.stopPropagation();
+                  }}
+                  defaultValue={[defaultCardsListWeekModeLength]}
+                  min={5}
+                  max={50}
+                  step={1}
+                  value={[cardsListWeekModeLength]}
+                  onValueChange={(value) => {
+                    if (value?.[0]) {
+                      setCardsListWeekModeLength(value[0]);
+                    }
+                  }}
+                />
+              </div>
             </div>
             <DrawerFooter>
               <DrawerClose asChild>

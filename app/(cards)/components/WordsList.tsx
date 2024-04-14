@@ -118,14 +118,17 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
   const handleKeybordActions = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === " ") {
+        event.preventDefault();
         toggleCard();
         return;
       }
 
       if (event.key === "ArrowLeft" && currentWordIndex !== 0) {
+        event.preventDefault();
         switchWords(-1);
       }
       if (event.key === "ArrowRight" && currentWordIndex < words.length) {
+        event.preventDefault();
         switchWords(1);
       }
 

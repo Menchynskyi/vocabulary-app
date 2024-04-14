@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { GithubIcon } from "../../../components/icons/GithubIcon";
 import { NotionIcon } from "../../../components/icons/NotionIcon";
 import {
+  VoiceLanguageCode,
   VoiceName,
   voiceChangeCustomEventName,
   voiceNameCookie,
@@ -110,19 +111,21 @@ export function CommandMenu() {
     setOpen(false);
   };
 
-  const changeVoice = (voiceName: VoiceName) => () => {
+  const setRandomVoice = (langCode: VoiceLanguageCode) => () => {
     const currentVoiceName = getCookie(voiceNameCookie) as VoiceName;
-    if (currentVoiceName === voiceName) {
-      return;
-    }
+    const voices = voiceOptions.filter(
+      (item) =>
+        item.languageCode === langCode && item.name !== currentVoiceName,
+    );
+    const randomIndex = Math.floor(Math.random() * voices.length);
+    const voiceName = voices[randomIndex].name;
 
     const customVoiceChangeEvent = new CustomEvent(voiceChangeCustomEventName);
     document.dispatchEvent(customVoiceChangeEvent);
 
     setCookie(voiceNameCookie, voiceName);
-    const voice = voiceOptions.find((item) => item.name === voiceName);
     toast("Voice changed", {
-      description: `Changed to ${voice?.languageCode === "en-GB" ? "British" : "American"} ${voice?.type} voice`,
+      description: `Changed to ${voices[randomIndex].label} voice`,
       action: {
         label: "Undo",
         onClick: () => {
@@ -205,28 +208,16 @@ export function CommandMenu() {
           <CommandSeparator />
           <CommandGroup heading="Voice">
             <CommandItem
-              onSelect={closeAfterDecorator(changeVoice("en-US-Journey-D"))}
+              onSelect={closeAfterDecorator(setRandomVoice("en-US"))}
             >
               <AudioWaveform className="mr-2 h-4 w-4" />
-              <span>Set American English male voice</span>
+              <span>Set random US English voice</span>
             </CommandItem>
             <CommandItem
-              onSelect={closeAfterDecorator(changeVoice("en-US-Journey-F"))}
-            >
-              <AudioWaveform className="mr-2 h-4 w-4" />
-              <span>Set American English female voice</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={closeAfterDecorator(changeVoice("en-GB-Studio-B"))}
+              onSelect={closeAfterDecorator(setRandomVoice("en-GB"))}
             >
               <AudioLines className="mr-2 h-4 w-4" />
-              <span>Set British English male voice</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={closeAfterDecorator(changeVoice("en-GB-Studio-C"))}
-            >
-              <AudioLines className="mr-2 h-4 w-4" />
-              <span>Set British English female voice</span>
+              <span>Set random GB English voice</span>
             </CommandItem>
           </CommandGroup>
 
