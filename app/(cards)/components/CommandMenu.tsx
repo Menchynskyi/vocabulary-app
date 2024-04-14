@@ -11,6 +11,7 @@ import {
   Search,
   AudioWaveform,
   AudioLines,
+  SettingsIcon,
 } from "lucide-react";
 import {
   CommandDialog,
@@ -39,6 +40,7 @@ import {
   voiceOptions,
 } from "@/constants/voice";
 import { getCookie, setCookie } from "cookies-next";
+import { settingsButtonId } from "@/constants/cards";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
@@ -136,6 +138,10 @@ export function CommandMenu() {
     });
   };
 
+  const openSettings = () => {
+    document.getElementById(settingsButtonId)?.click();
+  };
+
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
       if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/") {
@@ -202,6 +208,11 @@ export function CommandMenu() {
               {themeIcon}
               <span>{`Toggle theme`}</span>
               <CommandShortcut className="hidden sm:block">⌘S</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={closeAfterDecorator(openSettings)}>
+              <SettingsIcon className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+              <CommandShortcut className="hidden sm:block">⌘X</CommandShortcut>
             </CommandItem>
           </CommandGroup>
 

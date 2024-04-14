@@ -72,3 +72,5 @@ export const voiceOptions: Array<VoiceOption> = [
     label: "GB | Female | Studio",
   },
 ];
+
+export const defaultVoiceOption = voiceOptions[0];

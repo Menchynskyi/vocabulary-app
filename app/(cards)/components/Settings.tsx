@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -24,6 +24,7 @@ import {
   cardsListWeekModeLengthCookie,
   defaultCardsListLength,
   defaultCardsListWeekModeLength,
+  settingsButtonId,
 } from "@/constants/cards";
 import { Settings as SettingsIcon } from "lucide-react";
 import { getCookie, setCookie } from "cookies-next";
@@ -39,6 +40,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import {
+  defaultVoiceOption,
   voiceChangeCustomEventName,
   voiceNameCookie,
   voiceOptions,
@@ -46,6 +48,7 @@ import {
 
 export function Settings() {
   const { refresh } = useRouter();
+  const ref = useRef<HTMLButtonElement | null>(null);
   const [cardsListLength, setCardsListLength] = useState(() => {
     return Number(getCookie(cardsListLengthCookie)) || defaultCardsListLength;
   });
@@ -56,7 +59,7 @@ export function Settings() {
     );
   });
   const [selectedVoice, setSelectedVoice] = useState(() => {
-    return getCookie(voiceNameCookie) || voiceOptions[0].name;
+    return getCookie(voiceNameCookie) || defaultVoiceOption.name;
   });
 
   const handleSaveSettings = () => {
@@ -102,6 +105,18 @@ export function Settings() {
     }
   };
 
+  useEffect(() => {
+    const handleKeydown = (e: KeyboardEvent) => {
+      if (e.key === "x" && (e.metaKey || e.ctrlKey) && ref.current) {
+        e.preventDefault();
+        ref.current.click();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeydown);
+    return () => document.removeEventListener("keydown", handleKeydown);
+  }, []);
+
   return (
     <TooltipProvider delayDuration={200}>
       <Drawer
@@ -113,18 +128,30 @@ export function Settings() {
             Number(getCookie(cardsListWeekModeLengthCookie)) ||
               defaultCardsListWeekModeLength,
           );
-          setSelectedVoice(getCookie(voiceNameCookie) || voiceOptions[0].name);
+          setSelectedVoice(
+            getCookie(voiceNameCookie) || defaultVoiceOption.name,
+          );
         }}
       >
         <DrawerTrigger>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost">
+              <Button
+                id={settingsButtonId}
+                ref={ref}
+                size="icon"
+                variant="ghost"
+              >
                 <SettingsIcon className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              <p>Settings</p>
+              <p>
+                Settings
+                <kbd className="pointer-events-none ml-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 sm:inline-flex">
+                  <span className="text-xs">⌘</span>X
+                </kbd>
+              </p>
             </TooltipContent>
           </Tooltip>
         </DrawerTrigger>
