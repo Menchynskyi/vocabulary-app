@@ -38,7 +38,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { voiceNameCookie, voiceOptions } from "@/constants/voice";
+import {
+  voiceChangeCustomEventName,
+  voiceNameCookie,
+  voiceOptions,
+} from "@/constants/voice";
 
 export function Settings() {
   const { refresh } = useRouter();
@@ -79,6 +83,11 @@ export function Settings() {
     }
 
     if (currentVoiceName !== newVoiceName) {
+      const customVoiceChangeEvent = new CustomEvent(
+        voiceChangeCustomEventName,
+      );
+      document.dispatchEvent(customVoiceChangeEvent);
+
       setCookie(voiceNameCookie, newVoiceName);
       isSettingsChanged = true;
     }
