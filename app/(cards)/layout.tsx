@@ -1,5 +1,3 @@
-"use client";
-
 import { Header } from "@/components/Header";
 import { CardsProvider } from "./_components/CardsContext";
 import { CommandMenu } from "./_components/CommandMenu";

@@ -1,3 +1,5 @@
+"use client";
+
 import { Dispatch, createContext, useReducer } from "react";
 
 type CardsState = {
