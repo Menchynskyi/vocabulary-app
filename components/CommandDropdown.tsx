@@ -1,5 +1,5 @@
 import { Command } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "./ui/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,8 +8,8 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
   DropdownMenuGroup,
-} from "@/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+} from "./ui/DropdownMenu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/Tooltip";
 import { CardCommandsConfig } from "@/types";
 import { useMediaQuery } from "@/utils/useMediaQuery";
 import { Fragment } from "react";

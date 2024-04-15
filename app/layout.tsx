@@ -1,6 +1,6 @@
 import "@/styles/global.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/Sonner";
 import { Viewport } from "next";
 
 type RootLayoutProps = {

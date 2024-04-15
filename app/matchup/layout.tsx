@@ -1,5 +1,5 @@
 import { Header } from "@/components/Header";
-import { CommandMenu } from "./components/CommandMenu";
+import { CommandMenu } from "./_components/CommandMenu";
 
 type MatchupLayoutProps = {
   children: React.ReactNode;

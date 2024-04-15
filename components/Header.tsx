@@ -3,7 +3,7 @@ import { Navigation } from "./Navigation";
 import { ThemeToggleButton } from "./ThemeToggleButton";
 import { GithubIcon } from "./icons/GithubIcon";
 import { NotionIcon } from "./icons/NotionIcon";
-import { buttonVariants } from "./ui/button";
+import { buttonVariants } from "./ui/Button";
 
 type HeaderProps = {
   children?: React.ReactNode;

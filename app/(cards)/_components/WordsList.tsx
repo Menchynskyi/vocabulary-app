@@ -5,15 +5,15 @@ import { WordCard } from "./WordCard";
 import { uri } from "@/constants";
 import { Word } from "@/types";
 import { CardsContext } from "./CardsContext";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { CompletedList } from "./CompletedList";
-import { toast } from "sonner";
 import { voiceChangeCustomEventName } from "@/constants/voice";
+import { toast } from "sonner";
 
 async function transformTextToSpeech(text: string) {
   try {
-    const response = await fetch(`${uri}/api/textToSpeech?text=${text}`, {
+    const response = await fetch(`${uri}/api/text-to-speech?text=${text}`, {
       cache: "no-store",
     });
     const buffer = await response.arrayBuffer();

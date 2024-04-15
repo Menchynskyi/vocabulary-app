@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { Cards as CardsView } from "./components/Cards";
+import { Cards as CardsView } from "./_components/Cards";
 import { DateRangeMode } from "@/types";
-import { CardsSkeleton } from "./components/CardsSkeleton";
+import { CardsSkeleton } from "./_components/CardsSkeleton";
 
 type CardsProps = {
   searchParams: {

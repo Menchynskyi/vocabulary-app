@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import {
   Drawer,
   DrawerClose,
@@ -11,14 +11,14 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Slider } from "@/components/ui/slider";
+} from "@/components/ui/Drawer";
+import { Slider } from "@/components/ui/Slider";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/Tooltip";
 import {
   cardsListLengthCookie,
   cardsListWeekModeLengthCookie,
@@ -37,8 +37,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+} from "@/components/ui/Select";
+import { Label } from "@/components/ui/Label";
 import {
   defaultVoiceOption,
   voiceChangeCustomEventName,

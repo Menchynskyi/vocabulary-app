@@ -1,6 +1,18 @@
 "use client";
 
-import { Moon, Sun, Laptop, Triangle, Layers3, Search } from "lucide-react";
+import {
+  Calendar,
+  Moon,
+  Sun,
+  Laptop,
+  Triangle,
+  Wand,
+  RefreshCcw,
+  Search,
+  AudioWaveform,
+  AudioLines,
+  SettingsIcon,
+} from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -10,20 +22,34 @@ import {
   CommandList,
   CommandSeparator,
   CommandShortcut,
-} from "@/components/ui/command";
-import { useCallback, useEffect, useMemo, useState } from "react";
+} from "@/components/ui/Command";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import { CardsDispatchContext } from "./CardsContext";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { DateRangeMode } from "@/types";
 import { toast } from "sonner";
 import { GithubIcon } from "@/components/icons/GithubIcon";
 import { NotionIcon } from "@/components/icons/NotionIcon";
+import {
+  VoiceLanguageCode,
+  VoiceName,
+  voiceChangeCustomEventName,
+  voiceNameCookie,
+  voiceOptions,
+} from "@/constants/voice";
+import { getCookie, setCookie } from "cookies-next";
+import { settingsButtonId } from "@/constants/cards";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const dispatch = useContext(CardsDispatchContext);
 
-  const { push } = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace, push } = useRouter();
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -32,6 +58,37 @@ export function CommandMenu() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme]);
+
+  const toggleFlippedMode = useCallback(
+    () => {
+      dispatch({ type: "toggle_flipped_mode" });
+      toast("Flipped mode toggled", {
+        action: {
+          label: "Undo",
+          onClick: () => dispatch({ type: "toggle_flipped_mode" }),
+        },
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  const toggleVocabularyMode = () => {
+    const params = new URLSearchParams(searchParams);
+    const isWeekMode = params.get("mode") === DateRangeMode.week;
+
+    if (isWeekMode) {
+      params.delete("mode");
+    } else {
+      params.set("mode", DateRangeMode.week);
+    }
+
+    replace(`${pathname}?${params.toString()}`);
+
+    toast("Vocabulary mode toggled", {
+      description: `Changed to ${isWeekMode ? "random" : "week"} mode`,
+    });
+  };
 
   const changeTheme = (theme: string) => {
     setTheme(theme);
@@ -56,6 +113,35 @@ export function CommandMenu() {
     setOpen(false);
   };
 
+  const setRandomVoice = (langCode: VoiceLanguageCode) => () => {
+    const currentVoiceName = getCookie(voiceNameCookie) as VoiceName;
+    const voices = voiceOptions.filter(
+      (item) =>
+        item.languageCode === langCode && item.name !== currentVoiceName,
+    );
+    const randomIndex = Math.floor(Math.random() * voices.length);
+    const voiceName = voices[randomIndex].name;
+
+    const customVoiceChangeEvent = new CustomEvent(voiceChangeCustomEventName);
+    document.dispatchEvent(customVoiceChangeEvent);
+
+    setCookie(voiceNameCookie, voiceName);
+    toast("Voice changed", {
+      description: `Changed to ${voices[randomIndex].label} voice`,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          setCookie(voiceNameCookie, currentVoiceName);
+          document.dispatchEvent(customVoiceChangeEvent);
+        },
+      },
+    });
+  };
+
+  const openSettings = () => {
+    document.getElementById(settingsButtonId)?.click();
+  };
+
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
       if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/") {
@@ -66,6 +152,18 @@ export function CommandMenu() {
       if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         toggleTheme();
+        setOpen(false);
+      }
+
+      if (e.key === "f" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        toggleFlippedMode();
+        setOpen(false);
+      }
+
+      if (e.key === "v" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        toggleVocabularyMode();
         setOpen(false);
       }
     };
@@ -96,18 +194,49 @@ export function CommandMenu() {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Suggestions">
+            <CommandItem onSelect={closeAfterDecorator(toggleFlippedMode)}>
+              <RefreshCcw className="mr-2 h-4 w-4" />
+              <span>Toggle flipped mode</span>
+              <CommandShortcut className="hidden sm:block">⌘F</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={closeAfterDecorator(toggleVocabularyMode)}>
+              <Calendar className="mr-2 h-4 w-4" />
+              <span>Toggle vocabulary mode</span>
+              <CommandShortcut className="hidden sm:block">⌘V</CommandShortcut>
+            </CommandItem>
             <CommandItem onSelect={closeAfterDecorator(toggleTheme)}>
               {themeIcon}
               <span>{`Toggle theme`}</span>
               <CommandShortcut className="hidden sm:block">⌘S</CommandShortcut>
             </CommandItem>
+            <CommandItem onSelect={closeAfterDecorator(openSettings)}>
+              <SettingsIcon className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+              <CommandShortcut className="hidden sm:block">⌘X</CommandShortcut>
+            </CommandItem>
+          </CommandGroup>
+
+          <CommandSeparator />
+          <CommandGroup heading="Voice">
+            <CommandItem
+              onSelect={closeAfterDecorator(setRandomVoice("en-US"))}
+            >
+              <AudioWaveform className="mr-2 h-4 w-4" />
+              <span>Set random US English voice</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={closeAfterDecorator(setRandomVoice("en-GB"))}
+            >
+              <AudioLines className="mr-2 h-4 w-4" />
+              <span>Set random GB English voice</span>
+            </CommandItem>
           </CommandGroup>
 
           <CommandSeparator />
           <CommandGroup heading="Links">
-            <CommandItem onSelect={() => push("/")}>
-              <Layers3 className="mr-2 h-4 w-4" />
-              <span>Cards</span>
+            <CommandItem onSelect={() => push("/matchup")}>
+              <Wand className="mr-2 h-4 w-4" />
+              <span>Matchup</span>
             </CommandItem>
             <CommandItem
               onSelect={closeAfterDecorator(() =>

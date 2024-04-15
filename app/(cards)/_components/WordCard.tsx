@@ -4,14 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { isTextToSpeechEnabled } from "@/constants";
 import { CardCommandsConfig, Word, WordFields } from "@/types";
 import { cn } from "@/utils/tailwind";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { AudioLines, Languages, Sparkle, Lightbulb } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/Tooltip";
 import { CommandDropdown } from "@/components/CommandDropdown";
 import { CommandContextMenu } from "@/components/CommandContextMenu";
 import { toast } from "sonner";
