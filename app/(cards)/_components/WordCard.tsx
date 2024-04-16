@@ -174,7 +174,7 @@ export function WordCard({
         >
           <div
             className={cn(
-              "relative h-full w-full  transition-all	 duration-500 preserve-3d",
+              "relative h-full w-full  transition-all duration-300 preserve-3d",
               {
                 "rotate-y-180": isMeaningVisible,
               },
