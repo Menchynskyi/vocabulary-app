@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/Skeleton";
 
-export const CardsSkeleton = () => {
+export default function Loading() {
   return (
     <div className="flex flex-col items-center sm:flex-row">
       <Skeleton className="mb-[45px] mr-4 hidden h-10 w-10 rounded-full sm:flex" />
@@ -12,4 +12,4 @@ export const CardsSkeleton = () => {
       </div>
     </div>
   );
-};
+}

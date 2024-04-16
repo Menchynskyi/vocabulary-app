@@ -14,7 +14,7 @@ export default function CardsLayout({ children }: CardsLayoutProps) {
         <CommandMenu />
         <Settings />
       </Header>
-      {children}
+      <main className="mt-16 flex justify-center sm:mt-36">{children}</main>
     </CardsProvider>
   );
 }

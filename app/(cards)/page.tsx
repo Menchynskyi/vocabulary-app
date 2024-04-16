@@ -1,20 +1,32 @@
-import { Suspense } from "react";
-import { Cards as CardsView } from "./_components/Cards";
+import { cookies } from "next/headers";
 import { DateRangeMode } from "@/types";
-import { CardsSkeleton } from "./_components/CardsSkeleton";
+import { uri } from "@/constants";
+import { WordsList } from "./_components/WordsList";
+
+async function getWords(mode?: DateRangeMode) {
+  try {
+    const response = await fetch(`${uri}/api/words?mode=${mode}`, {
+      cache: "no-store",
+      headers: {
+        Cookie: cookies().toString(),
+      },
+    });
+    const { data } = await response.json();
+
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 type CardsProps = {
   searchParams: {
-    mode: DateRangeMode;
+    mode?: DateRangeMode;
   };
 };
 
 export default async function Cards({ searchParams }: CardsProps) {
-  return (
-    <main className="mt-16 flex justify-center sm:mt-36">
-      <Suspense fallback={<CardsSkeleton />}>
-        <CardsView dateRangeMode={searchParams?.mode} />
-      </Suspense>
-    </main>
-  );
+  const words = await getWords(searchParams?.mode);
+
+  return <WordsList words={words} dateRangeMode={searchParams?.mode} />;
 }

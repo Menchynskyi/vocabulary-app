@@ -11,7 +11,7 @@ export default function MatchupLayout({ children }: MatchupLayoutProps) {
       <Header>
         <CommandMenu />
       </Header>
-      {children}
+      <main className="mt-16 flex justify-center sm:mt-36">{children}</main>
     </>
   );
 }

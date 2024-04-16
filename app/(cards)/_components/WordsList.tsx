@@ -3,7 +3,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { WordCard } from "./WordCard";
 import { uri } from "@/constants";
-import { Word } from "@/types";
+import { DateRangeMode, Word } from "@/types";
 import { CardsContext } from "./CardsContext";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -28,10 +28,10 @@ async function transformTextToSpeech(text: string) {
 
 type WordsListProps = {
   words: Word[];
-  noWeekWords?: string;
+  dateRangeMode?: DateRangeMode;
 };
 
-export function WordsList({ words, noWeekWords }: WordsListProps) {
+export function WordsList({ words, dateRangeMode }: WordsListProps) {
   const { flippedMode } = useContext(CardsContext);
 
   const [isMeaningVisible, setIsMeaningVisible] = useState(flippedMode);
@@ -167,10 +167,15 @@ export function WordsList({ words, noWeekWords }: WordsListProps) {
 
   const currentWord = words[currentWordIndex];
 
+  const noWordsMessage =
+    dateRangeMode === DateRangeMode.week && !words.length
+      ? "No words were added last week"
+      : undefined;
+
   return (
     <>
-      {noWeekWords ? (
-        <span className="text-2xl sm:text-4xl">{noWeekWords}</span>
+      {noWordsMessage ? (
+        <span className="text-2xl sm:text-4xl">{noWordsMessage}</span>
       ) : null}
 
       {isCompleted ? (
