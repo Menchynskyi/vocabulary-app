@@ -28,7 +28,7 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/Button";
 import { CardsDispatchContext } from "./CardsContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { DateRangeMode } from "@/types";
+import { VocabularyMode } from "@/types";
 import { toast } from "sonner";
 import { GithubIcon } from "@/components/icons/GithubIcon";
 import { NotionIcon } from "@/components/icons/NotionIcon";
@@ -59,13 +59,13 @@ export function CommandMenu() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme]);
 
-  const toggleFlippedMode = useCallback(
+  const toggleFlipMode = useCallback(
     () => {
-      dispatch({ type: "toggle_flipped_mode" });
-      toast("Flipped mode toggled", {
+      dispatch({ type: "toggle_flip_mode" });
+      toast("Flip mode toggled", {
         action: {
           label: "Undo",
-          onClick: () => dispatch({ type: "toggle_flipped_mode" }),
+          onClick: () => dispatch({ type: "toggle_flip_mode" }),
         },
       });
     },
@@ -75,12 +75,12 @@ export function CommandMenu() {
 
   const toggleVocabularyMode = () => {
     const params = new URLSearchParams(searchParams);
-    const isWeekMode = params.get("mode") === DateRangeMode.week;
+    const isWeekMode = params.get("mode") === VocabularyMode.week;
 
     if (isWeekMode) {
       params.delete("mode");
     } else {
-      params.set("mode", DateRangeMode.week);
+      params.set("mode", VocabularyMode.week);
     }
 
     replace(`${pathname}?${params.toString()}`);
@@ -149,7 +149,7 @@ export function CommandMenu() {
         setOpen((open) => !open);
       }
 
-      if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
+      if (e.key === "x" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         toggleTheme();
         setOpen(false);
@@ -157,7 +157,7 @@ export function CommandMenu() {
 
       if (e.key === "f" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        toggleFlippedMode();
+        toggleFlipMode();
         setOpen(false);
       }
 
@@ -171,7 +171,7 @@ export function CommandMenu() {
     document.addEventListener("keydown", handleKeydown);
     return () => document.removeEventListener("keydown", handleKeydown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchParams, toggleTheme]);
 
   return (
     <>
@@ -194,9 +194,9 @@ export function CommandMenu() {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Suggestions">
-            <CommandItem onSelect={closeAfterDecorator(toggleFlippedMode)}>
+            <CommandItem onSelect={closeAfterDecorator(toggleFlipMode)}>
               <RefreshCcw className="mr-2 h-4 w-4" />
-              <span>Toggle flipped mode</span>
+              <span>Toggle flip mode</span>
               <CommandShortcut className="hidden sm:block">⌘F</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={closeAfterDecorator(toggleVocabularyMode)}>
@@ -207,12 +207,12 @@ export function CommandMenu() {
             <CommandItem onSelect={closeAfterDecorator(toggleTheme)}>
               {themeIcon}
               <span>{`Toggle theme`}</span>
-              <CommandShortcut className="hidden sm:block">⌘S</CommandShortcut>
+              <CommandShortcut className="hidden sm:block">⌘X</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={closeAfterDecorator(openSettings)}>
               <SettingsIcon className="mr-2 h-4 w-4" />
               <span>Settings</span>
-              <CommandShortcut className="hidden sm:block">⌘X</CommandShortcut>
+              <CommandShortcut className="hidden sm:block">⌘S</CommandShortcut>
             </CommandItem>
           </CommandGroup>
 

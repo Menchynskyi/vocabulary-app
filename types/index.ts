@@ -1,5 +1,6 @@
-export enum DateRangeMode {
+export enum VocabularyMode {
   week = "week",
+  random = "random",
 }
 
 export type Word = {

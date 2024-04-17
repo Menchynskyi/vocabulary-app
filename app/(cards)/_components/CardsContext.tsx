@@ -3,21 +3,21 @@
 import { Dispatch, createContext, useReducer } from "react";
 
 type CardsState = {
-  flippedMode: boolean;
+  flipMode: boolean;
 };
 
-type CardsAction = { type: "toggle_flipped_mode" };
+type CardsAction = { type: "toggle_flip_mode" };
 
 const initialState: CardsState = {
-  flippedMode: false,
+  flipMode: false,
 };
 
 function reducer(state: CardsState, action: CardsAction): CardsState {
   switch (action.type) {
-    case "toggle_flipped_mode": {
+    case "toggle_flip_mode": {
       return {
         ...state,
-        flippedMode: !state.flippedMode,
+        flipMode: !state.flipMode,
       };
     }
     default:

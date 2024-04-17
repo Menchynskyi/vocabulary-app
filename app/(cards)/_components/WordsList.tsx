@@ -3,7 +3,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { WordCard } from "./WordCard";
 import { uri } from "@/constants";
-import { DateRangeMode, Word } from "@/types";
+import { VocabularyMode, Word } from "@/types";
 import { CardsContext } from "./CardsContext";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -28,13 +28,13 @@ async function transformTextToSpeech(text: string) {
 
 type WordsListProps = {
   words: Word[];
-  dateRangeMode?: DateRangeMode;
+  vocabularyMode?: VocabularyMode;
 };
 
-export function WordsList({ words, dateRangeMode }: WordsListProps) {
-  const { flippedMode } = useContext(CardsContext);
+export function WordsList({ words, vocabularyMode }: WordsListProps) {
+  const { flipMode } = useContext(CardsContext);
 
-  const [isMeaningVisible, setIsMeaningVisible] = useState(flippedMode);
+  const [isMeaningVisible, setIsMeaningVisible] = useState(flipMode);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [audioLoading, setAudioLoading] = useState(false);
   const [wordsAudio, setWordsAudio] = useState(Array(words.length).fill(null));
@@ -46,8 +46,8 @@ export function WordsList({ words, dateRangeMode }: WordsListProps) {
   }, []);
 
   useEffect(() => {
-    setIsMeaningVisible(flippedMode);
-  }, [flippedMode]);
+    setIsMeaningVisible(flipMode);
+  }, [flipMode]);
 
   useEffect(() => {
     setCurrentWordIndex(0);
@@ -95,7 +95,7 @@ export function WordsList({ words, dateRangeMode }: WordsListProps) {
 
   const switchWords = useCallback(
     (inc: number) => {
-      setIsMeaningVisible(flippedMode);
+      setIsMeaningVisible(flipMode);
       const isNext = inc > 0;
 
       if (isMeaningVisible) {
@@ -112,7 +112,7 @@ export function WordsList({ words, dateRangeMode }: WordsListProps) {
         );
       }
     },
-    [isMeaningVisible, flippedMode, words.length],
+    [isMeaningVisible, flipMode, words.length],
   );
 
   const handleKeybordActions = useCallback(
@@ -168,7 +168,7 @@ export function WordsList({ words, dateRangeMode }: WordsListProps) {
   const currentWord = words[currentWordIndex];
 
   const noWordsMessage =
-    dateRangeMode === DateRangeMode.week && !words.length
+    vocabularyMode === VocabularyMode.week && !words.length
       ? "No words were added last week"
       : undefined;
 
@@ -179,11 +179,7 @@ export function WordsList({ words, dateRangeMode }: WordsListProps) {
       ) : null}
 
       {isCompleted ? (
-        <CompletedList
-          words={words}
-          goBack={() => setCurrentWordIndex((prev) => prev - 1)}
-          startOver={() => setCurrentWordIndex(0)}
-        />
+        <CompletedList words={words} startOver={() => setCurrentWordIndex(0)} />
       ) : (
         <div className="flex flex-col items-center sm:flex-row">
           <Button

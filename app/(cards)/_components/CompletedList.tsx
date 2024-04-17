@@ -1,21 +1,19 @@
 import { Button } from "@/components/ui/Button";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { Word } from "@/types";
+import { useContext } from "react";
+import { CardsDispatchContext } from "./CardsContext";
 
 type CompletedListProps = {
   words: Word[];
-  goBack: () => void;
   startOver: () => void;
 };
 
-export function CompletedList({
-  words,
-  goBack,
-  startOver,
-}: CompletedListProps) {
+export function CompletedList({ words, startOver }: CompletedListProps) {
+  const dispatch = useContext(CardsDispatchContext);
   return (
     <div className="flex flex-col">
-      <ScrollArea className="max-h-[400px] min-w-[90vw] max-w-[90vw] rounded-md border sm:max-h-[450px] sm:min-w-[450px] sm:max-w-[800px] ">
+      <ScrollArea className="max-h-[400px] min-w-[90vw] max-w-[90vw] rounded-md border sm:max-h-[450px] sm:min-w-[450px] sm:max-w-[500px] ">
         {words.map(({ id, word, translation, meaning, example }) => (
           <div key={id} className="p-4 text-lg [&:not(:last-of-type)]:border-b">
             <div>
@@ -27,19 +25,22 @@ export function CompletedList({
           </div>
         ))}
       </ScrollArea>
-      <div className="mt-10 flex justify-between sm:mt-4 sm:block">
+      <div className="mt-10 flex justify-between max-sm:flex-col sm:mt-4">
         <Button
           variant="outline"
-          className="mr-3 min-w-[9rem] max-sm:h-16 max-sm:text-xl sm:min-w-[6.125rem]"
-          onClick={goBack}
-        >
-          <span>Back</span>
-        </Button>
-        <Button
+          className="max-sm:h-14 max-sm:text-lg sm:mr-3 sm:min-w-[6.125rem] sm:px-8"
           onClick={startOver}
-          className="min-w-[9rem] max-sm:h-16 max-sm:text-xl sm:min-w-[6.125rem]"
         >
           <span>Start over</span>
+        </Button>
+        <Button
+          onClick={() => {
+            dispatch({ type: "toggle_flip_mode" });
+            startOver();
+          }}
+          className="max-sm:mt-4 max-sm:h-14 max-sm:text-lg sm:min-w-[6.125rem] sm:px-8"
+        >
+          <span>Flip and start over</span>
         </Button>
       </div>
     </div>
