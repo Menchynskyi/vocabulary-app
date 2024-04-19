@@ -97,15 +97,16 @@ export function WordsList({ words, vocabularyMode }: WordsListProps) {
     (inc: number) => {
       setIsMeaningVisible(flipMode);
       const isNext = inc > 0;
+      const isCardFlipped = isMeaningVisible !== flipMode;
 
-      if (isMeaningVisible) {
+      if (isCardFlipped) {
         setTimeout(() => {
           setCurrentWordIndex((prev) =>
             isNext
               ? Math.min(prev + inc, words.length)
               : Math.max(prev + inc, 0),
           );
-        }, 160);
+        }, 100);
       } else {
         setCurrentWordIndex((prev) =>
           isNext ? Math.min(prev + inc, words.length) : Math.max(prev + inc, 0),
