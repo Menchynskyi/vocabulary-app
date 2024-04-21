@@ -1,19 +1,11 @@
 import { VoiceName, defaultVoiceOption, voiceOptions } from "@/constants/voice";
-import { TextToSpeechClient } from "@google-cloud/text-to-speech";
-
-const client = new TextToSpeechClient({
-  projectId: process.env.GOOGLE_PROJECT_ID,
-  credentials: {
-    client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY,
-  },
-});
+import textToSpeechClient from ".";
 
 export async function synthesizeSpeech(text: string, voiceName?: VoiceName) {
   const { languageCode, name } =
     voiceOptions.find((item) => item.name === voiceName) || defaultVoiceOption;
   try {
-    const [response] = await client.synthesizeSpeech({
+    const [response] = await textToSpeechClient.synthesizeSpeech({
       audioConfig: {
         audioEncoding: "LINEAR16",
         pitch: 0,

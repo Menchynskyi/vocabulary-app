@@ -2,7 +2,7 @@ import {
   cardsListLengthCookie,
   cardsListWeekModeLengthCookie,
 } from "@/constants/cards";
-import { GetWordsParams, getWords } from "@/utils/words";
+import { GetWordsParams, getWords } from "@/server/notion/queries";
 import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
