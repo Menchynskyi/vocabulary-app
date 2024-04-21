@@ -12,6 +12,7 @@ export default function CardsLayout({ children }: CardsLayoutProps) {
   return (
     <CardsProvider>
       <Header>
+        <div>Test update</div>
         <Suspense>
           <CommandMenu />
         </Suspense>
