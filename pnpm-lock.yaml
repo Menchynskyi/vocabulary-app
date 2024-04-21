@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@google-cloud/text-to-speech':
-        specifier: ^5.0.1
+        specifier: ^5.2.0
         version: 5.2.0
       '@notionhq/client':
         specifier: ^2.2.3

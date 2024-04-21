@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@google-cloud/text-to-speech": "^5.0.1",
+    "@google-cloud/text-to-speech": "^5.2.0",
     "@notionhq/client": "^2.2.3",
     "@radix-ui/react-context-menu": "^2.1.5",
     "@radix-ui/react-dialog": "^1.0.5",
