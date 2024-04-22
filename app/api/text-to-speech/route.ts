@@ -1,6 +1,6 @@
 import { VoiceName, voiceNameCookie } from "@/constants/voice";
 import { NextRequest } from "next/server";
-import { synthesizeSpeech } from "@/server/gc/synthesizeSpeech";
+import { synthesizeSpeech } from "@/server/gcp/synthesizeSpeech";
 
 export const dynamic = "force-dynamic";
 
