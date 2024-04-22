@@ -12,9 +12,9 @@ export function Navigation() {
         href="/"
         aria-label="Cards page"
         className={cn(
-          "text-sm text-muted-foreground/60 transition-colors hover:text-foreground/80",
+          "text-sm text-muted-foreground transition-colors hover:text-muted-foreground/60",
           {
-            "text-mutet-foreground": pathname === "/",
+            "text-foreground hover:text-foreground/60": pathname === "/",
           },
         )}
       >
@@ -24,9 +24,9 @@ export function Navigation() {
         href="/blanks"
         aria-label="Blanks page"
         className={cn(
-          "ml-3 text-sm text-muted-foreground/60 transition-colors hover:text-foreground/80",
+          "ml-3 text-sm text-muted-foreground transition-colors hover:text-muted-foreground/60",
           {
-            "text-mutet-foreground": pathname === "/blanks",
+            "text-foreground hover:text-foreground/60": pathname === "/blanks",
           },
         )}
       >

@@ -1,7 +1,6 @@
 import "@/styles/global.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/Sonner";
-import { Viewport } from "next";
 
 type RootLayoutProps = {
   children: React.ReactNode;
@@ -29,8 +28,4 @@ export const metadata = {
   title: "Vocabulary App",
   description: "Learn new words with this app",
   keywords: "vocabulary, words, learn",
-};
-
-export const viewport: Viewport = {
-  userScalable: false,
 };
