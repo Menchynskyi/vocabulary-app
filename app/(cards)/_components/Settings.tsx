@@ -137,6 +137,7 @@ export function Settings() {
           <TooltipTrigger asChild>
             <DrawerTrigger asChild>
               <Button
+                aria-label="Settings"
                 id={settingsButtonId}
                 ref={ref}
                 size="icon"
@@ -232,10 +233,14 @@ export function Settings() {
             </div>
             <DrawerFooter>
               <DrawerClose asChild>
-                <Button onClick={handleSaveSettings}>Save</Button>
+                <Button aria-label="Save settings" onClick={handleSaveSettings}>
+                  Save
+                </Button>
               </DrawerClose>
               <DrawerClose asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button aria-label="Cancel" variant="outline">
+                  Cancel
+                </Button>
               </DrawerClose>
             </DrawerFooter>
           </div>

@@ -180,6 +180,7 @@ export function CommandMenu() {
         variant="outline"
         size="sm"
         className="mr-2"
+        aria-label="Open command menu"
       >
         <span className="hidden pr-2 text-sm text-muted-foreground sm:inline">
           Search commands...

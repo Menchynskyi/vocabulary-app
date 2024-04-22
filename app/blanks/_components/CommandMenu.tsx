@@ -78,6 +78,7 @@ export function CommandMenu() {
   return (
     <>
       <Button
+        aria-label="Open command menu"
         onClick={() => setOpen(true)}
         variant="outline"
         size="sm"

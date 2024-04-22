@@ -186,6 +186,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
           <Button
             size="icon"
             variant="outline"
+            aria-label="Previous card"
             onClick={() => switchCards(-1)}
             disabled={currentCardIndex === 0}
             className="mb-[45px] mr-4 hidden rounded-full sm:flex"
@@ -204,6 +205,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
           <Button
             size="icon"
             variant="outline"
+            aria-label="Next card"
             onClick={() => switchCards(1)}
             disabled={currentCardIndex >= cards.length}
             className="mb-[45px] ml-4 hidden rounded-full sm:flex"
@@ -214,6 +216,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
             <Button
               size="icon"
               variant="outline"
+              aria-label="Previous card"
               className="h-16 w-16"
               onClick={() => switchCards(-1)}
               disabled={currentCardIndex === 0}
@@ -223,6 +226,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
             <Button
               size="icon"
               variant="outline"
+              aria-label="Next card"
               className="h-16 w-16"
               onClick={() => switchCards(1)}
               disabled={currentCardIndex >= cards.length}

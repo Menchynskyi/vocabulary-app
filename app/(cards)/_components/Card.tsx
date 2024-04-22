@@ -72,17 +72,23 @@ export function Card({
   }, [avaialbleMeaningModes, meaningMode]);
 
   const nextMeaningButton = useMemo(() => {
-    const buttonData: Record<string, { tooltip: string; icon: JSX.Element }> = {
+    const buttonData: Record<
+      string,
+      { tooltip: string; icon: JSX.Element; ariaLabel: string }
+    > = {
       translation: {
         tooltip: "Show translation",
+        ariaLabel: "Show translation",
         icon: <Languages className="h-4 w-4" />,
       },
       meaning: {
         tooltip: "Show meaning",
+        ariaLabel: "Show meaning",
         icon: <Lightbulb className="h-4 w-4" />,
       },
       example: {
         tooltip: "Show example",
+        ariaLabel: "Show example",
         icon: <Sparkle className="h-4 w-4" />,
       },
     };
@@ -194,6 +200,7 @@ export function Card({
                         size="icon"
                         variant="ghost"
                         onClick={playWord}
+                        aria-label="Pronounce word"
                         className="ml-auto text-foreground"
                       >
                         <AudioLines
@@ -224,6 +231,7 @@ export function Card({
                       <Button
                         size="icon"
                         variant="ghost"
+                        aria-label={nextMeaningButton.ariaLabel}
                         onClick={handleChangeMeaningMode}
                         className="ml-auto text-primary-foreground"
                       >

@@ -31,6 +31,7 @@ export function CommandDropdown({
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
             <Button
+              aria-label="Commands"
               size="icon"
               variant="ghost"
               className={

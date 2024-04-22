@@ -14,6 +14,7 @@ export function Header({ children }: HeaderProps) {
     <header className="flex justify-center border-b px-4 py-2">
       <div className="flex w-full max-w-screen-2xl justify-between">
         <a
+          aria-label="Notion page"
           href={process.env.NEXT_PUBLIC_NOTION_PAGE_URL}
           className={buttonVariants({ variant: "ghost", size: "icon" })}
           target="_blank"
@@ -27,6 +28,7 @@ export function Header({ children }: HeaderProps) {
           {children}
           <ThemeToggleButton />
           <a
+            aria-label="GitHub repository"
             href="https://github.com/Menchynskyi/vocabulary-app"
             className={cn(
               buttonVariants({ variant: "ghost", size: "icon" }),
