@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useContext, useEffect, useState } from "react";
-import { WordCard } from "./WordCard";
+import { Card } from "./Card";
 import { uri } from "@/constants";
-import { VocabularyMode, Word } from "@/types";
+import { VocabularyMode, WordCard } from "@/types";
 import { CardsContext } from "./CardsContext";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -26,20 +26,20 @@ async function transformTextToSpeech(text: string) {
   }
 }
 
-type WordsListProps = {
-  words: Word[];
+type CardsListProps = {
+  cards: WordCard[];
   vocabularyMode?: VocabularyMode;
 };
 
-export function WordsList({ words, vocabularyMode }: WordsListProps) {
+export function CardsList({ cards, vocabularyMode }: CardsListProps) {
   const { flipMode } = useContext(CardsContext);
 
   const [isMeaningVisible, setIsMeaningVisible] = useState(flipMode);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [audioLoading, setAudioLoading] = useState(false);
-  const [wordsAudio, setWordsAudio] = useState(Array(words.length).fill(null));
+  const [cardAudio, setCardAudio] = useState(Array(cards.length).fill(null));
 
-  const isCompleted = currentWordIndex >= words.length;
+  const isCompleted = currentCardIndex >= cards.length;
 
   const toggleCard = useCallback(() => {
     setIsMeaningVisible((prev) => !prev);
@@ -50,11 +50,11 @@ export function WordsList({ words, vocabularyMode }: WordsListProps) {
   }, [flipMode]);
 
   useEffect(() => {
-    setCurrentWordIndex(0);
-    setWordsAudio(Array(words.length).fill(null));
+    setCurrentCardIndex(0);
+    setCardAudio(Array(cards.length).fill(null));
 
     const handleVoiceChange = () => {
-      setWordsAudio(Array(words.length).fill(null));
+      setCardAudio(Array(cards.length).fill(null));
     };
     document.addEventListener(voiceChangeCustomEventName, handleVoiceChange);
     return () => {
@@ -63,19 +63,19 @@ export function WordsList({ words, vocabularyMode }: WordsListProps) {
         handleVoiceChange,
       );
     };
-  }, [words.length]);
+  }, [cards.length]);
 
   const playWord = useCallback(
     async (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       event?.stopPropagation();
       try {
-        let blob = wordsAudio[currentWordIndex];
+        let blob = cardAudio[currentCardIndex];
 
         if (!blob) {
           setAudioLoading(true);
-          blob = await transformTextToSpeech(words[currentWordIndex].word);
-          setWordsAudio((prev) => {
-            prev[currentWordIndex] = blob;
+          blob = await transformTextToSpeech(cards[currentCardIndex].word);
+          setCardAudio((prev) => {
+            prev[currentCardIndex] = blob;
             return prev;
           });
         }
@@ -90,10 +90,10 @@ export function WordsList({ words, vocabularyMode }: WordsListProps) {
         setAudioLoading(false);
       }
     },
-    [currentWordIndex, words, wordsAudio],
+    [currentCardIndex, cards, cardAudio],
   );
 
-  const switchWords = useCallback(
+  const switchCards = useCallback(
     (inc: number) => {
       setIsMeaningVisible(flipMode);
       const isNext = inc > 0;
@@ -101,19 +101,19 @@ export function WordsList({ words, vocabularyMode }: WordsListProps) {
 
       if (isCardFlipped) {
         setTimeout(() => {
-          setCurrentWordIndex((prev) =>
+          setCurrentCardIndex((prev) =>
             isNext
-              ? Math.min(prev + inc, words.length)
+              ? Math.min(prev + inc, cards.length)
               : Math.max(prev + inc, 0),
           );
         }, 100);
       } else {
-        setCurrentWordIndex((prev) =>
-          isNext ? Math.min(prev + inc, words.length) : Math.max(prev + inc, 0),
+        setCurrentCardIndex((prev) =>
+          isNext ? Math.min(prev + inc, cards.length) : Math.max(prev + inc, 0),
         );
       }
     },
-    [isMeaningVisible, flipMode, words.length],
+    [isMeaningVisible, flipMode, cards.length],
   );
 
   const handleKeybordActions = useCallback(
@@ -124,13 +124,13 @@ export function WordsList({ words, vocabularyMode }: WordsListProps) {
         return;
       }
 
-      if (event.key === "ArrowLeft" && currentWordIndex !== 0) {
+      if (event.key === "ArrowLeft" && currentCardIndex !== 0) {
         event.preventDefault();
-        switchWords(-1);
+        switchCards(-1);
       }
-      if (event.key === "ArrowRight" && currentWordIndex < words.length) {
+      if (event.key === "ArrowRight" && currentCardIndex < cards.length) {
         event.preventDefault();
-        switchWords(1);
+        switchCards(1);
       }
 
       if (
@@ -148,14 +148,14 @@ export function WordsList({ words, vocabularyMode }: WordsListProps) {
         !isCompleted
       ) {
         event.preventDefault();
-        const text = `${words[currentWordIndex].word} - ${words[currentWordIndex].translation || words[currentWordIndex].meaning || words[currentWordIndex].example}`;
+        const text = `${cards[currentCardIndex].word} - ${cards[currentCardIndex].translation || cards[currentCardIndex].meaning || cards[currentCardIndex].example}`;
         navigator.clipboard.writeText(text);
         toast("Copied to clipboard", {
           description: text,
         });
       }
     },
-    [currentWordIndex, toggleCard, switchWords, playWord, words, isCompleted],
+    [currentCardIndex, toggleCard, switchCards, playWord, cards, isCompleted],
   );
 
   useEffect(() => {
@@ -166,46 +166,46 @@ export function WordsList({ words, vocabularyMode }: WordsListProps) {
     };
   }, [handleKeybordActions]);
 
-  const currentWord = words[currentWordIndex];
+  const currentCard = cards[currentCardIndex];
 
-  const noWordsMessage =
-    vocabularyMode === VocabularyMode.week && !words.length
+  const noCardsMessage =
+    vocabularyMode === VocabularyMode.week && !cards.length
       ? "No words were added last week"
       : undefined;
 
   return (
     <>
-      {noWordsMessage ? (
-        <span className="text-2xl sm:text-4xl">{noWordsMessage}</span>
+      {noCardsMessage ? (
+        <span className="text-2xl sm:text-4xl">{noCardsMessage}</span>
       ) : null}
 
       {isCompleted ? (
-        <CompletedList words={words} startOver={() => setCurrentWordIndex(0)} />
+        <CompletedList cards={cards} startOver={() => setCurrentCardIndex(0)} />
       ) : (
         <div className="flex flex-col items-center sm:flex-row">
           <Button
             size="icon"
             variant="outline"
-            onClick={() => switchWords(-1)}
-            disabled={currentWordIndex === 0}
+            onClick={() => switchCards(-1)}
+            disabled={currentCardIndex === 0}
             className="mb-[45px] mr-4 hidden rounded-full sm:flex"
           >
             <ArrowLeft />
           </Button>
-          <WordCard
-            nextCard={() => switchWords(1)}
-            prevCard={() => switchWords(-1)}
+          <Card
+            nextCard={() => switchCards(1)}
+            prevCard={() => switchCards(-1)}
             loading={audioLoading}
             playWord={playWord}
-            word={currentWord}
+            card={currentCard}
             toggleCard={toggleCard}
             isMeaningVisible={isMeaningVisible}
           />
           <Button
             size="icon"
             variant="outline"
-            onClick={() => switchWords(1)}
-            disabled={currentWordIndex >= words.length}
+            onClick={() => switchCards(1)}
+            disabled={currentCardIndex >= cards.length}
             className="mb-[45px] ml-4 hidden rounded-full sm:flex"
           >
             <ArrowRight />
@@ -215,8 +215,8 @@ export function WordsList({ words, vocabularyMode }: WordsListProps) {
               size="icon"
               variant="outline"
               className="h-16 w-16"
-              onClick={() => switchWords(-1)}
-              disabled={currentWordIndex === 0}
+              onClick={() => switchCards(-1)}
+              disabled={currentCardIndex === 0}
             >
               <ArrowLeft className="h-8 w-8" />
             </Button>
@@ -224,8 +224,8 @@ export function WordsList({ words, vocabularyMode }: WordsListProps) {
               size="icon"
               variant="outline"
               className="h-16 w-16"
-              onClick={() => switchWords(1)}
-              disabled={currentWordIndex >= words.length}
+              onClick={() => switchCards(1)}
+              disabled={currentCardIndex >= cards.length}
             >
               <ArrowRight className="h-8 w-8" />
             </Button>

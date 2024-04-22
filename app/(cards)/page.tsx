@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
 import { VocabularyMode } from "@/types";
 import { uri } from "@/constants";
-import { WordsList } from "./_components/WordsList";
+import { CardsList } from "./_components/CardsList";
 
-async function getWords(mode?: VocabularyMode) {
+async function getCards(mode?: VocabularyMode) {
   try {
-    const response = await fetch(`${uri}/api/words?mode=${mode}`, {
+    const response = await fetch(`${uri}/api/cards?mode=${mode}`, {
       cache: "no-store",
       headers: {
         Cookie: cookies().toString(),
@@ -26,7 +26,7 @@ type CardsProps = {
 };
 
 export default async function Cards({ searchParams }: CardsProps) {
-  const words = await getWords(searchParams?.mode);
+  const cards = await getCards(searchParams?.mode);
 
-  return <WordsList words={words} vocabularyMode={searchParams?.mode} />;
+  return <CardsList cards={cards} vocabularyMode={searchParams?.mode} />;
 }

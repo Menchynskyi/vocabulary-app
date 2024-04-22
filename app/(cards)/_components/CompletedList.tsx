@@ -1,20 +1,20 @@
 import { Button } from "@/components/ui/Button";
 import { ScrollArea } from "@/components/ui/ScrollArea";
-import { Word } from "@/types";
+import { WordCard } from "@/types";
 import { useContext } from "react";
 import { CardsDispatchContext } from "./CardsContext";
 
 type CompletedListProps = {
-  words: Word[];
+  cards: WordCard[];
   startOver: () => void;
 };
 
-export function CompletedList({ words, startOver }: CompletedListProps) {
+export function CompletedList({ cards, startOver }: CompletedListProps) {
   const dispatch = useContext(CardsDispatchContext);
   return (
     <div className="flex flex-col">
       <ScrollArea className="max-h-[400px] min-w-[90vw] max-w-[90vw] rounded-md border sm:max-h-[450px] sm:min-w-[450px] sm:max-w-[500px] ">
-        {words.map(({ id, word, translation, meaning, example }) => (
+        {cards.map(({ id, word, translation, meaning, example }) => (
           <div key={id} className="p-4 text-lg [&:not(:last-of-type)]:border-b">
             <div>
               <span>{word}</span>

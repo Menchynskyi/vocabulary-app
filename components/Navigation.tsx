@@ -20,15 +20,15 @@ export function Navigation() {
         Cards
       </Link>
       <Link
-        href="/matchup"
+        href="/blanks"
         className={cn(
           "ml-3 text-sm text-muted-foreground/60 transition-colors hover:text-foreground/80",
           {
-            "text-mutet-foreground": pathname === "/matchup",
+            "text-mutet-foreground": pathname === "/blanks",
           },
         )}
       >
-        Matchup
+        Blanks
       </Link>
     </nav>
   );

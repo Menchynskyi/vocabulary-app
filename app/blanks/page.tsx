@@ -2,7 +2,7 @@ import { db } from "@/server/db";
 
 export const dynamic = "force-dynamic";
 
-export default async function Matchup() {
+export default async function Blanks() {
   const blanksStats = await db.query.blanksStats.findFirst(); // for testing
 
   return (

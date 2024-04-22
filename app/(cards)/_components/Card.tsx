@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { isTextToSpeechEnabled } from "@/constants";
-import { CardCommandsConfig, Word, WordFields } from "@/types";
+import { CardCommandsConfig, WordCard, WordCardFields } from "@/types";
 import { cn } from "@/utils/tailwind";
 import { Button } from "@/components/ui/Button";
 import { AudioLines, Languages, Sparkle, Lightbulb } from "lucide-react";
@@ -16,9 +16,9 @@ import { CommandDropdown } from "@/components/CommandDropdown";
 import { CommandContextMenu } from "@/components/CommandContextMenu";
 import { toast } from "sonner";
 
-type WordCardProps = {
+type CardProps = {
   loading: boolean;
-  word: Word;
+  card: WordCard;
   toggleCard: () => void;
   playWord: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   isMeaningVisible: boolean;
@@ -26,40 +26,40 @@ type WordCardProps = {
   prevCard: () => void;
 };
 
-export function WordCard({
+export function Card({
   loading,
-  word,
+  card,
   toggleCard,
   playWord,
   isMeaningVisible,
   nextCard,
   prevCard,
-}: WordCardProps) {
-  const [meaningMode, setMeaningMode] = useState<WordFields>("translation");
+}: CardProps) {
+  const [meaningMode, setMeaningMode] = useState<WordCardFields>("translation");
 
   useEffect(() => {
     setMeaningMode(() => {
       switch (true) {
-        case !!word.translation:
+        case !!card.translation:
           return "translation";
-        case !!word.meaning:
+        case !!card.meaning:
           return "meaning";
-        case !!word.example:
+        case !!card.example:
           return "example";
         default:
           return "translation";
       }
     });
-  }, [word]);
+  }, [card]);
 
-  const meaning = word[meaningMode];
+  const meaning = card[meaningMode];
 
-  const avaialbleMeaningModes = Object.entries(word)
+  const avaialbleMeaningModes = Object.entries(card)
     .filter(
       ([key, value]) =>
         !!value && key !== "word" && key !== "id" && key !== "url",
     )
-    .map(([key]) => key) as WordFields[];
+    .map(([key]) => key) as WordCardFields[];
   const isOnlyOneMeaningType = avaialbleMeaningModes.length === 1;
 
   const nextMeaningMode = useMemo(() => {
@@ -129,7 +129,7 @@ export function WordCard({
         label: "Copy",
         shortcut: "⌘+C",
         onSelect: () => {
-          const text = `${word.word} - ${meaning}`;
+          const text = `${card.word} - ${meaning}`;
           navigator.clipboard.writeText(text);
           toast("Copied to clipboard", {
             description: text,
@@ -141,14 +141,14 @@ export function WordCard({
       {
         label: "Open in Notion",
         onSelect: () => {
-          window.open(word.url, "_blank");
+          window.open(card.url, "_blank");
         },
       },
       {
         label: "Open in Reverso Context",
         onSelect: () => {
           window.open(
-            `https://context.reverso.net/translation/english-${process.env.NEXT_PUBLIC_TRANSLATION_LANGUAGE === "UA" ? "ukrainian" : "russian"}/${word.word}`,
+            `https://context.reverso.net/translation/english-${process.env.NEXT_PUBLIC_TRANSLATION_LANGUAGE === "UA" ? "ukrainian" : "russian"}/${card.word}`,
             "_blank",
           );
         },
@@ -157,7 +157,7 @@ export function WordCard({
         label: "Open in Cambridge Dictionary",
         onSelect: () => {
           window.open(
-            `https://dictionary.cambridge.org/dictionary/english/${word.word}`,
+            `https://dictionary.cambridge.org/dictionary/english/${card.word}`,
             "_blank",
           );
         },
@@ -182,7 +182,7 @@ export function WordCard({
           >
             <div className="absolute flex h-full w-full flex-col rounded-md border bg-background text-center text-[1rem] text-secondary-foreground backface-hidden">
               <div className="flex	h-full items-center justify-center p-[40px] text-2xl">
-                <span>{word.word}</span>
+                <span>{card.word}</span>
               </div>
               <div className="flex rounded-b-md  border-t px-2 py-1">
                 <CommandDropdown cardCommands={cardCommands} />

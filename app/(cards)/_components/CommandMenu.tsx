@@ -234,9 +234,9 @@ export function CommandMenu() {
 
           <CommandSeparator />
           <CommandGroup heading="Links">
-            <CommandItem onSelect={() => push("/matchup")}>
+            <CommandItem onSelect={() => push("/blanks")}>
               <Wand className="mr-2 h-4 w-4" />
-              <span>Matchup</span>
+              <span>Blanks</span>
             </CommandItem>
             <CommandItem
               onSelect={closeAfterDecorator(() =>

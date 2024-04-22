@@ -3,7 +3,7 @@ export enum VocabularyMode {
   random = "random",
 }
 
-export type Word = {
+export type WordCard = {
   id: string;
   word: string;
   translation: string;
@@ -12,7 +12,7 @@ export type Word = {
   url: string;
 };
 
-export type WordFields = keyof Word;
+export type WordCardFields = keyof WordCard;
 
 export type CardCommandsConfig = Array<
   Array<{

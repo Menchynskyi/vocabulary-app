@@ -9,10 +9,12 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const test = request.cookies.get(cardsListLengthCookie);
-    const test2 = request.cookies.get(cardsListWeekModeLengthCookie);
-    const cardsListLength = Number(test?.value);
-    const cardsListWeekModeLength = Number(test2?.value);
+    const cardsLength = request.cookies.get(cardsListLengthCookie);
+    const cardsLengthWeekMode = request.cookies.get(
+      cardsListWeekModeLengthCookie,
+    );
+    const cardsListLength = Number(cardsLength?.value);
+    const cardsListWeekModeLength = Number(cardsLengthWeekMode?.value);
 
     const mode = request.nextUrl.searchParams.get("mode");
     const isWeekMode = mode === "week";

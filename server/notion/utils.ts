@@ -1,4 +1,4 @@
-import { Word } from "@/types";
+import { WordCard } from "@/types";
 
 type Order = "ascending" | "descending";
 
@@ -15,7 +15,7 @@ export const notionVocabularyDatabaseId =
   process.env.NOTION_VOCABULARY_DATABASE_ID || "";
 
 export function generateRandomWords(
-  words: Omit<Word, "id">[],
+  words: Omit<WordCard, "id">[],
   setLength: number,
 ) {
   if (setLength > words.length) {
