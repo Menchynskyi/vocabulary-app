@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { isTextToSpeechEnabled } from "@/constants";
-import { CardCommandsConfig, WordCard, WordCardFields } from "@/types";
+import { CardCommandsConfig, WordObject, WordObjectFields } from "@/types";
 import { cn } from "@/utils/tailwind";
 import { Button } from "@/components/ui/Button";
 import { AudioLines, Languages, Sparkle, Lightbulb } from "lucide-react";
@@ -15,10 +15,11 @@ import {
 import { CommandDropdown } from "@/components/CommandDropdown";
 import { CommandContextMenu } from "@/components/CommandContextMenu";
 import { toast } from "sonner";
+import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 
 type CardProps = {
   loading: boolean;
-  card: WordCard;
+  card: WordObject;
   toggleCard: () => void;
   playWord: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   isMeaningVisible: boolean;
@@ -35,7 +36,8 @@ export function Card({
   nextCard,
   prevCard,
 }: CardProps) {
-  const [meaningMode, setMeaningMode] = useState<WordCardFields>("translation");
+  const [meaningMode, setMeaningMode] =
+    useState<WordObjectFields>("translation");
 
   useEffect(() => {
     setMeaningMode(() => {
@@ -59,7 +61,7 @@ export function Card({
       ([key, value]) =>
         !!value && key !== "word" && key !== "id" && key !== "url",
     )
-    .map(([key]) => key) as WordCardFields[];
+    .map(([key]) => key) as WordObjectFields[];
   const isOnlyOneMeaningType = avaialbleMeaningModes.length === 1;
 
   const nextMeaningMode = useMemo(() => {
@@ -210,8 +212,13 @@ export function Card({
                         />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="left">
+                    <TooltipContent side="left" className="flex flex-nowrap">
                       <p>Pronounce</p>
+                      <KeyboardShortcut
+                        shortcut="P"
+                        withModifier
+                        className="ml-2"
+                      />
                     </TooltipContent>
                   </Tooltip>
                 )}

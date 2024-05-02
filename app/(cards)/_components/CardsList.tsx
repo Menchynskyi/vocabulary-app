@@ -2,32 +2,19 @@
 
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Card } from "./Card";
-import { uri } from "@/constants";
-import { VocabularyMode, WordCard } from "@/types";
+import { VocabularyMode, WordObject } from "@/types";
 import { CardsContext } from "./CardsContext";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { CompletedList } from "./CompletedList";
 import { voiceChangeCustomEventName } from "@/constants/voice";
 import { toast } from "sonner";
-
-async function transformTextToSpeech(text: string) {
-  try {
-    const response = await fetch(`${uri}/api/text-to-speech?text=${text}`, {
-      cache: "no-store",
-    });
-    const buffer = await response.arrayBuffer();
-    const blob = new Blob([buffer], {
-      type: response.headers.get("content-type") || "audio/mpeg",
-    });
-    return blob;
-  } catch (error) {
-    console.error(error);
-  }
-}
+import { getSynthesizedSpeech } from "@/server/gcp/queries";
+import { playBufferAudio } from "@/utils/playBufferAudio";
+import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
 
 type CardsListProps = {
-  cards: WordCard[];
+  cards: WordObject[];
   vocabularyMode?: VocabularyMode;
 };
 
@@ -37,7 +24,9 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
   const [isMeaningVisible, setIsMeaningVisible] = useState(flipMode);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [audioLoading, setAudioLoading] = useState(false);
-  const [cardAudio, setCardAudio] = useState(Array(cards.length).fill(null));
+  const [cardAudio, setCardAudio] = useState<Array<Blob | null>>(
+    Array(cards.length).fill(null),
+  );
 
   const isCompleted = currentCardIndex >= cards.length;
 
@@ -68,22 +57,31 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
   const playWord = useCallback(
     async (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       event?.stopPropagation();
+      setAudioLoading(true);
+
       try {
-        let blob = cardAudio[currentCardIndex];
+        const blob = cardAudio[currentCardIndex];
 
         if (!blob) {
-          setAudioLoading(true);
-          blob = await transformTextToSpeech(cards[currentCardIndex].word);
-          setCardAudio((prev) => {
-            prev[currentCardIndex] = blob;
-            return prev;
+          const audioData = await getSynthesizedSpeech(
+            cards[currentCardIndex].word,
+          );
+          if (!audioData) throw new Error("No audio data");
+
+          playBufferAudio({
+            audioData,
+            cacheFunc: (blob) => {
+              setCardAudio((prev) =>
+                prev.map((item, index) =>
+                  index === currentCardIndex ? blob : item,
+                ),
+              );
+            },
           });
+          return;
         }
 
-        const audio = new Audio(URL.createObjectURL(blob));
-        setTimeout(() => {
-          audio.play();
-        }, 0);
+        playBufferAudio({ cachedBlob: blob });
       } catch (error) {
         console.error(error);
       } finally {
@@ -116,55 +114,67 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
     [isMeaningVisible, flipMode, cards.length],
   );
 
-  const handleKeybordActions = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === " ") {
-        event.preventDefault();
-        toggleCard();
-        return;
-      }
-
-      if (event.key === "ArrowLeft" && currentCardIndex !== 0) {
-        event.preventDefault();
-        switchCards(-1);
-      }
-      if (event.key === "ArrowRight" && currentCardIndex < cards.length) {
-        event.preventDefault();
-        switchCards(1);
-      }
-
-      if (
-        event.key === "p" &&
-        (event.metaKey || event.ctrlKey) &&
-        !isCompleted
-      ) {
-        event.preventDefault();
-        playWord();
-      }
-
-      if (
-        event.key === "c" &&
-        (event.metaKey || event.ctrlKey) &&
-        !isCompleted
-      ) {
-        event.preventDefault();
-        const text = `${cards[currentCardIndex].word} - ${cards[currentCardIndex].translation || cards[currentCardIndex].meaning || cards[currentCardIndex].example}`;
-        navigator.clipboard.writeText(text);
-        toast("Copied to clipboard", {
-          description: text,
-        });
-      }
-    },
-    [currentCardIndex, toggleCard, switchCards, playWord, cards, isCompleted],
-  );
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeybordActions);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeybordActions);
-    };
-  }, [handleKeybordActions]);
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        key: " ",
+        action: (e) => {
+          e.preventDefault();
+          toggleCard();
+        },
+      },
+      {
+        key: "ArrowLeft",
+        action: (e) => {
+          if (currentCardIndex !== 0) return;
+          e.preventDefault();
+          switchCards(-1);
+        },
+      },
+      {
+        key: "ArrowRight",
+        action: (e) => {
+          if (currentCardIndex < cards.length) return;
+          e.preventDefault();
+          switchCards(1);
+        },
+      },
+      {
+        key: "p",
+        modifier: "ctrl",
+        action: (e) => {
+          if (isCompleted) return;
+          e.preventDefault();
+          playWord();
+        },
+      },
+      {
+        key: "c",
+        modifier: "ctrl",
+        action: (e) => {
+          if (isCompleted) return;
+          e.preventDefault();
+          const text = `${cards[currentCardIndex].word} - ${
+            cards[currentCardIndex].translation ||
+            cards[currentCardIndex].meaning ||
+            cards[currentCardIndex].example
+          }`;
+          navigator.clipboard.writeText(text);
+          toast("Copied to clipboard", {
+            description: text,
+          });
+        },
+      },
+    ],
+    deps: [
+      currentCardIndex,
+      toggleCard,
+      switchCards,
+      playWord,
+      cards,
+      isCompleted,
+    ],
+  });
 
   const currentCard = cards[currentCardIndex];
 

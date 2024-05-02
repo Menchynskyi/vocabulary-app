@@ -22,7 +22,8 @@
     "incremental": true,
     "removeComments": true,
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "input-otp": ["node_modules/input-otp/packages/input-otp/dist"]
     },
     "baseUrl": ".",
     "plugins": [

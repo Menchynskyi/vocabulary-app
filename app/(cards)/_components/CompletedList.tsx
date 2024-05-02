@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/Button";
 import { ScrollArea } from "@/components/ui/ScrollArea";
-import { WordCard } from "@/types";
+import { WordObject } from "@/types";
 import { useContext } from "react";
 import { CardsDispatchContext } from "./CardsContext";
 
 type CompletedListProps = {
-  cards: WordCard[];
+  cards: WordObject[];
   startOver: () => void;
 };
 

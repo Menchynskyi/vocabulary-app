@@ -1,23 +1,6 @@
-import { cookies } from "next/headers";
 import { VocabularyMode } from "@/types";
-import { uri } from "@/constants";
 import { CardsList } from "./_components/CardsList";
-
-async function getCards(mode?: VocabularyMode) {
-  try {
-    const response = await fetch(`${uri}/api/cards?mode=${mode}`, {
-      cache: "no-store",
-      headers: {
-        Cookie: cookies().toString(),
-      },
-    });
-    const { data } = await response.json();
-
-    return data;
-  } catch (error) {
-    console.error(error);
-  }
-}
+import { getWords } from "@/server/notion/queries";
 
 type CardsProps = {
   searchParams: {
@@ -26,7 +9,7 @@ type CardsProps = {
 };
 
 export default async function Cards({ searchParams }: CardsProps) {
-  const cards = await getCards(searchParams?.mode);
+  const cards = await getWords(searchParams?.mode);
 
   return <CardsList cards={cards} vocabularyMode={searchParams?.mode} />;
 }

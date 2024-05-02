@@ -1,7 +1,18 @@
-import { VoiceName, defaultVoiceOption, voiceOptions } from "@/constants/voice";
-import textToSpeechClient from ".";
+"use server";
 
-export async function synthesizeSpeech(text: string, voiceName?: VoiceName) {
+import {
+  VoiceName,
+  defaultVoiceOption,
+  voiceNameCookie,
+  voiceOptions,
+} from "@/constants/voice";
+import textToSpeechClient from ".";
+import { cookies } from "next/headers";
+
+export async function getSynthesizedSpeech(text: string) {
+  const cookieStore = cookies();
+  const voiceName = cookieStore.get(voiceNameCookie)?.value as VoiceName;
+
   const { languageCode, name } =
     voiceOptions.find((item) => item.name === voiceName) || defaultVoiceOption;
   try {
@@ -19,7 +30,7 @@ export async function synthesizeSpeech(text: string, voiceName?: VoiceName) {
         text,
       },
     });
-    return response.audioContent;
+    return response.audioContent as Uint8Array;
   } catch (error) {
     console.error(error);
   }

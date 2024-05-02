@@ -26,7 +26,8 @@ export function Navigation() {
         className={cn(
           "ml-3 text-sm text-muted-foreground transition-colors hover:text-muted-foreground/60",
           {
-            "text-foreground hover:text-foreground/60": pathname === "/blanks",
+            "text-foreground hover:text-foreground/60":
+              pathname.startsWith("/blanks"),
           },
         )}
       >

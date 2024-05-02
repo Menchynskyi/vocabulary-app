@@ -11,13 +11,15 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/Command";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { GithubIcon } from "@/components/icons/GithubIcon";
 import { NotionIcon } from "@/components/icons/NotionIcon";
+import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
+import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
@@ -56,24 +58,35 @@ export function CommandMenu() {
     setOpen(false);
   };
 
-  useEffect(() => {
-    const handleKeydown = (e: KeyboardEvent) => {
-      if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/") {
-        e.preventDefault();
-        setOpen((open) => !open);
-      }
-
-      if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        toggleTheme();
-        setOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeydown);
-    return () => document.removeEventListener("keydown", handleKeydown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        key: "k",
+        modifier: "ctrl",
+        action: (e) => {
+          e.preventDefault();
+          setOpen((open) => !open);
+        },
+      },
+      {
+        key: "/",
+        action: (e) => {
+          e.preventDefault();
+          setOpen((open) => !open);
+        },
+      },
+      {
+        key: "x",
+        modifier: "ctrl",
+        action: (e) => {
+          e.preventDefault();
+          toggleTheme();
+          setOpen(false);
+        },
+      },
+    ],
+    deps: [toggleTheme],
+  });
 
   return (
     <>
@@ -87,9 +100,7 @@ export function CommandMenu() {
         <span className="hidden pr-2 text-sm text-muted-foreground sm:inline">
           Search commands...
         </span>
-        <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 sm:inline-flex">
-          <span className="text-xs">⌘</span>K
-        </kbd>
+        <KeyboardShortcut shortcut="K" withModifier />
         <Search className="h-4 w-4 sm:hidden" />
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
@@ -100,7 +111,7 @@ export function CommandMenu() {
             <CommandItem onSelect={closeAfterDecorator(toggleTheme)}>
               {themeIcon}
               <span>{`Toggle theme`}</span>
-              <CommandShortcut className="hidden sm:block">⌘S</CommandShortcut>
+              <CommandShortcut className="hidden sm:block">⌘+X</CommandShortcut>
             </CommandItem>
           </CommandGroup>
 

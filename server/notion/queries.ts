@@ -1,4 +1,8 @@
+"use server";
+
 import {
+  cardsListLengthCookie,
+  cardsListWeekModeLengthCookie,
   defaultCardsListLength,
   defaultCardsListWeekModeLength,
 } from "@/constants/cards";
@@ -8,26 +12,34 @@ import {
   generateRandomWords,
   generateSorts,
   notionVocabularyDatabaseId,
+  parseWordResponse,
 } from "./utils";
-import {
-  PageObjectResponse,
-  TextRichTextItemResponse,
-} from "@notionhq/client/build/src/api-endpoints";
+import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+import { cookies } from "next/headers";
+import { VocabularyMode } from "@/types";
 
-export type GetWordsParams = {
-  isWeekMode?: boolean;
-  wordsLength?: number;
-};
+export async function getWords(mode?: VocabularyMode) {
+  const cookieStore = cookies();
+  const cardsLength = Number(cookieStore.get(cardsListLengthCookie)?.value);
+  const cardsLengthWeekMode = Number(
+    cookieStore.get(cardsListWeekModeLengthCookie)?.value,
+  );
 
-export async function getWords({ isWeekMode, wordsLength }: GetWordsParams) {
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const isWeekMode = mode === "week";
 
-  const fallbackLength = isWeekMode
+  let _numberOfWords = isWeekMode
     ? defaultCardsListWeekModeLength
     : defaultCardsListLength;
 
-  const _numberOfWords = wordsLength || fallbackLength;
+  if (!isNaN(cardsLength) && !isWeekMode) {
+    _numberOfWords = cardsLength;
+  }
+  if (!isNaN(cardsLengthWeekMode) && isWeekMode) {
+    _numberOfWords = cardsLengthWeekMode;
+  }
+
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
   let response = await notionClient.databases.query({
     database_id: notionVocabularyDatabaseId,
@@ -68,45 +80,24 @@ export async function getWords({ isWeekMode, wordsLength }: GetWordsParams) {
 
   return generateRandomWords(
     (response.results as PageObjectResponse[])
-      .map((result) => {
-        let word = "";
-        let translation = "";
-        let meaning = "";
-        let example = "";
-
-        if (result.properties.Word.type === "title") {
-          const wordResponse = result.properties.Word
-            .title[0] as TextRichTextItemResponse;
-          word = wordResponse?.text.content || "";
-        }
-        if (result.properties.Translation.type === "rich_text") {
-          const translationResponse = result.properties.Translation
-            .rich_text[0] as TextRichTextItemResponse;
-          translation = translationResponse?.text.content || "";
-        }
-        if (result.properties.Meaning.type === "rich_text") {
-          const meaningResponse = result.properties.Meaning
-            .rich_text[0] as TextRichTextItemResponse;
-          meaning = meaningResponse?.text.content || "";
-        }
-        if (result.properties.Example.type === "rich_text") {
-          const exampleResponse = result.properties.Example
-            .rich_text[0] as TextRichTextItemResponse;
-          example = exampleResponse?.text.content || "";
-        }
-
-        return {
-          word,
-          translation,
-          meaning,
-          example,
-          url: result.url,
-        };
-      })
+      .map(parseWordResponse)
       .filter(
         (word) =>
           word.word && (word.translation || word.meaning || word.example),
       ),
     _numberOfWords,
   );
+}
+
+export async function getLatestWord(nextCursor?: string) {
+  const response = await notionClient.databases.query({
+    database_id: notionVocabularyDatabaseId,
+    page_size: 1,
+    start_cursor: nextCursor,
+    sorts: [{ property: "Created date", direction: "descending" }],
+  });
+
+  const word = parseWordResponse(response.results[0] as PageObjectResponse);
+
+  return { word, nextCursor: response.next_cursor };
 }

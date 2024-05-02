@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import {
   Drawer,
@@ -45,6 +45,8 @@ import {
   voiceNameCookie,
   voiceOptions,
 } from "@/constants/voice";
+import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
+import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 
 export function Settings() {
   const { refresh } = useRouter();
@@ -105,17 +107,18 @@ export function Settings() {
     }
   };
 
-  useEffect(() => {
-    const handleKeydown = (e: KeyboardEvent) => {
-      if (e.key === "s" && (e.metaKey || e.ctrlKey) && ref.current) {
-        e.preventDefault();
-        ref.current.click();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeydown);
-    return () => document.removeEventListener("keydown", handleKeydown);
-  }, []);
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        key: "s",
+        modifier: "ctrl",
+        action: (e) => {
+          e.preventDefault();
+          ref.current?.click();
+        },
+      },
+    ],
+  });
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -150,9 +153,7 @@ export function Settings() {
           <TooltipContent side="bottom">
             <p>
               Settings
-              <kbd className="pointer-events-none ml-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 sm:inline-flex">
-                <span className="text-xs">⌘</span>S
-              </kbd>
+              <KeyboardShortcut className="ml-2" shortcut="S" withModifier />
             </p>
           </TooltipContent>
         </Tooltip>

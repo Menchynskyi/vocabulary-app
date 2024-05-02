@@ -23,7 +23,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/Command";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/Button";
 import { CardsDispatchContext } from "./CardsContext";
@@ -41,6 +41,8 @@ import {
 } from "@/constants/voice";
 import { getCookie, setCookie } from "cookies-next";
 import { settingsButtonId } from "@/constants/cards";
+import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
+import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
@@ -142,36 +144,54 @@ export function CommandMenu() {
     document.getElementById(settingsButtonId)?.click();
   };
 
-  useEffect(() => {
-    const handleKeydown = (e: KeyboardEvent) => {
-      if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "/") {
-        e.preventDefault();
-        setOpen((open) => !open);
-      }
-
-      if (e.key === "x" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        toggleTheme();
-        setOpen(false);
-      }
-
-      if (e.key === "f" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        toggleFlipMode();
-        setOpen(false);
-      }
-
-      if (e.key === "v" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        toggleVocabularyMode();
-        setOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeydown);
-    return () => document.removeEventListener("keydown", handleKeydown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, toggleTheme]);
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        key: "k",
+        modifier: "ctrl",
+        action: (e) => {
+          e.preventDefault();
+          setOpen((open) => !open);
+        },
+      },
+      {
+        key: "/",
+        modifier: "ctrl",
+        action: (e) => {
+          e.preventDefault();
+          setOpen((open) => !open);
+        },
+      },
+      {
+        key: "x",
+        modifier: "ctrl",
+        action: (e) => {
+          e.preventDefault();
+          toggleTheme();
+          setOpen(false);
+        },
+      },
+      {
+        key: "f",
+        modifier: "ctrl",
+        action: (e) => {
+          e.preventDefault();
+          toggleFlipMode();
+          setOpen(false);
+        },
+      },
+      {
+        key: "v",
+        modifier: "ctrl",
+        action: (e) => {
+          e.preventDefault();
+          toggleVocabularyMode();
+          setOpen(false);
+        },
+      },
+    ],
+    deps: [searchParams, toggleTheme],
+  });
 
   return (
     <>
@@ -185,9 +205,7 @@ export function CommandMenu() {
         <span className="hidden pr-2 text-sm text-muted-foreground sm:inline">
           Search commands...
         </span>
-        <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 sm:inline-flex">
-          <span className="text-xs">⌘</span>K
-        </kbd>
+        <KeyboardShortcut shortcut="K" withModifier />
         <Search className="h-4 w-4 sm:hidden" />
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
@@ -198,22 +216,22 @@ export function CommandMenu() {
             <CommandItem onSelect={closeAfterDecorator(toggleFlipMode)}>
               <RefreshCcw className="mr-2 h-4 w-4" />
               <span>Toggle flip mode</span>
-              <CommandShortcut className="hidden sm:block">⌘F</CommandShortcut>
+              <CommandShortcut className="hidden sm:block">⌘+F</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={closeAfterDecorator(toggleVocabularyMode)}>
               <Calendar className="mr-2 h-4 w-4" />
               <span>Toggle vocabulary mode</span>
-              <CommandShortcut className="hidden sm:block">⌘V</CommandShortcut>
+              <CommandShortcut className="hidden sm:block">⌘+V</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={closeAfterDecorator(toggleTheme)}>
               {themeIcon}
               <span>{`Toggle theme`}</span>
-              <CommandShortcut className="hidden sm:block">⌘X</CommandShortcut>
+              <CommandShortcut className="hidden sm:block">⌘+X</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={closeAfterDecorator(openSettings)}>
               <SettingsIcon className="mr-2 h-4 w-4" />
               <span>Settings</span>
-              <CommandShortcut className="hidden sm:block">⌘S</CommandShortcut>
+              <CommandShortcut className="hidden sm:block">⌘+S</CommandShortcut>
             </CommandItem>
           </CommandGroup>
 

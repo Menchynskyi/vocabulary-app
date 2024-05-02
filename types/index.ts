@@ -3,8 +3,8 @@ export enum VocabularyMode {
   random = "random",
 }
 
-export type WordCard = {
-  id: string;
+export type WordObject = {
+  id: number;
   word: string;
   translation: string;
   meaning: string;
@@ -12,7 +12,7 @@ export type WordCard = {
   url: string;
 };
 
-export type WordCardFields = keyof WordCard;
+export type WordObjectFields = keyof WordObject;
 
 export type CardCommandsConfig = Array<
   Array<{
@@ -22,3 +22,15 @@ export type CardCommandsConfig = Array<
     disabled?: boolean;
   }>
 >;
+
+export enum BlanksDifficulty {
+  Easy = "easy",
+  Medium = "medium",
+  Hard = "hard",
+  Extreme = "extreme",
+}
+
+export type SlotGrops = Array<{
+  type: "char" | "separator" | "prefilled";
+  slots: Array<{ char: string; index: number }>;
+}>;

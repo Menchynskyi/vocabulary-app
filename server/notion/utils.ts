@@ -1,4 +1,8 @@
-import { WordCard } from "@/types";
+import { WordObject } from "@/types";
+import {
+  PageObjectResponse,
+  TextRichTextItemResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 
 type Order = "ascending" | "descending";
 
@@ -15,7 +19,7 @@ export const notionVocabularyDatabaseId =
   process.env.NOTION_VOCABULARY_DATABASE_ID || "";
 
 export function generateRandomWords(
-  words: Omit<WordCard, "id">[],
+  words: Omit<WordObject, "id">[],
   setLength: number,
 ) {
   if (setLength > words.length) {
@@ -90,3 +94,41 @@ export function generateFilter(length = 5) {
   }
   return filters;
 }
+
+export const parseWordResponse = (
+  response: PageObjectResponse,
+): Omit<WordObject, "id"> => {
+  let word = "";
+  let translation = "";
+  let meaning = "";
+  let example = "";
+
+  if (response.properties.Word.type === "title") {
+    const wordResponse = response.properties.Word
+      .title[0] as TextRichTextItemResponse;
+    word = wordResponse?.text.content || "";
+  }
+  if (response.properties.Translation.type === "rich_text") {
+    const translationResponse = response.properties.Translation
+      .rich_text[0] as TextRichTextItemResponse;
+    translation = translationResponse?.text.content || "";
+  }
+  if (response.properties.Meaning.type === "rich_text") {
+    const meaningResponse = response.properties.Meaning
+      .rich_text[0] as TextRichTextItemResponse;
+    meaning = meaningResponse?.text.content || "";
+  }
+  if (response.properties.Example.type === "rich_text") {
+    const exampleResponse = response.properties.Example
+      .rich_text[0] as TextRichTextItemResponse;
+    example = exampleResponse?.text.content || "";
+  }
+
+  return {
+    word,
+    translation,
+    meaning,
+    example,
+    url: response.url,
+  };
+};
