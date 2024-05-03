@@ -7,9 +7,16 @@ import {
   InputOTPSlot,
   InputOTPSeparator,
 } from "@/components/ui/InputOtp";
-import { SlotGrops, WordObject } from "@/types";
+import { BlanksDifficulty, SlotGrops, WordObject } from "@/types";
 import { useRouter } from "next/navigation";
-import { Fragment, useCallback, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { HintButtons } from "./HintButtons";
 import { useIsMounted } from "@/utils/useIsMounted";
 import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
@@ -23,6 +30,7 @@ type BlanksInputProps = {
   nextCursor: string | null;
   pureString: string;
   slotGroups: SlotGrops;
+  difficulty: BlanksDifficulty;
 };
 
 export function BlanksInput({
@@ -30,6 +38,7 @@ export function BlanksInput({
   nextCursor,
   pureString,
   slotGroups,
+  difficulty,
 }: BlanksInputProps) {
   const { push } = useRouter();
   const isMounted = useIsMounted();
@@ -63,6 +72,10 @@ export function BlanksInput({
   };
 
   const isCompleted = areStringsEqualCaseInsensitive(value, pureString);
+
+  useEffect(() => {
+    setValue("");
+  }, [difficulty]);
 
   useKeyboardShortcuts({
     shortcuts: [
@@ -137,6 +150,7 @@ export function BlanksInput({
         <HintButtons
           value={value}
           word={wordObject.word}
+          difficulty={difficulty}
           revealLetter={revealLetter}
         />
       )}

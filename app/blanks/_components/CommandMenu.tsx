@@ -1,6 +1,16 @@
 "use client";
 
-import { Moon, Sun, Laptop, Triangle, Layers3, Search } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  Laptop,
+  Triangle,
+  Layers3,
+  Search,
+  SettingsIcon,
+  AudioWaveform,
+  AudioLines,
+} from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -20,6 +30,15 @@ import { GithubIcon } from "@/components/icons/GithubIcon";
 import { NotionIcon } from "@/components/icons/NotionIcon";
 import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
+import { settingsButtonId } from "@/constants";
+import {
+  VoiceLanguageCode,
+  VoiceName,
+  voiceChangeCustomEventName,
+  voiceNameCookie,
+  voiceOptions,
+} from "@/constants/voice";
+import { getCookie, setCookie } from "cookies-next";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
@@ -39,6 +58,35 @@ export function CommandMenu() {
     setTheme(theme);
     toast("Theme changed", {
       description: `Changed to ${theme} mode`,
+    });
+  };
+
+  const openSettings = () => {
+    document.getElementById(settingsButtonId)?.click();
+  };
+
+  const setRandomVoice = (langCode: VoiceLanguageCode) => () => {
+    const currentVoiceName = getCookie(voiceNameCookie) as VoiceName;
+    const voices = voiceOptions.filter(
+      (item) =>
+        item.languageCode === langCode && item.name !== currentVoiceName,
+    );
+    const randomIndex = Math.floor(Math.random() * voices.length);
+    const voiceName = voices[randomIndex].name;
+
+    const customVoiceChangeEvent = new CustomEvent(voiceChangeCustomEventName);
+    document.dispatchEvent(customVoiceChangeEvent);
+
+    setCookie(voiceNameCookie, voiceName);
+    toast("Voice changed", {
+      description: `Changed to ${voices[randomIndex].label} voice`,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          setCookie(voiceNameCookie, currentVoiceName);
+          document.dispatchEvent(customVoiceChangeEvent);
+        },
+      },
     });
   };
 
@@ -113,6 +161,11 @@ export function CommandMenu() {
               <span>{`Toggle theme`}</span>
               <CommandShortcut className="hidden sm:block">⌘+X</CommandShortcut>
             </CommandItem>
+            <CommandItem onSelect={closeAfterDecorator(openSettings)}>
+              <SettingsIcon className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+              <CommandShortcut className="hidden sm:block">⌘+S</CommandShortcut>
+            </CommandItem>
           </CommandGroup>
 
           <CommandSeparator />
@@ -150,6 +203,22 @@ export function CommandMenu() {
             >
               <GithubIcon className="mr-2 !h-[1.125rem] !w-[1.125rem]" />
               <span>GitHub</span>
+            </CommandItem>
+          </CommandGroup>
+
+          <CommandSeparator />
+          <CommandGroup heading="Voice">
+            <CommandItem
+              onSelect={closeAfterDecorator(setRandomVoice("en-US"))}
+            >
+              <AudioWaveform className="mr-2 h-4 w-4" />
+              <span>Set random US English voice</span>
+            </CommandItem>
+            <CommandItem
+              onSelect={closeAfterDecorator(setRandomVoice("en-GB"))}
+            >
+              <AudioLines className="mr-2 h-4 w-4" />
+              <span>Set random GB English voice</span>
             </CommandItem>
           </CommandGroup>
 

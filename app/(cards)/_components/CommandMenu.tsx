@@ -40,7 +40,7 @@ import {
   voiceOptions,
 } from "@/constants/voice";
 import { getCookie, setCookie } from "cookies-next";
-import { settingsButtonId } from "@/constants/cards";
+import { settingsButtonId } from "@/constants";
 import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 

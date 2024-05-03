@@ -1,25 +1,47 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getSynthesizedSpeech } from "@/server/gcp/queries";
 import { playBufferAudio } from "@/utils/playBufferAudio";
 import { cn } from "@/utils/tailwind";
 import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
 import { toast } from "sonner";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
+import { BlanksDifficulty } from "@/types";
+
+const getNumberOfRevealHints = (difficulty: BlanksDifficulty) => {
+  switch (difficulty) {
+    case BlanksDifficulty.Easy:
+      return 3;
+    case BlanksDifficulty.Medium:
+      return 2;
+    case BlanksDifficulty.Hard:
+      return 1;
+    case BlanksDifficulty.Extreme:
+    default:
+      return 0;
+  }
+};
 
 type HintButtonProps = {
   revealLetter: () => void;
   word: string;
   value: string;
+  difficulty: BlanksDifficulty;
 };
 
-export function HintButtons({ revealLetter, word, value }: HintButtonProps) {
+export function HintButtons({
+  revealLetter,
+  word,
+  value,
+  difficulty,
+}: HintButtonProps) {
   const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [isPronounced, setIsPronounced] = useState(false);
-  // TODO: set numberOfRevealHints based on the difficulty level and the number of the hidden letters
-  const [numberOfRevealHints, setNumberOfRevealHints] = useState(3);
+  const [numberOfRevealHints, setNumberOfRevealHints] = useState(() =>
+    getNumberOfRevealHints(difficulty),
+  );
 
   const handlePronounce = async () => {
     setIsAudioLoading(true);
@@ -43,6 +65,10 @@ export function HintButtons({ revealLetter, word, value }: HintButtonProps) {
           : `You have ${numberOfRevealHints - 1} reveal hints left`,
     });
   };
+
+  useEffect(() => {
+    setNumberOfRevealHints(getNumberOfRevealHints(difficulty));
+  }, [difficulty]);
 
   useKeyboardShortcuts({
     shortcuts: [

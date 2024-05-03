@@ -10,13 +10,13 @@ export const transformStringToSlotGroups = (
 
   switch (difficulty) {
     case BlanksDifficulty.Easy:
-      numberOfPrefilledChars = Math.min(4, Math.floor(str.length * 0.5));
+      numberOfPrefilledChars = Math.min(6, Math.floor(str.length * 0.5));
       break;
     case BlanksDifficulty.Medium:
-      numberOfPrefilledChars = Math.min(2, Math.floor(str.length * 0.25));
+      numberOfPrefilledChars = Math.min(4, Math.floor(str.length * 0.25));
       break;
     case BlanksDifficulty.Hard:
-      numberOfPrefilledChars = Math.min(1, Math.floor(str.length * 0.1));
+      numberOfPrefilledChars = Math.min(2, Math.floor(str.length * 0.1));
       break;
     case BlanksDifficulty.Extreme:
       numberOfPrefilledChars = 0;

@@ -19,12 +19,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/Tooltip";
-import {
-  cardsListLengthCookie,
-  cardsListWeekModeLengthCookie,
-  defaultCardsListLength,
-  defaultCardsListWeekModeLength,
-} from "@/constants/cards";
 import { Settings as SettingsIcon } from "lucide-react";
 import { getCookie, setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
@@ -46,45 +40,59 @@ import {
 } from "@/constants/voice";
 import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
+import { blanksDifficultyCookie } from "@/constants/blanks";
 import { settingsButtonId } from "@/constants";
+import { BlanksDifficulty } from "@/types";
+
+const difficultyOptions = [
+  {
+    label: BlanksDifficulty.Easy,
+    value: 1,
+  },
+  {
+    label: BlanksDifficulty.Medium,
+    value: 2,
+  },
+  {
+    label: BlanksDifficulty.Hard,
+    value: 3,
+  },
+  {
+    label: BlanksDifficulty.Extreme,
+    value: 4,
+  },
+];
 
 export function Settings() {
   const { refresh } = useRouter();
   const ref = useRef<HTMLButtonElement | null>(null);
-  const [cardsListLength, setCardsListLength] = useState(() => {
-    return Number(getCookie(cardsListLengthCookie)) || defaultCardsListLength;
-  });
-  const [cardsListWeekModeLength, setCardsListWeekModeLength] = useState(() => {
+  const [blanksDifficulty, setBlanksDifficulty] = useState(() => {
+    const difficulty = getCookie(blanksDifficultyCookie);
     return (
-      Number(getCookie(cardsListWeekModeLengthCookie)) ||
-      defaultCardsListWeekModeLength
+      difficultyOptions.find((item) => item.label === difficulty)?.value ||
+      difficultyOptions[0].value
     );
   });
   const [selectedVoice, setSelectedVoice] = useState(() => {
     return getCookie(voiceNameCookie) || defaultVoiceOption.name;
   });
 
+  const difficulty = difficultyOptions.find(
+    (item) => item.value === blanksDifficulty,
+  )?.label;
+
   const handleSaveSettings = () => {
-    const currentCardsListLength = getCookie(cardsListLengthCookie);
-    const currentCardsListWeekModeLength = getCookie(
-      cardsListWeekModeLengthCookie,
-    );
+    const currentBlanksDifficulty = getCookie(blanksDifficultyCookie);
     const currentVoiceName = getCookie(voiceNameCookie);
 
     let isVoiceChanged = false;
     let isSettingsChanged = false;
 
-    const newCardsListLength = cardsListLength.toString();
-    const newCardsListWeekModeLength = cardsListWeekModeLength.toString();
+    const newBlanksDifficulty = difficulty;
     const newVoiceName = selectedVoice;
 
-    if (currentCardsListLength !== newCardsListLength) {
-      setCookie(cardsListLengthCookie, newCardsListLength);
-      isSettingsChanged = true;
-    }
-
-    if (currentCardsListWeekModeLength !== newCardsListWeekModeLength) {
-      setCookie(cardsListWeekModeLengthCookie, newCardsListWeekModeLength);
+    if (currentBlanksDifficulty !== newBlanksDifficulty) {
+      setCookie(blanksDifficultyCookie, newBlanksDifficulty);
       isSettingsChanged = true;
     }
 
@@ -124,12 +132,10 @@ export function Settings() {
     <TooltipProvider delayDuration={200}>
       <Drawer
         onOpenChange={() => {
-          setCardsListLength(
-            Number(getCookie(cardsListLengthCookie)) || defaultCardsListLength,
-          );
-          setCardsListWeekModeLength(
-            Number(getCookie(cardsListWeekModeLengthCookie)) ||
-              defaultCardsListWeekModeLength,
+          const difficulty = getCookie(blanksDifficultyCookie);
+          setBlanksDifficulty(
+            difficultyOptions.find((item) => item.label === difficulty)
+              ?.value || 1,
           );
           setSelectedVoice(
             getCookie(voiceNameCookie) || defaultVoiceOption.name,
@@ -161,7 +167,7 @@ export function Settings() {
           <div className="mx-auto w-full max-w-sm">
             <DrawerHeader>
               <DrawerTitle>Settings</DrawerTitle>
-              <DrawerDescription>Customize cards behavior</DrawerDescription>
+              <DrawerDescription>Customize blanks behavior</DrawerDescription>
             </DrawerHeader>
             <div className="space-y-4 p-4">
               <div>
@@ -188,45 +194,23 @@ export function Settings() {
               </div>
 
               <div>
-                <Label htmlFor="random-mode-card-limit">
-                  Random mode card limit: {cardsListLength}
+                <Label htmlFor="blanks-difficulty">
+                  Blanks difficulty: {difficulty}
                 </Label>
                 <Slider
                   className="mt-2"
-                  id="random-mode-card-limit"
+                  id="blanks-difficulty"
                   onPointerMove={(e) => {
                     e.stopPropagation();
                   }}
-                  defaultValue={[defaultCardsListLength]}
-                  min={5}
-                  max={50}
+                  defaultValue={[1]}
+                  min={1}
+                  max={4}
                   step={1}
-                  value={[cardsListLength]}
+                  value={[blanksDifficulty]}
                   onValueChange={(value) => {
                     if (value?.[0]) {
-                      setCardsListLength(value[0]);
-                    }
-                  }}
-                />
-              </div>
-              <div>
-                <Label htmlFor="week-mode-card-limit">
-                  Week mode card limit: {cardsListWeekModeLength}
-                </Label>
-                <Slider
-                  className="mt-2"
-                  id="week-mode-card-limit"
-                  onPointerMove={(e) => {
-                    e.stopPropagation();
-                  }}
-                  defaultValue={[defaultCardsListWeekModeLength]}
-                  min={5}
-                  max={50}
-                  step={1}
-                  value={[cardsListWeekModeLength]}
-                  onValueChange={(value) => {
-                    if (value?.[0]) {
-                      setCardsListWeekModeLength(value[0]);
+                      setBlanksDifficulty(value[0]);
                     }
                   }}
                 />
