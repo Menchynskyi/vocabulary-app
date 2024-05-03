@@ -32,5 +32,6 @@ export enum BlanksDifficulty {
 
 export type SlotGrops = Array<{
   type: "char" | "separator" | "prefilled";
-  slots: Array<{ char: string; index: number }>;
+  groupId: string;
+  slots: Array<{ slotId: string; char: string; index: number }>;
 }>;

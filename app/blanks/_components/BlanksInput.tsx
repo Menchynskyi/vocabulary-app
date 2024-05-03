@@ -24,6 +24,7 @@ import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 import { areStringsEqualCaseInsensitive } from "@/utils/strings";
 import { REGEXP_ONLY_CHARS } from "input-otp";
 import { useMediaQuery } from "@/utils/useMediaQuery";
+import { cn } from "@/utils/tailwind";
 
 type BlanksInputProps = {
   wordObject: Omit<WordObject, "id">;
@@ -45,6 +46,7 @@ export function BlanksInput({
   const { isDesktop } = useMediaQuery();
 
   const [value, setValue] = useState("");
+  const [accuracy, setAccuracy] = useState(100);
   const ref = useRef<HTMLInputElement | null>(null);
 
   const revealLetter = () => {
@@ -65,6 +67,17 @@ export function BlanksInput({
   }, [nextCursor, push, value, pureString]);
 
   const handleInputChange = (newValue: string) => {
+    const isCorrect = areStringsEqualCaseInsensitive(
+      newValue[newValue.length - 1],
+      pureString[newValue.length - 1],
+    );
+    if (!isCorrect) {
+      setAccuracy((prev) => {
+        const newAccuracy = prev - prev / (100 / pureString.length);
+        return Math.round(newAccuracy * 100) / 100;
+      });
+    }
+
     setValue(newValue);
     if (areStringsEqualCaseInsensitive(newValue, pureString)) {
       ref.current?.blur();
@@ -114,17 +127,17 @@ export function BlanksInput({
         onChange={handleInputChange}
         pattern={REGEXP_ONLY_CHARS}
       >
-        {slotGroups.map((group, groupIndex) =>
+        {slotGroups.map((group) =>
           group.type === "char" ? (
-            <InputOTPGroup key={groupIndex + group.type}>
-              {group.slots.map(({ char, index }) => {
+            <InputOTPGroup key={group.type + group.groupId}>
+              {group.slots.map(({ char, index, slotId }) => {
                 const isCorrect = areStringsEqualCaseInsensitive(
                   value[index],
                   pureString[index],
                 );
                 return (
                   <InputOTPSlot
-                    key={char + index}
+                    key={char + slotId}
                     index={index}
                     isCorrect={value[index] ? isCorrect : undefined}
                   />
@@ -132,7 +145,7 @@ export function BlanksInput({
               })}
             </InputOTPGroup>
           ) : (
-            <Fragment key={groupIndex + group.type}>
+            <Fragment key={group.type + group.groupId}>
               {group.slots.map(({ char, index }) => (
                 <InputOTPSeparator key={char + index} char={char} />
               ))}
@@ -140,34 +153,61 @@ export function BlanksInput({
           ),
         )}
       </InputOTP>
-      {!!translation && (
-        <div className="mt-4 max-sm:text-center">
-          <span>{translation}</span>
-        </div>
-      )}
 
       {!isCompleted && (
-        <HintButtons
-          value={value}
-          word={wordObject.word}
-          difficulty={difficulty}
-          revealLetter={revealLetter}
-        />
+        <>
+          {!!translation && (
+            <div className="mt-4 max-sm:text-center">
+              <span>{translation}</span>
+            </div>
+          )}
+          <HintButtons
+            value={value}
+            word={wordObject.word}
+            difficulty={difficulty}
+            revealLetter={revealLetter}
+          />
+        </>
       )}
 
       {isCompleted && (
-        <Button
-          onClick={handleClickNext}
-          className="mt-10 w-full"
-          aria-label="Next word"
-          variant="outline"
-        >
-          Next word
-          <KeyboardShortcut
-            shortcut="↵"
-            className="ml-2 h-auto px-2 text-[14px]"
-          />
-        </Button>
+        <>
+          {wordObject.translation && (
+            <div className="mt-4 max-sm:text-center">
+              <span>Translation: {wordObject.translation}</span>
+            </div>
+          )}
+          {wordObject.meaning && (
+            <div
+              className={cn(
+                "mt-2 max-sm:text-center",
+                !wordObject.translation && "mt-4",
+              )}
+            >
+              <span>Meaning: {wordObject.meaning}</span>
+            </div>
+          )}
+          {wordObject.example && (
+            <div className="mt-2 max-sm:text-center">
+              <span>Example: {wordObject.example}</span>
+            </div>
+          )}
+          <div className="mt-2 max-sm:text-center">
+            <span>Accuracy: {accuracy}%</span>
+          </div>
+          <Button
+            onClick={handleClickNext}
+            className="mt-10 w-full"
+            aria-label="Next word"
+            variant="outline"
+          >
+            Next word
+            <KeyboardShortcut
+              shortcut="↵"
+              className="ml-2 h-auto px-2 text-[14px]"
+            />
+          </Button>
+        </>
       )}
     </div>
   );

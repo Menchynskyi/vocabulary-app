@@ -1,4 +1,5 @@
 import { BlanksDifficulty, SlotGrops } from "@/types";
+import { v4 as uuidv4 } from "uuid";
 
 const regexp = new RegExp("^[a-zA-Z]+$");
 
@@ -60,9 +61,11 @@ export const transformStringToSlotGroups = (
         const type = regexp.test(char) ? "char" : "separator";
         acc.push({
           type: isPrefilled ? "prefilled" : type,
+          groupId: uuidv4(),
           slots: [
             {
               char,
+              slotId: uuidv4(),
               index: type === "char" ? pureStringIndex : -1,
             },
           ],
@@ -77,10 +80,15 @@ export const transformStringToSlotGroups = (
         if (lastGroupType !== "separator") {
           acc.push({
             type: "separator",
-            slots: [{ char: modifiedChar, index: -1 }],
+            groupId: uuidv4(),
+            slots: [{ slotId: uuidv4(), char: modifiedChar, index: -1 }],
           });
         } else {
-          acc[acc.length - 1].slots.push({ char: modifiedChar, index: -1 });
+          acc[acc.length - 1].slots.push({
+            slotId: uuidv4(),
+            char: modifiedChar,
+            index: -1,
+          });
         }
         return acc;
       }
@@ -90,8 +98,10 @@ export const transformStringToSlotGroups = (
         if (lastGroupType !== "prefilled") {
           acc.push({
             type: "prefilled",
+            groupId: uuidv4(),
             slots: [
               {
+                slotId: uuidv4(),
                 char,
                 index: -1,
               },
@@ -100,6 +110,7 @@ export const transformStringToSlotGroups = (
         } else {
           acc[acc.length - 1].slots.push({
             char,
+            slotId: uuidv4(),
             index: -1,
           });
         }
@@ -110,9 +121,11 @@ export const transformStringToSlotGroups = (
       if (lastGroupType !== "char") {
         acc.push({
           type: "char",
+          groupId: uuidv4(),
           slots: [
             {
               char,
+              slotId: uuidv4(),
               index: pureStringIndex,
             },
           ],
@@ -120,6 +133,7 @@ export const transformStringToSlotGroups = (
       } else {
         acc[acc.length - 1].slots.push({
           char,
+          slotId: uuidv4(),
           index: pureStringIndex,
         });
       }
