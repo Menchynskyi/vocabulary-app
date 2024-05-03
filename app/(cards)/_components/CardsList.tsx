@@ -126,7 +126,8 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
       {
         key: "ArrowLeft",
         action: (e) => {
-          if (currentCardIndex !== 0) return;
+          console.log("test", currentCardIndex);
+          if (currentCardIndex === 0) return;
           e.preventDefault();
           switchCards(-1);
         },
@@ -134,7 +135,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
       {
         key: "ArrowRight",
         action: (e) => {
-          if (currentCardIndex < cards.length) return;
+          if (currentCardIndex >= cards.length) return;
           e.preventDefault();
           switchCards(1);
         },
