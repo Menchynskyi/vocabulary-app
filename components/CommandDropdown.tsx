@@ -12,7 +12,8 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/Tooltip";
 import { CardCommandsConfig } from "@/types";
 import { useMediaQuery } from "@/utils/useMediaQuery";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
+import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
 
 type CommandDropdownProps = {
   isPrimary?: boolean;
@@ -24,13 +25,35 @@ export function CommandDropdown({
   cardCommands,
 }: CommandDropdownProps) {
   const { isMobile } = useMediaQuery();
+  const [open, setOpen] = useState(false);
+
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        key: " ",
+        action: () => {
+          setOpen(false);
+        },
+      },
+    ],
+  });
 
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      open={open}
+      onOpenChange={() => {
+        setOpen((prev) => !prev);
+      }}
+    >
       <Tooltip>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
             <Button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setOpen((prev) => !prev);
+              }}
               aria-label="Commands"
               size="icon"
               variant="ghost"
