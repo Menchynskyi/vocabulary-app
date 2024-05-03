@@ -16,5 +16,5 @@ export const useMediaQuery = () => {
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  return { isMobile };
+  return { isMobile, isDesktop: !isMobile };
 };

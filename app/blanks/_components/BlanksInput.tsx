@@ -16,6 +16,7 @@ import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 import { areStringsEqualCaseInsensitive } from "@/utils/strings";
 import { REGEXP_ONLY_CHARS } from "input-otp";
+import { useMediaQuery } from "@/utils/useMediaQuery";
 
 type BlanksInputProps = {
   wordObject: Omit<WordObject, "id">;
@@ -32,6 +33,7 @@ export function BlanksInput({
 }: BlanksInputProps) {
   const { push } = useRouter();
   const isMounted = useIsMounted();
+  const { isDesktop } = useMediaQuery();
 
   const [value, setValue] = useState("");
   const ref = useRef<HTMLInputElement | null>(null);
@@ -92,7 +94,7 @@ export function BlanksInput({
     <div className="mt-6 min-w-[90vw] max-w-[90vw] flex-col overflow-hidden rounded-md border bg-background p-4 sm:mt-8 sm:min-w-[500px] sm:max-w-[500px] sm:px-10">
       <InputOTP
         ref={ref}
-        autoFocus
+        autoFocus={isDesktop}
         disabled={isCompleted}
         maxLength={pureString.length}
         value={value}

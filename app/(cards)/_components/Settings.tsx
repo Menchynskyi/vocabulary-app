@@ -160,7 +160,7 @@ export function Settings() {
         <DrawerContent>
           <div className="mx-auto w-full max-w-sm">
             <DrawerHeader>
-              <DrawerTitle>Cards settings</DrawerTitle>
+              <DrawerTitle>Settings</DrawerTitle>
               <DrawerDescription>Customize cards behavior</DrawerDescription>
             </DrawerHeader>
             <div className="space-y-4 p-4">
