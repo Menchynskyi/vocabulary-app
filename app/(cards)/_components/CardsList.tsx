@@ -126,7 +126,6 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
       {
         key: "ArrowLeft",
         action: (e) => {
-          console.log("test", currentCardIndex);
           if (currentCardIndex === 0) return;
           e.preventDefault();
           switchCards(-1);
