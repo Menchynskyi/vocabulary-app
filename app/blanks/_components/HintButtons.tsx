@@ -19,8 +19,9 @@ const getNumberOfRevealHints = (difficulty: BlanksDifficulty) => {
     case BlanksDifficulty.Hard:
       return 1;
     case BlanksDifficulty.Extreme:
-    default:
       return 0;
+    default:
+      return 3;
   }
 };
 
