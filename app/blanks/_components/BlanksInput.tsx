@@ -25,6 +25,8 @@ import { areStringsEqualCaseInsensitive } from "@/utils/strings";
 import { REGEXP_ONLY_CHARS } from "input-otp";
 import { useMediaQuery } from "@/utils/useMediaQuery";
 import { cn } from "@/utils/tailwind";
+import { createUserBlanksStats } from "@/server/db/queries";
+import { useUser } from "@clerk/nextjs";
 
 type BlanksInputProps = {
   wordObject: Omit<WordObject, "id">;
@@ -44,6 +46,7 @@ export function BlanksInput({
   const { push } = useRouter();
   const isMounted = useIsMounted();
   const { isDesktop } = useMediaQuery();
+  const { isSignedIn } = useUser();
 
   const [value, setValue] = useState("");
   const [accuracy, setAccuracy] = useState(100);
@@ -67,6 +70,7 @@ export function BlanksInput({
   }, [nextCursor, push, value, pureString]);
 
   const handleInputChange = (newValue: string) => {
+    console.log("newValue", newValue);
     const isCorrect = areStringsEqualCaseInsensitive(
       newValue[newValue.length - 1],
       pureString[newValue.length - 1],
@@ -79,8 +83,12 @@ export function BlanksInput({
     }
 
     setValue(newValue);
-    if (areStringsEqualCaseInsensitive(newValue, pureString)) {
-      ref.current?.blur();
+
+    if (!areStringsEqualCaseInsensitive(newValue, pureString)) return;
+
+    ref.current?.blur();
+    if (isSignedIn) {
+      createUserBlanksStats(accuracy);
     }
   };
 
@@ -146,8 +154,8 @@ export function BlanksInput({
             </InputOTPGroup>
           ) : (
             <Fragment key={group.type + group.groupId}>
-              {group.slots.map(({ char, index }) => (
-                <InputOTPSeparator key={char + index} char={char} />
+              {group.slots.map(({ char, slotId }) => (
+                <InputOTPSeparator key={char + slotId} char={char} />
               ))}
             </Fragment>
           ),

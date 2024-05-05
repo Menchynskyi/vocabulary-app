@@ -57,3 +57,13 @@
     @apply bg-zinc-50 text-foreground dark:bg-zinc-950;
   }
 }
+
+.cl-cardBox h1,
+.cl-cardBox span,
+.cl-cardBox p {
+  @apply text-foreground;
+}
+
+.cl-profileSectionItem img {
+  @apply dark:invert;
+}

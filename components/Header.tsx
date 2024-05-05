@@ -4,6 +4,7 @@ import { ThemeToggleButton } from "./ThemeToggleButton";
 import { GithubIcon } from "./icons/GithubIcon";
 import { NotionIcon } from "./icons/NotionIcon";
 import { buttonVariants } from "./ui/Button";
+import { UserProfileButton } from "./UserProfileButton";
 
 type HeaderProps = {
   children?: React.ReactNode;
@@ -40,6 +41,7 @@ export function Header({ children }: HeaderProps) {
             <GithubIcon className="h-[1.2rem] w-[1.2rem]" />
           </a>
         </div>
+        <UserProfileButton />
       </div>
     </header>
   );

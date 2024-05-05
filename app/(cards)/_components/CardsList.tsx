@@ -119,7 +119,6 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
       {
         key: " ",
         action: (e) => {
-          e.preventDefault();
           toggleCard();
         },
       },
