@@ -117,7 +117,6 @@ export async function updateWord(
   id: string,
   data: Partial<Omit<EditWordData, "notionId">>,
 ) {
-  console.log(data, "test");
   const user = auth();
   if (!user.userId) throw new Error("Unauthorized");
 
