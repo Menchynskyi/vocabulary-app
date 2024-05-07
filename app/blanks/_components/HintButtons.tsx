@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { getSynthesizedSpeech } from "@/server/gcp/queries";
 import { playBufferAudio } from "@/utils/playBufferAudio";
 import { cn } from "@/utils/tailwind";
-import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
+import { useKeyboardShortcuts } from "@/utils/keyboardShortcuts";
 import { toast } from "sonner";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 import { BlanksDifficulty } from "@/types";
@@ -74,16 +74,16 @@ export function HintButtons({
   useKeyboardShortcuts({
     shortcuts: [
       {
-        key: "p",
-        modifier: "ctrl",
+        scope: "blanks",
+        shortcut: "pronounceWord",
         action: (e) => {
           e.preventDefault();
           handlePronounce();
         },
       },
       {
-        key: "v",
-        modifier: "ctrl",
+        scope: "blanks",
+        shortcut: "revealLetter",
         action: (e) => {
           e.preventDefault();
           handleRevealLetter();
@@ -103,7 +103,11 @@ export function HintButtons({
         onClick={handleRevealLetter}
       >
         Reveal a letter
-        <KeyboardShortcut shortcut="V" withModifier className="ml-2 h-auto" />
+        <KeyboardShortcut
+          scope="blanks"
+          shortcut="revealLetter"
+          className="ml-2 h-auto"
+        />
       </Button>
       <Button
         aria-label="Pronounce"
@@ -113,7 +117,11 @@ export function HintButtons({
         onClick={handlePronounce}
       >
         Pronounce
-        <KeyboardShortcut shortcut="P" withModifier className="ml-2 h-auto" />
+        <KeyboardShortcut
+          scope="blanks"
+          shortcut="pronounceWord"
+          className="ml-2 h-auto"
+        />
       </Button>
     </div>
   );

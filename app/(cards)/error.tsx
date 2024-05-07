@@ -7,5 +7,5 @@ export default function Error() {
     if (typeof window === "undefined") return;
     window.location.reload();
   };
-  return <ErrorMessage retry={handleRetry} />;
+  return <ErrorMessage className="mt-16 sm:mt-36" retry={handleRetry} />;
 }

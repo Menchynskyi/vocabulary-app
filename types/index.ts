@@ -10,9 +10,12 @@ export type WordObject = {
   meaning: string;
   example: string;
   url: string;
+  notionId: string;
 };
 
 export type WordObjectFields = keyof WordObject;
+
+export type EditWordData = Omit<WordObject, "url" | "id">;
 
 export type CardCommandsConfig = Array<
   Array<{

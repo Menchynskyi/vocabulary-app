@@ -1,5 +1,5 @@
 import { Command } from "lucide-react";
-import { Button } from "./ui/Button";
+import { Button } from "../../../components/ui/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,12 +8,16 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
   DropdownMenuGroup,
-} from "./ui/DropdownMenu";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/Tooltip";
+} from "../../../components/ui/DropdownMenu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "../../../components/ui/Tooltip";
 import { CardCommandsConfig } from "@/types";
 import { useMediaQuery } from "@/utils/useMediaQuery";
 import { Fragment, useState } from "react";
-import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
+import { useKeyboardShortcuts } from "@/utils/keyboardShortcuts";
 
 type CommandDropdownProps = {
   isPrimary?: boolean;
@@ -30,7 +34,9 @@ export function CommandDropdown({
   useKeyboardShortcuts({
     shortcuts: [
       {
-        key: " ",
+        // Close the dropdown on toggleCard
+        scope: "cards",
+        shortcut: "flipCard",
         action: () => {
           setOpen(false);
         },

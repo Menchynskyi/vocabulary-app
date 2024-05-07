@@ -5,6 +5,7 @@ import { GithubIcon } from "./icons/GithubIcon";
 import { NotionIcon } from "./icons/NotionIcon";
 import { buttonVariants } from "./ui/Button";
 import { UserProfileButton } from "./UserProfileButton";
+import { MobileNavigation } from "./MobileNavigation";
 
 type HeaderProps = {
   children?: React.ReactNode;
@@ -17,15 +18,20 @@ export function Header({ children }: HeaderProps) {
         <a
           aria-label="Notion page"
           href={process.env.NEXT_PUBLIC_NOTION_PAGE_URL}
-          className={buttonVariants({ variant: "ghost", size: "icon" })}
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "icon" }),
+            "hidden md:flex",
+          )}
           target="_blank"
           rel="noreferrer"
         >
           <NotionIcon className="h-[1.4rem] w-[1.4rem] transition-all" />
         </a>
-        <Navigation />
 
-        <div className="flex items-center">
+        <Navigation />
+        <MobileNavigation />
+
+        <div className="flex items-center max-md:ml-auto">
           {children}
           <ThemeToggleButton />
           <a

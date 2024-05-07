@@ -129,6 +129,7 @@ export const parseWordResponse = (
     translation,
     meaning,
     example,
+    notionId: response.id,
     url: response.url,
   };
 };

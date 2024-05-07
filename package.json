@@ -13,6 +13,7 @@
   "dependencies": {
     "@clerk/nextjs": "^5.0.6",
     "@google-cloud/text-to-speech": "^5.2.0",
+    "@hookform/resolvers": "^3.3.4",
     "@notionhq/client": "^2.2.3",
     "@radix-ui/react-context-menu": "^2.1.5",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -35,11 +36,13 @@
     "next-themes": "^0.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.51.4",
     "sonner": "^1.4.41",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^9.0.1",
-    "vaul": "^0.9.0"
+    "vaul": "^0.9.0",
+    "zod": "^3.23.6"
   },
   "devDependencies": {
     "@types/react": "^18.2.47",

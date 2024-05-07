@@ -48,7 +48,7 @@ export function AuthProvider({ children, ...props }: NextClerkProviderProps) {
           footerActionText: "text-muted-foreground",
           footerActionLink: "text-foreground hover:text-primary",
           socialButtonsProviderIcon__github: "dark:invert",
-          modalBackdrop: "bg-black bg-opacity-80",
+          modalBackdrop: "bg-black bg-opacity-80 overflow-hidden",
           userButtonTrigger:
             "!focus:outline-none !shadow-none !focus:shadow-none mx-auto",
           userButtonPopoverFooter: "hidden",

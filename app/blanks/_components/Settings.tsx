@@ -38,7 +38,7 @@ import {
   voiceNameCookie,
   voiceOptions,
 } from "@/constants/voice";
-import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
+import { useKeyboardShortcuts } from "@/utils/keyboardShortcuts";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 import { blanksDifficultyCookie } from "@/constants/blanks";
 import { settingsButtonId } from "@/constants";
@@ -118,8 +118,8 @@ export function Settings() {
   useKeyboardShortcuts({
     shortcuts: [
       {
-        key: "s",
-        modifier: "ctrl",
+        scope: "global",
+        shortcut: "toggleSettings",
         action: (e) => {
           e.preventDefault();
           ref.current?.click();
@@ -159,7 +159,11 @@ export function Settings() {
           <TooltipContent side="bottom">
             <p>
               Settings
-              <KeyboardShortcut className="ml-2" shortcut="S" withModifier />
+              <KeyboardShortcut
+                className="ml-2"
+                scope="global"
+                shortcut="toggleSettings"
+              />
             </p>
           </TooltipContent>
         </Tooltip>

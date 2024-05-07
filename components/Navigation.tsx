@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 export function Navigation() {
   const pathname = usePathname();
   return (
-    <nav className="ml-4 mr-auto flex items-center">
+    <nav className="ml-4 mr-auto hidden items-center md:flex ">
       <Link
         href="/"
         aria-label="Cards page"
@@ -15,7 +15,7 @@ export function Navigation() {
           "text-sm text-muted-foreground transition-colors hover:text-muted-foreground/60",
           {
             "text-foreground hover:text-foreground/60 max-sm:hover:text-foreground":
-              pathname === "/",
+              pathname === "/" || pathname.startsWith("/edit-card"),
           },
         )}
       >

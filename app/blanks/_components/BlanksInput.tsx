@@ -19,7 +19,7 @@ import {
 } from "react";
 import { HintButtons } from "./HintButtons";
 import { useIsMounted } from "@/utils/useIsMounted";
-import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
+import { useKeyboardShortcuts } from "@/utils/keyboardShortcuts";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 import { areStringsEqualCaseInsensitive } from "@/utils/strings";
 import { REGEXP_ONLY_CHARS } from "input-otp";
@@ -70,7 +70,6 @@ export function BlanksInput({
   }, [nextCursor, push, value, pureString]);
 
   const handleInputChange = (newValue: string) => {
-    console.log("newValue", newValue);
     const isCorrect = areStringsEqualCaseInsensitive(
       newValue[newValue.length - 1],
       pureString[newValue.length - 1],
@@ -101,7 +100,8 @@ export function BlanksInput({
   useKeyboardShortcuts({
     shortcuts: [
       {
-        key: "Enter",
+        scope: "blanks",
+        shortcut: "nextWord",
         action: (e) => {
           e.preventDefault();
           handleClickNext();
@@ -211,7 +211,8 @@ export function BlanksInput({
           >
             Next word
             <KeyboardShortcut
-              shortcut="↵"
+              scope="blanks"
+              shortcut="nextWord"
               className="ml-2 h-auto px-2 text-[14px]"
             />
           </Button>

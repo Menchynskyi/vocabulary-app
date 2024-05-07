@@ -28,7 +28,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { GithubIcon } from "@/components/icons/GithubIcon";
 import { NotionIcon } from "@/components/icons/NotionIcon";
-import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
+import {
+  getShortcutDisplayName,
+  useKeyboardShortcuts,
+} from "@/utils/keyboardShortcuts";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 import { settingsButtonId } from "@/constants";
 import {
@@ -109,23 +112,16 @@ export function CommandMenu() {
   useKeyboardShortcuts({
     shortcuts: [
       {
-        key: "k",
-        modifier: "ctrl",
+        scope: "global",
+        shortcut: "toggleCommandMenu",
         action: (e) => {
           e.preventDefault();
           setOpen((open) => !open);
         },
       },
       {
-        key: "/",
-        action: (e) => {
-          e.preventDefault();
-          setOpen((open) => !open);
-        },
-      },
-      {
-        key: "x",
-        modifier: "ctrl",
+        scope: "global",
+        shortcut: "toggleTheme",
         action: (e) => {
           e.preventDefault();
           toggleTheme();
@@ -148,7 +144,7 @@ export function CommandMenu() {
         <span className="hidden pr-2 text-sm text-muted-foreground sm:inline">
           Search commands...
         </span>
-        <KeyboardShortcut shortcut="K" withModifier />
+        <KeyboardShortcut scope="global" shortcut="toggleCommandMenu" />
         <Search className="h-4 w-4 sm:hidden" />
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
@@ -159,12 +155,16 @@ export function CommandMenu() {
             <CommandItem onSelect={closeAfterDecorator(toggleTheme)}>
               {themeIcon}
               <span>{`Toggle theme`}</span>
-              <CommandShortcut className="hidden sm:block">⌘+X</CommandShortcut>
+              <CommandShortcut className="hidden sm:block">
+                {getShortcutDisplayName("global", "toggleTheme")}
+              </CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={closeAfterDecorator(openSettings)}>
               <SettingsIcon className="mr-2 h-4 w-4" />
               <span>Settings</span>
-              <CommandShortcut className="hidden sm:block">⌘+S</CommandShortcut>
+              <CommandShortcut className="hidden sm:block">
+                {getShortcutDisplayName("global", "toggleSettings")}
+              </CommandShortcut>
             </CommandItem>
           </CommandGroup>
 
