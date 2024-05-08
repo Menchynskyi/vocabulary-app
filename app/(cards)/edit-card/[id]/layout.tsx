@@ -6,8 +6,8 @@ type EditCardLayoutProps = {
 
 export default function EditCardLayout({ children }: EditCardLayoutProps) {
   return (
-    <div className="mt-12 max-sm:w-[90vw] sm:min-w-[400px]">
-      <h1 className="mb-8 text-2xl font-semibold">Edit card</h1>
+    <div className="mt-8 max-sm:w-[90vw] sm:mt-12 sm:min-w-[400px]">
+      <h1 className="mb-6 text-2xl font-semibold sm:mb-8">Edit card</h1>
       {children}
     </div>
   );
