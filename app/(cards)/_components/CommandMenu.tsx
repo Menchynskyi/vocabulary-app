@@ -46,12 +46,16 @@ import {
   useKeyboardShortcuts,
 } from "@/utils/keyboardShortcuts";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
+import { useMediaQuery } from "@/utils/useMediaQuery";
+import { useIsMounted } from "@/utils/useIsMounted";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const dispatch = useContext(CardsDispatchContext);
 
+  const { isMobile } = useMediaQuery();
+  const isMounted = useIsMounted();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace, push } = useRouter();
@@ -190,19 +194,21 @@ export function CommandMenu() {
 
   return (
     <>
-      <Button
-        onClick={() => setOpen(true)}
-        variant="outline"
-        size="sm"
-        className="mr-2"
-        aria-label="Open command menu"
-      >
-        <span className="hidden pr-2 text-sm text-muted-foreground sm:inline">
-          Search commands...
-        </span>
-        <KeyboardShortcut scope="global" shortcut="toggleCommandMenu" />
-        <Search className="h-4 w-4 sm:hidden" />
-      </Button>
+      {isMounted && (
+        <Button
+          onClick={() => setOpen(true)}
+          variant={isMobile ? "ghost" : "outline"}
+          size="sm"
+          className="max-sm:h-full sm:mr-2"
+          aria-label="Open command menu"
+        >
+          <span className="hidden pr-2 text-sm text-muted-foreground sm:inline">
+            Search commands...
+          </span>
+          <KeyboardShortcut scope="global" shortcut="toggleCommandMenu" />
+          <Search className="h-4 w-4 sm:hidden" />
+        </Button>
+      )}
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>

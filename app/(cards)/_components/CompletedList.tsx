@@ -13,7 +13,7 @@ export function CompletedList({ cards, startOver }: CompletedListProps) {
   const dispatch = useContext(CardsDispatchContext);
   return (
     <div className="flex flex-col">
-      <ScrollArea className="h-[400px] min-w-[90vw] max-w-[90vw] rounded-md border sm:h-[450px] sm:min-w-[450px] sm:max-w-[500px] ">
+      <ScrollArea className="h-[340px] min-w-[90vw] max-w-[90vw] rounded-md border sm:h-[450px] sm:min-w-[450px] sm:max-w-[500px] ">
         {cards.map(({ id, word, translation, meaning, example }) => (
           <div key={id} className="p-4 text-lg [&:not(:last-of-type)]:border-b">
             <div>
