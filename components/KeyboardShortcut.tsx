@@ -1,16 +1,23 @@
+import {
+  ShortcutsScope,
+  shortcuts,
+  Shortcut,
+  ScopeShortcuts,
+} from "@/utils/keyboardShortcuts";
 import { cn } from "@/utils/tailwind";
 
-type KeyboardShortcutProps = {
-  shortcut: string;
-  withModifier?: boolean;
+type KeyboardShortcutProps<T extends ShortcutsScope> = {
+  scope: T;
+  shortcut: ScopeShortcuts<T>;
   className?: string;
 };
 
-export function KeyboardShortcut({
+export function KeyboardShortcut<T extends ShortcutsScope>({
+  scope,
   shortcut,
   className = "",
-  withModifier = false,
-}: KeyboardShortcutProps) {
+}: KeyboardShortcutProps<T>) {
+  const { withModifier, displayName } = shortcuts[scope][shortcut] as Shortcut;
   return (
     <kbd
       className={cn(
@@ -19,7 +26,7 @@ export function KeyboardShortcut({
       )}
     >
       {withModifier && <span className="text-xs">⌘</span>}
-      {shortcut}
+      {displayName}
     </kbd>
   );
 }

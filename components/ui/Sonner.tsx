@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Toaster as Sonner } from "sonner";
 
@@ -19,6 +20,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
           actionButton: "!bg-primary !text-primary-foreground",
           cancelButton: "!bg-muted !text-muted-foreground",
         },
+      }}
+      icons={{
+        loading: <Loader2 className="h-4 w-4 animate-spin" />,
       }}
       {...props}
     />

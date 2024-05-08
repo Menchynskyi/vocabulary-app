@@ -1,15 +1,20 @@
 "use client";
 
+import { EditWordData } from "@/types";
 import { Dispatch, createContext, useReducer } from "react";
 
 type CardsState = {
   flipMode: boolean;
+  editWordData: EditWordData | null;
 };
 
-type CardsAction = { type: "toggle_flip_mode" };
+type CardsAction =
+  | { type: "toggle_flip_mode" }
+  | { type: "set_edit_word_data"; payload: EditWordData };
 
 const initialState: CardsState = {
   flipMode: false,
+  editWordData: null,
 };
 
 function reducer(state: CardsState, action: CardsAction): CardsState {
@@ -18,6 +23,12 @@ function reducer(state: CardsState, action: CardsAction): CardsState {
       return {
         ...state,
         flipMode: !state.flipMode,
+      };
+    }
+    case "set_edit_word_data": {
+      return {
+        ...state,
+        editWordData: action.payload,
       };
     }
     default:

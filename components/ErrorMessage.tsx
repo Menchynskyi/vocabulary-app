@@ -1,14 +1,16 @@
 import { AlertCircle } from "lucide-react";
 import { Button } from "./ui/Button";
 import { Alert, AlertDescription, AlertTitle } from "./ui/Alert";
+import { cn } from "@/utils/tailwind";
 
 type ErrorMessageProps = {
   retry?: () => void;
+  className?: string;
 };
 
-export function ErrorMessage({ retry }: ErrorMessageProps) {
+export function ErrorMessage({ retry, className }: ErrorMessageProps) {
   return (
-    <div className="px-8">
+    <div className={cn("px-8", className)}>
       <Alert variant="destructive" className="max-sm:min-w-[90vw]">
         <div className="flex items-center">
           <AlertCircle className="h-8 w-8" />

@@ -12,10 +12,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/Tooltip";
-import { CommandDropdown } from "@/components/CommandDropdown";
-import { CommandContextMenu } from "@/components/CommandContextMenu";
-import { toast } from "sonner";
+import { CommandDropdown } from "./CommandDropdown";
+import { CommandContextMenu } from "./CommandContextMenu";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
+import { toast } from "sonner";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { getShortcutDisplayName } from "@/utils/keyboardShortcuts";
+
+const meaningModes: Array<WordObjectFields> = [
+  "translation",
+  "meaning",
+  "example",
+];
 
 type CardProps = {
   loading: boolean;
@@ -25,6 +34,7 @@ type CardProps = {
   isMeaningVisible: boolean;
   nextCard: () => void;
   prevCard: () => void;
+  handleEditWord: () => void;
 };
 
 export function Card({
@@ -35,7 +45,11 @@ export function Card({
   isMeaningVisible,
   nextCard,
   prevCard,
+  handleEditWord,
 }: CardProps) {
+  const { isSignedIn } = useAuth();
+  const { push } = useRouter();
+
   const [meaningMode, setMeaningMode] =
     useState<WordObjectFields>("translation");
 
@@ -59,7 +73,7 @@ export function Card({
   const avaialbleMeaningModes = Object.entries(card)
     .filter(
       ([key, value]) =>
-        !!value && key !== "word" && key !== "id" && key !== "url",
+        !!value && meaningModes.includes(key as WordObjectFields),
     )
     .map(([key]) => key) as WordObjectFields[];
   const isOnlyOneMeaningType = avaialbleMeaningModes.length === 1;
@@ -108,34 +122,35 @@ export function Card({
     [
       {
         label: "Flip card",
-        shortcut: "Space",
+        shortcut: getShortcutDisplayName("cards", "flipCard"),
         onSelect: toggleCard,
       },
       {
         label: "Next card",
-        shortcut: "→",
+        shortcut: getShortcutDisplayName("cards", "nextCard"),
         onSelect: nextCard,
       },
       {
         label: "Previous card",
-        shortcut: "←",
+        shortcut: getShortcutDisplayName("cards", "prevCard"),
         onSelect: prevCard,
       },
       {
         label: "Pronounce",
-        shortcut: "⌘+P",
+        shortcut: getShortcutDisplayName("cards", "pronounceWord"),
         onSelect: playWord as () => void,
       },
     ],
     [
       {
         label: "Edit",
-        shortcut: "⌘+E",
-        disabled: true,
+        shortcut: getShortcutDisplayName("cards", "editWord"),
+        disabled: !isSignedIn,
+        onSelect: handleEditWord,
       },
       {
         label: "Copy",
-        shortcut: "⌘+C",
+        shortcut: getShortcutDisplayName("cards", "copyCard"),
         onSelect: () => {
           const text = `${card.word} - ${meaning}`;
           navigator.clipboard.writeText(text);
@@ -215,8 +230,8 @@ export function Card({
                     <TooltipContent side="left" className="flex flex-nowrap">
                       <p>Pronounce</p>
                       <KeyboardShortcut
-                        shortcut="P"
-                        withModifier
+                        scope="cards"
+                        shortcut="pronounceWord"
                         className="ml-2"
                       />
                     </TooltipContent>

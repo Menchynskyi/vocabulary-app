@@ -6,7 +6,7 @@ import {
   ContextMenuShortcut,
   ContextMenuGroup,
   ContextMenuTrigger,
-} from "./ui/ContextMenu";
+} from "../../../components/ui/ContextMenu";
 import { CardCommandsConfig } from "@/types";
 import { Fragment } from "react";
 

@@ -3,7 +3,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Card } from "./Card";
 import { VocabularyMode, WordObject } from "@/types";
-import { CardsContext } from "./CardsContext";
+import { CardsContext, CardsDispatchContext } from "./CardsContext";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { CompletedList } from "./CompletedList";
@@ -11,7 +11,9 @@ import { voiceChangeCustomEventName } from "@/constants/voice";
 import { toast } from "sonner";
 import { getSynthesizedSpeech } from "@/server/gcp/queries";
 import { playBufferAudio } from "@/utils/playBufferAudio";
-import { useKeyboardShortcuts } from "@/utils/useKeyboardShortcuts";
+import { useKeyboardShortcuts } from "@/utils/keyboardShortcuts";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 
 type CardsListProps = {
   cards: WordObject[];
@@ -19,7 +21,10 @@ type CardsListProps = {
 };
 
 export function CardsList({ cards, vocabularyMode }: CardsListProps) {
+  const { isSignedIn } = useAuth();
   const { flipMode } = useContext(CardsContext);
+  const dispatch = useContext(CardsDispatchContext);
+  const { push } = useRouter();
 
   const [isMeaningVisible, setIsMeaningVisible] = useState(flipMode);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -33,6 +38,19 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
   const toggleCard = useCallback(() => {
     setIsMeaningVisible((prev) => !prev);
   }, []);
+
+  const handleEditWord = useCallback(() => {
+    if (currentCardIndex >= cards.length || !isSignedIn) return;
+
+    const { notionId, word, translation, meaning, example } =
+      cards[currentCardIndex];
+    dispatch({
+      type: "set_edit_word_data",
+      payload: { notionId, word, translation, meaning, example },
+    });
+    push(`/edit-card/${notionId}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cards, currentCardIndex]);
 
   useEffect(() => {
     setIsMeaningVisible(flipMode);
@@ -117,13 +135,15 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
   useKeyboardShortcuts({
     shortcuts: [
       {
-        key: " ",
+        scope: "cards",
+        shortcut: "flipCard",
         action: (e) => {
           toggleCard();
         },
       },
       {
-        key: "ArrowLeft",
+        scope: "cards",
+        shortcut: "prevCard",
         action: (e) => {
           if (currentCardIndex === 0) return;
           e.preventDefault();
@@ -131,7 +151,8 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
         },
       },
       {
-        key: "ArrowRight",
+        scope: "cards",
+        shortcut: "nextCard",
         action: (e) => {
           if (currentCardIndex >= cards.length) return;
           e.preventDefault();
@@ -139,8 +160,8 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
         },
       },
       {
-        key: "p",
-        modifier: "ctrl",
+        scope: "cards",
+        shortcut: "pronounceWord",
         action: (e) => {
           if (isCompleted) return;
           e.preventDefault();
@@ -148,8 +169,8 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
         },
       },
       {
-        key: "c",
-        modifier: "ctrl",
+        scope: "cards",
+        shortcut: "copyCard",
         action: (e) => {
           if (isCompleted) return;
           e.preventDefault();
@@ -164,6 +185,14 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
           });
         },
       },
+      {
+        scope: "cards",
+        shortcut: "editWord",
+        action: (e) => {
+          e.preventDefault();
+          handleEditWord();
+        },
+      },
     ],
     deps: [
       currentCardIndex,
@@ -172,6 +201,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
       playWord,
       cards,
       isCompleted,
+      handleEditWord,
     ],
   });
 
@@ -183,7 +213,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
       : undefined;
 
   return (
-    <>
+    <div className="mt-16 sm:mt-36">
       {noCardsMessage ? (
         <span className="text-2xl sm:text-4xl">{noCardsMessage}</span>
       ) : null}
@@ -209,6 +239,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
             playWord={playWord}
             card={currentCard}
             toggleCard={toggleCard}
+            handleEditWord={handleEditWord}
             isMeaningVisible={isMeaningVisible}
           />
           <Button
@@ -245,6 +276,6 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
