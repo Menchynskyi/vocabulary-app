@@ -6,7 +6,6 @@ import {
   Laptop,
   Triangle,
   Layers3,
-  Search,
   SettingsIcon,
   AudioWaveform,
   AudioLines,
@@ -23,7 +22,6 @@ import {
 } from "@/components/ui/Command";
 import { useCallback, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { GithubIcon } from "@/components/icons/GithubIcon";
@@ -32,7 +30,6 @@ import {
   getShortcutDisplayName,
   useKeyboardShortcuts,
 } from "@/utils/keyboardShortcuts";
-import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 import { settingsButtonId } from "@/constants";
 import {
   VoiceLanguageCode,
@@ -42,6 +39,7 @@ import {
   voiceOptions,
 } from "@/constants/voice";
 import { getCookie, setCookie } from "cookies-next";
+import { CommandMenuTrigger } from "@/components/CommandMenuButton";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
@@ -134,19 +132,7 @@ export function CommandMenu() {
 
   return (
     <>
-      <Button
-        aria-label="Open command menu"
-        onClick={() => setOpen(true)}
-        variant="outline"
-        size="sm"
-        className="mr-2"
-      >
-        <span className="hidden pr-2 text-sm text-muted-foreground sm:inline">
-          Search commands...
-        </span>
-        <KeyboardShortcut scope="global" shortcut="toggleCommandMenu" />
-        <Search className="h-4 w-4 sm:hidden" />
-      </Button>
+      <CommandMenuTrigger onOpen={() => setOpen(true)} />
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>

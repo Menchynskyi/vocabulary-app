@@ -8,7 +8,6 @@ import {
   Triangle,
   Wand,
   RefreshCcw,
-  Search,
   AudioWaveform,
   AudioLines,
   SettingsIcon,
@@ -25,7 +24,6 @@ import {
 } from "@/components/ui/Command";
 import { useCallback, useContext, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/Button";
 import { CardsDispatchContext } from "./CardsContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { VocabularyMode } from "@/types";
@@ -45,17 +43,13 @@ import {
   getShortcutDisplayName,
   useKeyboardShortcuts,
 } from "@/utils/keyboardShortcuts";
-import { KeyboardShortcut } from "@/components/KeyboardShortcut";
-import { useMediaQuery } from "@/utils/useMediaQuery";
-import { useIsMounted } from "@/utils/useIsMounted";
+import { CommandMenuTrigger } from "@/components/CommandMenuButton";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const dispatch = useContext(CardsDispatchContext);
 
-  const { isMobile } = useMediaQuery();
-  const isMounted = useIsMounted();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace, push } = useRouter();
@@ -194,21 +188,7 @@ export function CommandMenu() {
 
   return (
     <>
-      {isMounted && (
-        <Button
-          onClick={() => setOpen(true)}
-          variant={isMobile ? "ghost" : "outline"}
-          size="sm"
-          className="max-sm:h-full sm:mr-2"
-          aria-label="Open command menu"
-        >
-          <span className="hidden pr-2 text-sm text-muted-foreground sm:inline">
-            Search commands...
-          </span>
-          <KeyboardShortcut scope="global" shortcut="toggleCommandMenu" />
-          <Search className="h-4 w-4 sm:hidden" />
-        </Button>
-      )}
+      <CommandMenuTrigger onOpen={() => setOpen(true)} />
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>

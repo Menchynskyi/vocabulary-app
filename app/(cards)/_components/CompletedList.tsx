@@ -25,11 +25,11 @@ export function CompletedList({ cards, startOver }: CompletedListProps) {
           </div>
         ))}
       </ScrollArea>
-      <div className="mt-10 flex justify-between max-sm:flex-col sm:mt-4">
+      <div className="mt-10 flex flex-col justify-between gap-2 sm:mt-4 sm:flex-row">
         <Button
           aria-label="Start over"
           variant="outline"
-          className="max-sm:h-14 max-sm:text-lg sm:mr-3 sm:min-w-[6.125rem] sm:px-8"
+          className="w-full"
           onClick={startOver}
         >
           <span>Start over</span>
@@ -40,7 +40,7 @@ export function CompletedList({ cards, startOver }: CompletedListProps) {
             dispatch({ type: "toggle_flip_mode" });
             startOver();
           }}
-          className="max-sm:mt-4 max-sm:h-14 max-sm:text-lg sm:min-w-[6.125rem] sm:px-8"
+          className="w-full"
         >
           <span>Flip and start over</span>
         </Button>

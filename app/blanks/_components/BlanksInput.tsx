@@ -27,6 +27,8 @@ import { useMediaQuery } from "@/utils/useMediaQuery";
 import { cn } from "@/utils/tailwind";
 import { createUserBlanksStats } from "@/server/db/queries";
 import { useUser } from "@clerk/nextjs";
+import { ScrollBar } from "@/components/ui/ScrollArea";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 
 type BlanksInputProps = {
   wordObject: Omit<WordObject, "id">;
@@ -126,41 +128,43 @@ export function BlanksInput({
 
   return (
     <div className="mt-6 min-w-[90vw] max-w-[90vw] flex-col overflow-hidden rounded-md border bg-background p-4 sm:mt-8 sm:min-w-[500px] sm:max-w-[500px] sm:px-10">
-      <InputOTP
-        ref={ref}
-        autoFocus={isDesktop}
-        disabled={isCompleted}
-        maxLength={pureString.length}
-        value={value}
-        onChange={handleInputChange}
-        pattern={REGEXP_ONLY_CHARS}
-      >
-        {slotGroups.map((group) =>
-          group.type === "char" ? (
-            <InputOTPGroup key={group.type + group.groupId}>
-              {group.slots.map(({ char, index, slotId }) => {
-                const isCorrect = areStringsEqualCaseInsensitive(
-                  value[index],
-                  pureString[index],
-                );
-                return (
-                  <InputOTPSlot
-                    key={char + slotId}
-                    index={index}
-                    isCorrect={value[index] ? isCorrect : undefined}
-                  />
-                );
-              })}
-            </InputOTPGroup>
-          ) : (
-            <Fragment key={group.type + group.groupId}>
-              {group.slots.map(({ char, slotId }) => (
-                <InputOTPSeparator key={char + slotId} char={char} />
-              ))}
-            </Fragment>
-          ),
-        )}
-      </InputOTP>
+      <ScrollArea className="max-h-[200px] overflow-y-auto p-1">
+        <InputOTP
+          ref={ref}
+          autoFocus={isDesktop}
+          disabled={isCompleted}
+          maxLength={pureString.length}
+          value={value}
+          onChange={handleInputChange}
+          pattern={REGEXP_ONLY_CHARS}
+        >
+          {slotGroups.map((group) =>
+            group.type === "char" ? (
+              <InputOTPGroup key={group.type + group.groupId}>
+                {group.slots.map(({ char, index, slotId }) => {
+                  const isCorrect = areStringsEqualCaseInsensitive(
+                    value[index],
+                    pureString[index],
+                  );
+                  return (
+                    <InputOTPSlot
+                      key={char + slotId}
+                      index={index}
+                      isCorrect={value[index] ? isCorrect : undefined}
+                    />
+                  );
+                })}
+              </InputOTPGroup>
+            ) : (
+              <Fragment key={group.type + group.groupId}>
+                {group.slots.map(({ char, slotId }) => (
+                  <InputOTPSeparator key={char + slotId} char={char} />
+                ))}
+              </Fragment>
+            ),
+          )}
+        </InputOTP>
+      </ScrollArea>
 
       {!isCompleted && (
         <>

@@ -165,7 +165,7 @@ export function EditCardForm({
             </FormItem>
           )}
         />
-        <div className="flex flex-col gap-4 sm:flex-row">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Button
             type="button"
             variant="secondary"
@@ -176,7 +176,7 @@ export function EditCardForm({
             Cancel
           </Button>
           <Button type="submit" disabled={disabled} className="w-full ">
-            Edit
+            Save
           </Button>
         </div>
       </form>

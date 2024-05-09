@@ -17,7 +17,11 @@ const InputOTP = React.forwardRef<
     )}
     className={cn("!opacity-0 disabled:cursor-not-allowed", className)}
     inputMode="text"
-    spellCheck="false"
+    spellCheck={false}
+    lang="en"
+    autoCapitalize="off"
+    autoComplete="off"
+    autoCorrect="off"
     {...props}
   />
 ));

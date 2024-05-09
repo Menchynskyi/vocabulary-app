@@ -222,13 +222,13 @@ export function Settings() {
             </div>
             <DrawerFooter>
               <DrawerClose asChild>
-                <Button aria-label="Save settings" onClick={handleSaveSettings}>
-                  Save
+                <Button aria-label="Cancel" variant="outline">
+                  Cancel
                 </Button>
               </DrawerClose>
               <DrawerClose asChild>
-                <Button aria-label="Cancel" variant="outline">
-                  Cancel
+                <Button aria-label="Save settings" onClick={handleSaveSettings}>
+                  Save
                 </Button>
               </DrawerClose>
             </DrawerFooter>

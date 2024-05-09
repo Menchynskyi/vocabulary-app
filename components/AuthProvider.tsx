@@ -43,7 +43,7 @@ export function AuthProvider({ children, ...props }: NextClerkProviderProps) {
           headerTitle: "text-foreground",
           headerSubtitle: "text-muted-foreground",
           modalCloseButton:
-            "text-foreground hover:text-muted-foreground opacity-70 hover:opacity-100 !shadow-none transition-opacity !focus-shadow-none hover:bg-background",
+            "text-foreground hover:text-muted-foreground opacity-70 hover:opacity-100 !shadow-none transition-opacity !focus-shadow-none hover:bg-background [&>svg]:h-2.5 [&>svg]:w-2.5",
           footer: "[&>*:last-child]:hidden bg-background bg-none",
           footerActionText: "text-muted-foreground",
           footerActionLink: "text-foreground hover:text-primary",
@@ -69,6 +69,8 @@ export function AuthProvider({ children, ...props }: NextClerkProviderProps) {
           navbarButton:
             "[&.cl-active]:bg-background sm:hover:[&.cl-active]:bg-muted sm:hover:bg-muted text-foreground max-md:[&.cl-active]:bg-muted",
           scrollBox: "bg-background shadow-none rounded-none",
+          pageScrollBox: "!max-h-[calc(100vh-8rem)]",
+          profileSection__danger: "pb-14",
           navbarMobileMenuRow: "bg-none bg-background border-b border-red-500",
           navbarMobileMenuButton:
             "text-foreground !focus:shadow-none !shadow-none hover:text-foreground",
