@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  Moon,
-  Sun,
-  Laptop,
-  Triangle,
-  Layers3,
-  SettingsIcon,
-  AudioWaveform,
   AudioLines,
+  AudioWaveform,
+  Laptop,
+  Layers3,
+  Moon,
+  SettingsIcon,
+  Sun,
+  Triangle,
 } from "lucide-react";
 import {
   CommandDialog,

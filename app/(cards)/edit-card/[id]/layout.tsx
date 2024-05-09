@@ -1,5 +1,3 @@
-import { Header } from "@/components/Header";
-
 type EditCardLayoutProps = {
   children: React.ReactNode;
 };

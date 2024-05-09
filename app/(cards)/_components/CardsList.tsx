@@ -137,7 +137,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
       {
         scope: "cards",
         shortcut: "flipCard",
-        action: (e) => {
+        action: () => {
           toggleCard();
         },
       },

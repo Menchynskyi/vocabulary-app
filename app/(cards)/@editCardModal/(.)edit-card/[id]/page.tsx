@@ -4,9 +4,9 @@ import { CardsContext } from "@/app/(cards)/_components/CardsContext";
 import { EditCardForm } from "@/app/(cards)/_components/EditCardForm";
 import {
   Dialog,
-  DialogHeader,
   DialogContent,
   DialogDescription,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/Dialog";
 import { useRouter } from "next/navigation";

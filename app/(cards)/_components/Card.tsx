@@ -5,7 +5,7 @@ import { isTextToSpeechEnabled } from "@/constants";
 import { CardCommandsConfig, WordObject, WordObjectFields } from "@/types";
 import { cn } from "@/utils/tailwind";
 import { Button } from "@/components/ui/Button";
-import { AudioLines, Languages, Sparkle, Lightbulb } from "lucide-react";
+import { AudioLines, Languages, Lightbulb, Sparkle } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -17,7 +17,6 @@ import { CommandContextMenu } from "./CommandContextMenu";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import { getShortcutDisplayName } from "@/utils/keyboardShortcuts";
 
 const meaningModes: Array<WordObjectFields> = [
@@ -48,7 +47,6 @@ export function Card({
   handleEditWord,
 }: CardProps) {
   const { isSignedIn } = useAuth();
-  const { push } = useRouter();
 
   const [meaningMode, setMeaningMode] =
     useState<WordObjectFields>("translation");

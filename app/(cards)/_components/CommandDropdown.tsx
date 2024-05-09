@@ -1,19 +1,19 @@
 import { Command } from "lucide-react";
-import { Button } from "../../../components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-  DropdownMenuGroup,
-} from "../../../components/ui/DropdownMenu";
+} from "@/components/ui/DropdownMenu";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "../../../components/ui/Tooltip";
+} from "@/components/ui/Tooltip";
 import { CardCommandsConfig } from "@/types";
 import { useMediaQuery } from "@/utils/useMediaQuery";
 import { Fragment, useState } from "react";

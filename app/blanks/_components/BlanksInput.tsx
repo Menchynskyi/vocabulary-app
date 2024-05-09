@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/Button";
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSlot,
   InputOTPSeparator,
+  InputOTPSlot,
 } from "@/components/ui/InputOtp";
 import { BlanksDifficulty, SlotGrops, WordObject } from "@/types";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,6 @@ import { useMediaQuery } from "@/utils/useMediaQuery";
 import { cn } from "@/utils/tailwind";
 import { createUserBlanksStats } from "@/server/db/queries";
 import { useUser } from "@clerk/nextjs";
-import { ScrollBar } from "@/components/ui/ScrollArea";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 
 type BlanksInputProps = {

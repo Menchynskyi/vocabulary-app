@@ -1,16 +1,16 @@
 "use client";
 
 import {
+  AudioLines,
+  AudioWaveform,
   Calendar,
-  Moon,
-  Sun,
   Laptop,
+  Moon,
+  RefreshCcw,
+  SettingsIcon,
+  Sun,
   Triangle,
   Wand,
-  RefreshCcw,
-  AudioWaveform,
-  AudioLines,
-  SettingsIcon,
 } from "lucide-react";
 import {
   CommandDialog,

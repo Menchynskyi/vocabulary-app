@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState } from "react";
-import tailwindConfig from "../tailwind.config";
+import tailwindConfig from "@/tailwind.config";
 import resolveConfig from "tailwindcss/resolveConfig";
 
 const fullConfig = resolveConfig(tailwindConfig);

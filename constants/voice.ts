@@ -13,7 +13,7 @@ export type VoiceName =
 
 export type VoiceLanguageCode = "en-US" | "en-GB";
 
-export type VoiceType = "male" | "female";
+type VoiceType = "male" | "female";
 
 export type VoiceOption = {
   name: VoiceName;

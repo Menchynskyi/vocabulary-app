@@ -116,7 +116,6 @@ export function AuthProvider({ children, ...props }: NextClerkProviderProps) {
             clerkButtonVariants({ variant: "ghost" }),
             "text-foreground hover:text-foreground hover:bg-muted",
           ),
-
           formButtonPrimary: clerkButtonVariants(),
         },
       }}

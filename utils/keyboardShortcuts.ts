@@ -1,5 +1,5 @@
 import { DependencyList, useEffect } from "react";
-import { isClerkModalOpen, isRadixModalOpen } from "./modal";
+import { isClerkModalOpen, isRadixModalOpen } from "./modals";
 
 export type Shortcut = {
   key: string;

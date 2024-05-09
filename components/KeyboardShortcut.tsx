@@ -1,8 +1,8 @@
 import {
+  ScopeShortcuts,
+  Shortcut,
   ShortcutsScope,
   shortcuts,
-  Shortcut,
-  ScopeShortcuts,
 } from "@/utils/keyboardShortcuts";
 import { cn } from "@/utils/tailwind";
 
