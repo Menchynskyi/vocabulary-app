@@ -4,7 +4,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { Card } from "./Card";
 import { VocabularyMode, WordObject } from "@/types";
 import { CardsContext, CardsDispatchContext } from "./CardsContext";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonVariants } from "@/components/ui/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { CompletedList } from "./CompletedList";
 import { voiceChangeCustomEventName } from "@/constants/voice";
@@ -14,6 +14,7 @@ import { playBufferAudio } from "@/utils/playBufferAudio";
 import { useKeyboardShortcuts } from "@/utils/keyboardShortcuts";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
+import Link from "next/link";
 
 type CardsListProps = {
   cards: WordObject[];
@@ -207,17 +208,21 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
 
   const currentCard = cards[currentCardIndex];
 
-  const noCardsMessage =
-    vocabularyMode === VocabularyMode.week && !cards.length
-      ? "No words were added last week"
-      : undefined;
+  if (vocabularyMode === VocabularyMode.week && !cards.length) {
+    return (
+      <div className="mt-16 flex flex-col sm:mt-36">
+        <span className="mb-4 text-lg sm:text-2xl">
+          No words were added last week
+        </span>
+        <Link href="/" className={buttonVariants({ variant: "secondary" })}>
+          Random mode
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-16 sm:mt-36">
-      {noCardsMessage ? (
-        <span className="text-2xl sm:text-4xl">{noCardsMessage}</span>
-      ) : null}
-
       {isCompleted ? (
         <CompletedList cards={cards} startOver={() => setCurrentCardIndex(0)} />
       ) : (
