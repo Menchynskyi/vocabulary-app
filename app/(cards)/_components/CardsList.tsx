@@ -4,7 +4,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { Card } from "./Card";
 import { VocabularyMode, WordObject } from "@/types";
 import { CardsContext, CardsDispatchContext } from "./CardsContext";
-import { Button, buttonVariants } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { CompletedList } from "./CompletedList";
 import { voiceChangeCustomEventName } from "@/constants/voice";
@@ -14,7 +14,6 @@ import { playBufferAudio } from "@/utils/playBufferAudio";
 import { useKeyboardShortcuts } from "@/utils/keyboardShortcuts";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import Link from "next/link";
 
 type CardsListProps = {
   cards: WordObject[];
