@@ -214,9 +214,14 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
         <span className="mb-4 text-lg sm:text-2xl">
           No words were added last week
         </span>
-        <Link href="/" className={buttonVariants({ variant: "secondary" })}>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            window.location.href = "/";
+          }}
+        >
           Random mode
-        </Link>
+        </Button>
       </div>
     );
   }
