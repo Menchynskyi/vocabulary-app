@@ -19,7 +19,7 @@ export default async function Stats({ searchParams }: StatsProps) {
 
   const { data, totalPages } = await getUserBlanksStats(page > 0 ? page : 1);
 
-  if (page > totalPages) {
+  if (page > totalPages && totalPages !== 0) {
     redirect(`/stats?page=${totalPages}`);
   }
 
