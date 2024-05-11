@@ -3,6 +3,7 @@
 import {
   AudioLines,
   AudioWaveform,
+  BarChart3,
   Calendar,
   Laptop,
   Moon,
@@ -44,6 +45,7 @@ import {
   useKeyboardShortcuts,
 } from "@/utils/keyboardShortcuts";
 import { CommandMenuTrigger } from "@/components/CommandMenuButton";
+import { SignedIn } from "@clerk/nextjs";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
@@ -246,6 +248,12 @@ export function CommandMenu() {
               <Wand className="mr-2 h-4 w-4" />
               <span>Blanks</span>
             </CommandItem>
+            <SignedIn>
+              <CommandItem onSelect={() => push("/stats")}>
+                <BarChart3 className="mr-2 h-4 w-4" />
+                <span>Stats</span>
+              </CommandItem>
+            </SignedIn>
             <CommandItem
               onSelect={closeAfterDecorator(() =>
                 window.open(process.env.NEXT_PUBLIC_NOTION_PAGE_URL, "_blank"),
