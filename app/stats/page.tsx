@@ -1,5 +1,5 @@
 import { getUserBlanksStats } from "@/server/db/queries";
-import { AccuracyChart } from "./_components/AccuracyChart";
+import { BlanksAccuracyChart } from "./_components/BlanksAccuracyChart";
 import { Suspense } from "react";
 import { StatsSkeleton } from "./_components/StatsSkeleton";
 import { redirect } from "next/navigation";
@@ -36,7 +36,7 @@ export default async function Stats({ searchParams }: StatsProps) {
         </div>
 
         <Suspense fallback={<StatsSkeleton />}>
-          <AccuracyChart data={data} pagination={{ page, totalPages }} />
+          <BlanksAccuracyChart data={data} pagination={{ page, totalPages }} />
         </Suspense>
       </div>
     </div>

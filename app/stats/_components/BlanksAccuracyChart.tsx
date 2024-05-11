@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 
-type AccuracyChartProps = {
+type BlanksAccuracyChartProps = {
   data: Array<{
     accuracy: number;
     avgAccuracy: number;
@@ -19,7 +19,10 @@ type AccuracyChartProps = {
   };
 };
 
-export function AccuracyChart({ data, pagination }: AccuracyChartProps) {
+export function BlanksAccuracyChart({
+  data,
+  pagination,
+}: BlanksAccuracyChartProps) {
   const { push } = useRouter();
   const searchParams = useSearchParams();
 
@@ -93,15 +96,12 @@ export function AccuracyChart({ data, pagination }: AccuracyChartProps) {
               dataKey="avgAccuracy"
               activeDot={{
                 r: 6,
-                style: { fill: "var(--theme-primary)", opacity: 0.25 },
+                style: { fill: "hsl(var(--primary))", opacity: 0.25 },
               }}
-              style={
-                {
-                  stroke: "var(--theme-primary)",
-                  opacity: 0.25,
-                  "--theme-primary": `hsl(47.9 95.8% 53.1%)`,
-                } as React.CSSProperties
-              }
+              style={{
+                stroke: "hsl(var(--primary))",
+                opacity: 0.25,
+              }}
             />
             <Line
               type="monotone"
@@ -109,14 +109,11 @@ export function AccuracyChart({ data, pagination }: AccuracyChartProps) {
               strokeWidth={2}
               activeDot={{
                 r: 8,
-                style: { fill: "var(--theme-primary)" },
+                style: { fill: "hsl(var(--primary))" },
               }}
-              style={
-                {
-                  stroke: "var(--theme-primary)",
-                  "--theme-primary": `hsl(47.9 95.8% 53.1%)`,
-                } as React.CSSProperties
-              }
+              style={{
+                stroke: "hsl(var(--primary))",
+              }}
             />
           </LineChart>
         </ResponsiveContainer>
