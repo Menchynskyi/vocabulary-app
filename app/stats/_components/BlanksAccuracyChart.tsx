@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import { formatDate } from "@/utils/dates";
 import { MoveLeft, MoveRight } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis } from "recharts";
@@ -41,9 +42,12 @@ export function BlanksAccuracyChart({
   if (data.length === 0) {
     return (
       <div className="justify-center p-6 pt-2">
-        <p className="text-muted-foreground">
+        <Link
+          href="/blanks"
+          className="text-muted-foreground hover:text-primary hover:underline"
+        >
           Start filling in blanks to see your accuracy here
-        </p>
+        </Link>
       </div>
     );
   }
