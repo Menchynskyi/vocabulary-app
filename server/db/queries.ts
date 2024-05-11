@@ -5,7 +5,6 @@ import { db } from ".";
 import { blanksStats } from "./schema";
 import { numberToDoublePrecision } from "@/utils/numbers";
 import { count, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 
 export const getUserBlanksStats = async (pageNumber: number, size = 20) => {
   const user = auth();
