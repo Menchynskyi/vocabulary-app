@@ -1,11 +1,11 @@
 import { Header } from "@/components/Header";
 import { CommandMenu } from "./_components/CommandMenu";
 
-type StatsProps = {
+type StatsLayoutProps = {
   children: React.ReactNode;
 };
 
-export default function Stats({ children }: StatsProps) {
+export default function StatsLayout({ children }: StatsLayoutProps) {
   return (
     <>
       <Header>
