@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  AudioLines,
-  AudioWaveform,
-  BarChart3,
-  Laptop,
-  Layers3,
-  Moon,
-  SettingsIcon,
-  Sun,
-  Triangle,
-} from "lucide-react";
+import { Laptop, Layers3, Moon, Sun, Triangle, Wand } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -31,17 +21,7 @@ import {
   getShortcutDisplayName,
   useKeyboardShortcuts,
 } from "@/utils/keyboardShortcuts";
-import { settingsButtonId } from "@/constants";
-import {
-  VoiceLanguageCode,
-  VoiceName,
-  voiceChangeCustomEventName,
-  voiceNameCookie,
-  voiceOptions,
-} from "@/constants/voice";
-import { getCookie, setCookie } from "cookies-next";
 import { CommandMenuTrigger } from "@/components/CommandMenuButton";
-import { SignedIn } from "@clerk/nextjs";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
@@ -61,35 +41,6 @@ export function CommandMenu() {
     setTheme(theme);
     toast("Theme changed", {
       description: `Changed to ${theme} mode`,
-    });
-  };
-
-  const openSettings = () => {
-    document.getElementById(settingsButtonId)?.click();
-  };
-
-  const setRandomVoice = (langCode: VoiceLanguageCode) => () => {
-    const currentVoiceName = getCookie(voiceNameCookie) as VoiceName;
-    const voices = voiceOptions.filter(
-      (item) =>
-        item.languageCode === langCode && item.name !== currentVoiceName,
-    );
-    const randomIndex = Math.floor(Math.random() * voices.length);
-    const voiceName = voices[randomIndex].name;
-
-    const customVoiceChangeEvent = new CustomEvent(voiceChangeCustomEventName);
-    document.dispatchEvent(customVoiceChangeEvent);
-
-    setCookie(voiceNameCookie, voiceName);
-    toast("Voice changed", {
-      description: `Changed to ${voices[randomIndex].label} voice`,
-      action: {
-        label: "Undo",
-        onClick: () => {
-          setCookie(voiceNameCookie, currentVoiceName);
-          document.dispatchEvent(customVoiceChangeEvent);
-        },
-      },
     });
   };
 
@@ -147,13 +98,6 @@ export function CommandMenu() {
                 {getShortcutDisplayName("global", "toggleTheme")}
               </CommandShortcut>
             </CommandItem>
-            <CommandItem onSelect={closeAfterDecorator(openSettings)}>
-              <SettingsIcon className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-              <CommandShortcut className="hidden sm:block">
-                {getShortcutDisplayName("global", "toggleSettings")}
-              </CommandShortcut>
-            </CommandItem>
           </CommandGroup>
 
           <CommandSeparator />
@@ -162,12 +106,10 @@ export function CommandMenu() {
               <Layers3 className="mr-2 h-4 w-4" />
               <span>Cards</span>
             </CommandItem>
-            <SignedIn>
-              <CommandItem onSelect={() => push("/stats")}>
-                <BarChart3 className="mr-2 h-4 w-4" />
-                <span>Stats</span>
-              </CommandItem>
-            </SignedIn>
+            <CommandItem onSelect={() => push("/blanks")}>
+              <Wand className="mr-2 h-4 w-4" />
+              <span>Blanks</span>
+            </CommandItem>
             <CommandItem
               onSelect={closeAfterDecorator(() =>
                 window.open(process.env.NEXT_PUBLIC_NOTION_PAGE_URL, "_blank"),
@@ -197,22 +139,6 @@ export function CommandMenu() {
             >
               <GithubIcon className="mr-2 !h-[1.125rem] !w-[1.125rem]" />
               <span>GitHub</span>
-            </CommandItem>
-          </CommandGroup>
-
-          <CommandSeparator />
-          <CommandGroup heading="Voice">
-            <CommandItem
-              onSelect={closeAfterDecorator(setRandomVoice("en-US"))}
-            >
-              <AudioWaveform className="mr-2 h-4 w-4" />
-              <span>Set random US English voice</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={closeAfterDecorator(setRandomVoice("en-GB"))}
-            >
-              <AudioLines className="mr-2 h-4 w-4" />
-              <span>Set random GB English voice</span>
             </CommandItem>
           </CommandGroup>
 

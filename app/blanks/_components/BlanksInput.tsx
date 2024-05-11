@@ -28,6 +28,8 @@ import { cn } from "@/utils/tailwind";
 import { createUserBlanksStats } from "@/server/db/queries";
 import { useUser } from "@clerk/nextjs";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { numberToDoublePrecision } from "@/utils/numbers";
+import Link from "next/link";
 
 type BlanksInputProps = {
   wordObject: Omit<WordObject, "id">;
@@ -78,7 +80,7 @@ export function BlanksInput({
     if (!isCorrect) {
       setAccuracy((prev) => {
         const newAccuracy = prev - prev / (100 / pureString.length);
-        return Math.round(newAccuracy * 100) / 100;
+        return numberToDoublePrecision(newAccuracy);
       });
     }
 
@@ -204,7 +206,16 @@ export function BlanksInput({
             </div>
           )}
           <div className="mt-2 max-sm:text-center">
-            <span>Accuracy: {accuracy}%</span>
+            {isSignedIn ? (
+              <Link
+                className="hover:text-primary hover:underline"
+                href="/stats"
+              >
+                <span>Accuracy: {accuracy}%</span>
+              </Link>
+            ) : (
+              <span>Accuracy: {accuracy}%</span>
+            )}
           </div>
           <Button
             onClick={handleClickNext}
