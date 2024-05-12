@@ -203,7 +203,7 @@ export function Card({
           >
             <div className="absolute flex h-full w-full flex-col rounded-md border bg-background text-center text-[1rem] text-secondary-foreground backface-hidden">
               <div className="flex	h-full items-center justify-center p-[40px] text-2xl">
-                <span>{card.word}</span>
+                <span className="select-none">{card.word}</span>
               </div>
               <div className="flex rounded-b-md  border-t px-2 py-1">
                 <CommandDropdown cardCommands={cardCommands} />
@@ -239,7 +239,7 @@ export function Card({
             </div>
             <div className="absolute flex h-full w-full flex-col whitespace-pre-line rounded-md border bg-primary/100 from-black text-center text-[1rem] text-primary-foreground backface-hidden rotate-y-180">
               <div className="flex h-full items-center justify-center p-[40px] text-2xl">
-                <span>{meaning}</span>
+                <span className="select-none">{meaning}</span>
               </div>
 
               <div className="flex rounded-b-md border-t bg-primary/30 px-2 py-1">
