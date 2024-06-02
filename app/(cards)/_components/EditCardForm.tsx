@@ -175,7 +175,7 @@ export function EditCardForm({
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={disabled} className="w-full ">
+          <Button type="submit" disabled={disabled} className="w-full">
             Save
           </Button>
         </div>

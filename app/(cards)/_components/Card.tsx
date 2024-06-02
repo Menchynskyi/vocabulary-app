@@ -195,17 +195,17 @@ export function Card({
         >
           <div
             className={cn(
-              "relative h-full w-full  transition-all duration-300 preserve-3d",
+              "relative h-full w-full transition-all duration-300 preserve-3d",
               {
                 "rotate-y-180": isMeaningVisible,
               },
             )}
           >
             <div className="absolute flex h-full w-full flex-col rounded-md border bg-background text-center text-[1rem] text-secondary-foreground backface-hidden">
-              <div className="flex	h-full items-center justify-center p-[40px] text-2xl">
+              <div className="flex h-full items-center justify-center p-[40px] text-2xl">
                 <span className="select-none">{card.word}</span>
               </div>
-              <div className="flex rounded-b-md  border-t px-2 py-1">
+              <div className="flex rounded-b-md border-t px-2 py-1">
                 <CommandDropdown cardCommands={cardCommands} />
 
                 {isTextToSpeechEnabled && (

@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 export function Navigation() {
   const pathname = usePathname();
   return (
-    <nav className="ml-4 mr-auto hidden items-center md:flex ">
+    <nav className="ml-4 mr-auto hidden items-center md:flex">
       <Link
         href="/"
         aria-label="Cards page"
