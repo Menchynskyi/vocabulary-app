@@ -13,7 +13,7 @@ const alphabets = {
 };
 
 const isUkrainianTranslation =
-  process.env.NEXT_PUBLIC_TRANSLATION_LANGUAGE === "UA";
+  process.env.NEXT_PUBLIC_NOTION_VOCABULARY_TRANSLATION_LANGUAGE === "UA";
 
 export const notionVocabularyDatabaseId =
   process.env.NOTION_VOCABULARY_DATABASE_ID || "";

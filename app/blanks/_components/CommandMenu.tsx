@@ -179,7 +179,7 @@ export function CommandMenu() {
             <CommandItem
               onSelect={closeAfterDecorator(() =>
                 window.open(
-                  "https://vercel.com/menchynskyis-projects/vocabulary-app",
+                  process.env.NEXT_PUBLIC_VERCEL_PROJECT_URL,
                   "_blank",
                 ),
               )}

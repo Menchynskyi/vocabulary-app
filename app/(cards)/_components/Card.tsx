@@ -169,7 +169,7 @@ export function Card({
         label: "Open in Reverso Context",
         onSelect: () => {
           window.open(
-            `https://context.reverso.net/translation/english-${process.env.NEXT_PUBLIC_TRANSLATION_LANGUAGE === "UA" ? "ukrainian" : "russian"}/${card.word}`,
+            `https://context.reverso.net/translation/english-${process.env.NEXT_PUBLIC_NOTION_VOCABULARY_TRANSLATION_LANGUAGE === "UA" ? "ukrainian" : "russian"}/${card.word}`,
             "_blank",
           );
         },
