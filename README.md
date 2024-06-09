@@ -16,30 +16,28 @@ This is a [Next.js](https://nextjs.org/) project.
    # Notion
    NOTION_SECRET=your_notion_secret
    NOTION_VOCABULARY_DATABASE_ID=your_notion_vocabulary_database_id
-   NEXT_PUBLIC_NOTION_VOCABULARY_TRANSLATION_LANGUAGE=UA  # Default translation language is set to Ukrainian (UA)
+   NEXT_PUBLIC_NOTION_VOCABULARY_TRANSLATION_LANGUAGE=UA  # Default is set to Ukrainian
 
    # URLs
    NEXT_PUBLIC_NOTION_PAGE_URL=your_notion_page_url
    NEXT_PUBLIC_VERCEL_PROJECT_URL=your_vercel_project_url
 
    # Google Cloud
-   # You can get this from Google Cloud Dashboard
    NEXT_PUBLIC_TEXT_TO_SPEECH_ENABLED=false  # Indicates if text-to-speech is enabled (true/false)
-   GOOGLE_CLOUD_PRIVATE_KEY=your_google_cloud_private_key
-   GOOGLE_CLOUD_CLIENT_EMAIL=your_google_cloud_client_email
-   GOOGLE_CLOUD_PROJECT_ID=your_google_cloud_project_id
+   GOOGLE_CLOUD_PRIVATE_KEY=your_google_cloud_private_key # Get this from Google Cloud Dashboard
+   GOOGLE_CLOUD_CLIENT_EMAIL=your_google_cloud_client_email # Get this from Google Cloud Dashboard
+   GOOGLE_CLOUD_PROJECT_ID=your_google_cloud_project_id # Get this from Google Cloud Dashboard
 
    # Clerk
-   # You can get this from Clerk Dashboard
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-   CLERK_SECRET_KEY=your_clerk_secret_key
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key # Get this from Clerk Dashboard
+   CLERK_SECRET_KEY=your_clerk_secret_key # Get this from Clerk Dashboard
    NEXT_PUBLIC_CLERK_SIGN_IN_URL=/  # Clerk sign-in URL path
    NEXT_PUBLIC_CLERK_SIGN_UP_URL=/  # Clerk sign-up URL path
    NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/  # Redirect URL after sign-in
    NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/  # Redirect URL after sign-up
 
    # Postgres
-   # You can get this from Vercel
+   # Get all these values from Vercel Dashboard
    POSTGRES_URL=your_postgres_url
    POSTGRES_PRISMA_URL=your_postgres_prisma_url
    POSTGRES_URL_NO_SSL=your_postgres_url_no_ssl
