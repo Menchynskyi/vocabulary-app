@@ -1,8 +1,42 @@
 # Vocabulary App
 
-This is a [Next.js](https://nextjs.org/) project.
+## Application Setup
+
+### Notion
+
+1. Create a [Notion](https://www.notion.so/) database. Be precise with column names and types. If you want to use different column names, adjust the server actions accordingly.
+
+   | Column Name  | Type  |
+   | ------------ | ----- |
+   | Word         | Title |
+   | Translation  | Text  |
+   | Meaning      | Text  |
+   | Example      | Text  |
+   | Created date | Date  |
+
+2. Create a [Notion integration](https://www.notion.so/my-integrations) and connect it to your database. You can find the tutorial [here](https://developers.notion.com/docs/create-a-notion-integration).
+3. Add env variables to your Vercel project.
+
+### Clerk
+
+1. Create a [Clerk](https://clerk.com/) project.
+2. Choose GitHub and Google options for your application.
+3. Add env variables to your Vercel project.
+
+### Google Cloud
+
+1. Create [Google Cloud](https://cloud.google.com/?hl=en) project.
+2. Add env variables to your Vercel project.
+
+### Vercel
+
+1. Create [Vercel](https://vercel.com/) project.
+2. Create a PostgreSQL database.
+3. Connect the forked or original repository to your project and deploy the app.
 
 ## Local Development Setup
+
+This is a [Next.js](https://nextjs.org/) project.
 
 ### Setup Environment Variables
 
