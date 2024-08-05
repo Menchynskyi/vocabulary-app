@@ -77,9 +77,10 @@ export function BlanksInput({
       newValue[newValue.length - 1],
       pureString[newValue.length - 1],
     );
-    if (!isCorrect) {
+    if (!isCorrect && newValue.length > value.length) {
       setAccuracy((prev) => {
-        const newAccuracy = prev - prev / (100 / pureString.length);
+        const mistakeWeight = 100 / wordObject.word.length;
+        const newAccuracy = prev - (prev * mistakeWeight) / 100;
         return numberToDoublePrecision(newAccuracy);
       });
     }
