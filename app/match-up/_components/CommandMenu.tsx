@@ -4,11 +4,9 @@ import {
   AudioLines,
   AudioWaveform,
   BarChart3,
-  Calendar,
   Laptop,
-  Link2,
+  Layers3,
   Moon,
-  RefreshCcw,
   SettingsIcon,
   Sun,
   Triangle,
@@ -24,11 +22,9 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/Command";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
-import { CardsDispatchContext } from "./CardsContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { VocabularyMode } from "@/types";
 import { toast } from "sonner";
 import { GithubIcon } from "@/components/icons/GithubIcon";
 import { NotionIcon } from "@/components/icons/NotionIcon";
@@ -51,11 +47,9 @@ import { SignedIn } from "@clerk/nextjs";
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
-  const dispatch = useContext(CardsDispatchContext);
 
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace, push } = useRouter();
+  const { push } = useRouter();
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -64,37 +58,6 @@ export function CommandMenu() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [theme]);
-
-  const toggleFlipMode = useCallback(
-    () => {
-      dispatch({ type: "toggle_flip_mode" });
-      toast("Flip mode toggled", {
-        action: {
-          label: "Undo",
-          onClick: () => dispatch({ type: "toggle_flip_mode" }),
-        },
-      });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
-
-  const toggleVocabularyMode = () => {
-    const params = new URLSearchParams(searchParams);
-    const isWeekMode = params.get("mode") === VocabularyMode.week;
-
-    if (isWeekMode) {
-      params.delete("mode");
-    } else {
-      params.set("mode", VocabularyMode.week);
-    }
-
-    replace(`${pathname}?${params.toString()}`);
-
-    toast("Vocabulary mode toggled", {
-      description: `Changed to ${isWeekMode ? "random" : "week"} mode`,
-    });
-  };
 
   const changeTheme = (theme: string) => {
     setTheme(theme);
@@ -117,31 +80,6 @@ export function CommandMenu() {
   const closeAfterDecorator = (fn: () => void) => () => {
     fn();
     setOpen(false);
-  };
-
-  const setRandomVoice = (langCode: VoiceLanguageCode) => () => {
-    const currentVoiceName = getCookie(voiceNameCookie) as VoiceName;
-    const voices = voiceOptions.filter(
-      (item) =>
-        item.languageCode === langCode && item.name !== currentVoiceName,
-    );
-    const randomIndex = Math.floor(Math.random() * voices.length);
-    const voiceName = voices[randomIndex].name;
-
-    const customVoiceChangeEvent = new CustomEvent(voiceChangeCustomEventName);
-    document.dispatchEvent(customVoiceChangeEvent);
-
-    setCookie(voiceNameCookie, voiceName);
-    toast("Voice changed", {
-      description: `Changed to ${voices[randomIndex].label} voice`,
-      action: {
-        label: "Undo",
-        onClick: () => {
-          setCookie(voiceNameCookie, currentVoiceName);
-          document.dispatchEvent(customVoiceChangeEvent);
-        },
-      },
-    });
   };
 
   const openSettings = () => {
@@ -167,24 +105,6 @@ export function CommandMenu() {
           setOpen(false);
         },
       },
-      {
-        scope: "cards",
-        shortcut: "toggleFlipMode",
-        action: (e) => {
-          e.preventDefault();
-          toggleFlipMode();
-          setOpen(false);
-        },
-      },
-      {
-        scope: "cards",
-        shortcut: "toggleVocabularyMode",
-        action: (e) => {
-          e.preventDefault();
-          toggleVocabularyMode();
-          setOpen(false);
-        },
-      },
     ],
     deps: [searchParams, toggleTheme],
   });
@@ -197,20 +117,6 @@ export function CommandMenu() {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Suggestions">
-            <CommandItem onSelect={closeAfterDecorator(toggleFlipMode)}>
-              <RefreshCcw className="mr-2 h-4 w-4" />
-              <span>Toggle flip mode</span>
-              <CommandShortcut className="hidden sm:block">
-                {getShortcutDisplayName("cards", "toggleFlipMode")}
-              </CommandShortcut>
-            </CommandItem>
-            <CommandItem onSelect={closeAfterDecorator(toggleVocabularyMode)}>
-              <Calendar className="mr-2 h-4 w-4" />
-              <span>Toggle vocabulary mode</span>
-              <CommandShortcut className="hidden sm:block">
-                {getShortcutDisplayName("cards", "toggleVocabularyMode")}
-              </CommandShortcut>
-            </CommandItem>
             <CommandItem onSelect={closeAfterDecorator(toggleTheme)}>
               {themeIcon}
               <span>{`Toggle theme`}</span>
@@ -228,26 +134,10 @@ export function CommandMenu() {
           </CommandGroup>
 
           <CommandSeparator />
-          <CommandGroup heading="Voice">
-            <CommandItem
-              onSelect={closeAfterDecorator(setRandomVoice("en-US"))}
-            >
-              <AudioWaveform className="mr-2 h-4 w-4" />
-              <span>Set random US English voice</span>
-            </CommandItem>
-            <CommandItem
-              onSelect={closeAfterDecorator(setRandomVoice("en-GB"))}
-            >
-              <AudioLines className="mr-2 h-4 w-4" />
-              <span>Set random GB English voice</span>
-            </CommandItem>
-          </CommandGroup>
-
-          <CommandSeparator />
           <CommandGroup heading="Links">
-            <CommandItem onSelect={() => push("/match-up")}>
-              <Link2 className="mr-2 h-4 w-4" />
-              <span>Match up</span>
+            <CommandItem onSelect={() => push("/")}>
+              <Layers3 className="mr-2 h-4 w-4" />
+              <span>Cards</span>
             </CommandItem>
             <CommandItem onSelect={() => push("/blanks")}>
               <Wand className="mr-2 h-4 w-4" />

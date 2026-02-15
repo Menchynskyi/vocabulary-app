@@ -23,6 +23,19 @@ export function Navigation() {
         Cards
       </Link>
       <Link
+        href="/match-up"
+        aria-label="Match up page"
+        className={cn(
+          "ml-3 text-sm text-muted-foreground transition-colors hover:text-muted-foreground/60",
+          {
+            "text-foreground hover:text-foreground/60 max-sm:hover:text-foreground":
+              pathname.startsWith("/match-up"),
+          },
+        )}
+      >
+        Match up
+      </Link>
+      <Link
         href="/blanks"
         aria-label="Blanks page"
         className={cn(

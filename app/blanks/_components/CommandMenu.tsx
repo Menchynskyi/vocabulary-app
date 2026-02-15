@@ -6,6 +6,7 @@ import {
   BarChart3,
   Laptop,
   Layers3,
+  Link2,
   Moon,
   SettingsIcon,
   Sun,
@@ -161,6 +162,10 @@ export function CommandMenu() {
             <CommandItem onSelect={() => push("/")}>
               <Layers3 className="mr-2 h-4 w-4" />
               <span>Cards</span>
+            </CommandItem>
+            <CommandItem onSelect={() => push("/match-up")}>
+              <Link2 className="mr-2 h-4 w-4" />
+              <span>Match up</span>
             </CommandItem>
             <SignedIn>
               <CommandItem onSelect={() => push("/stats")}>
