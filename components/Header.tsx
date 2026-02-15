@@ -13,7 +13,7 @@ type HeaderProps = {
 
 export function Header({ children }: HeaderProps) {
   return (
-    <header className="flex justify-center border-b px-4 py-2">
+    <header className="flex justify-center border-b px-4 py-2 sticky top-0 backdrop-blur-md">
       <div className="flex w-full max-w-screen-2xl justify-between">
         <a
           aria-label="Notion page"
