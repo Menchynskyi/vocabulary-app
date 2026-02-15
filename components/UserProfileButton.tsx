@@ -10,9 +10,36 @@ import {
 import { Button } from "./ui/Button";
 import { LogIn } from "lucide-react";
 import { Skeleton } from "./ui/Skeleton";
+import { useEffect } from "react";
 
 export function UserProfileButton() {
   const { isLoaded } = useUser();
+
+  useEffect(() => {
+    const checkPopover = () => {
+      const popover = document.querySelector(".cl-userButton-popover");
+
+      if (popover) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "unset";
+      }
+    };
+
+    checkPopover();
+
+    const observer = new MutationObserver(checkPopover);
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      observer.disconnect();
+      document.body.style.overflow = "unset";
+    };
+  }, []);
 
   if (!isLoaded) {
     return (
@@ -37,6 +64,8 @@ export function UserProfileButton() {
             appearance={{
               elements: {
                 rootBox: "border-0 w-10",
+                userButtonPopoverCard: "!fixed",
+                userButtonPopoverFooter: "hidden",
               },
             }}
           />
