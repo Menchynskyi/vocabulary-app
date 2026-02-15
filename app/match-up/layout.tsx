@@ -16,7 +16,7 @@ export default function MatchUpLayout({ children }: MatchUpLayoutProps) {
           <Settings />
         </Suspense>
       </Header>
-      <main className="mt-16 flex justify-center sm:mt-36">{children}</main>
+      <main className="mt-10 flex justify-center lg:mt-36">{children}</main>
     </>
   );
 }
