@@ -1,6 +1,14 @@
 "use client";
 
-import { Laptop, Layers3, Moon, Sun, Triangle, Wand } from "lucide-react";
+import {
+  Laptop,
+  Layers3,
+  Link2,
+  Moon,
+  Sun,
+  Triangle,
+  Wand,
+} from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -105,6 +113,10 @@ export function CommandMenu() {
             <CommandItem onSelect={() => push("/")}>
               <Layers3 className="mr-2 h-4 w-4" />
               <span>Cards</span>
+            </CommandItem>
+            <CommandItem onSelect={() => push("/match-up")}>
+              <Link2 className="mr-2 h-4 w-4" />
+              <span>Match up</span>
             </CommandItem>
             <CommandItem onSelect={() => push("/blanks")}>
               <Wand className="mr-2 h-4 w-4" />

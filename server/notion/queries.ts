@@ -23,7 +23,10 @@ import { EditWordData, VocabularyMode } from "@/types";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
-export async function getWords(mode?: VocabularyMode) {
+export async function getWords(
+  mode?: VocabularyMode,
+  listLengthOverride?: number,
+) {
   const cookieStore = cookies();
   const cardsLength = Number(cookieStore.get(cardsListLengthCookie)?.value);
   const cardsLengthWeekMode = Number(
@@ -32,14 +35,25 @@ export async function getWords(mode?: VocabularyMode) {
 
   const isWeekMode = mode === "week";
 
-  let _numberOfWords = isWeekMode
-    ? defaultCardsListWeekModeLength
-    : defaultCardsListLength;
+  let _numberOfWords =
+    listLengthOverride !== undefined
+      ? listLengthOverride
+      : isWeekMode
+        ? defaultCardsListWeekModeLength
+        : defaultCardsListLength;
 
-  if (!isNaN(cardsLength) && !isWeekMode) {
+  if (
+    listLengthOverride === undefined &&
+    !isNaN(cardsLength) &&
+    !isWeekMode
+  ) {
     _numberOfWords = cardsLength;
   }
-  if (!isNaN(cardsLengthWeekMode) && isWeekMode) {
+  if (
+    listLengthOverride === undefined &&
+    !isNaN(cardsLengthWeekMode) &&
+    isWeekMode
+  ) {
     _numberOfWords = cardsLengthWeekMode;
   }
 

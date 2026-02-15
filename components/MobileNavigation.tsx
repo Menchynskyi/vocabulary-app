@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/Sheet";
 import { Button } from "./ui/Button";
-import { BarChart3, Layers3, Menu, Wand } from "lucide-react";
+import { BarChart3, Layers3, Link2, Menu, Wand } from "lucide-react";
 import { NotionIcon } from "./icons/NotionIcon";
 import { useState } from "react";
 import { SignedIn } from "@clerk/nextjs";
@@ -54,6 +54,25 @@ export function MobileNavigation() {
               )}
             >
               Cards
+            </Link>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-10 pl-4">
+              <Link2 className="mr-2 h-4 w-4" />
+            </div>
+            <Link
+              href="/match-up"
+              aria-label="Match up page"
+              onClick={() => setIsOpened(false)}
+              className={cn(
+                "text-md text-muted-foreground transition-colors hover:text-muted-foreground/60",
+                {
+                  "text-foreground hover:text-foreground/60 max-sm:hover:text-foreground":
+                    pathname.startsWith("/match-up"),
+                },
+              )}
+            >
+              Match up
             </Link>
           </div>
           <div className="flex items-center gap-1">
