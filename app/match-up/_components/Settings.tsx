@@ -96,7 +96,10 @@ export function Settings() {
           setLives(
             Number.isNaN(livesValue)
               ? defaultMatchUpLives
-              : Math.min(matchUpLivesMax, Math.max(matchUpLivesMin, livesValue)),
+              : Math.min(
+                  matchUpLivesMax,
+                  Math.max(matchUpLivesMin, livesValue),
+                ),
           );
           const wordsValue = Number(getCookie(matchUpWordsCountCookie));
           setWordsCount(
@@ -126,7 +129,7 @@ export function Settings() {
           <TooltipContent side="bottom">
             <p>
               Settings
-              <KeyboardShortcut 
+              <KeyboardShortcut
                 className="ml-2"
                 scope="global"
                 shortcut="toggleSettings"
@@ -142,9 +145,7 @@ export function Settings() {
             </DrawerHeader>
             <div className="space-y-4 p-4">
               <div>
-                <Label htmlFor="match-up-lives">
-                  Number of lives: {lives}
-                </Label>
+                <Label htmlFor="match-up-lives">Number of lives: {lives}</Label>
                 <Slider
                   className="mt-2"
                   id="match-up-lives"

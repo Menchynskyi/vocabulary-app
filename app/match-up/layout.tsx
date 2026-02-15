@@ -13,7 +13,7 @@ export default function MatchUpLayout({ children }: MatchUpLayoutProps) {
       <Header>
         <Suspense>
           <CommandMenu />
-        <Settings />
+          <Settings />
         </Suspense>
       </Header>
       <main className="mt-16 flex justify-center sm:mt-36">{children}</main>

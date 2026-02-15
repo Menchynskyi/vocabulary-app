@@ -1,6 +1,14 @@
 "use client";
 
-import { Laptop, Layers3, Link2, Moon, Sun, Triangle, Wand } from "lucide-react";
+import {
+  Laptop,
+  Layers3,
+  Link2,
+  Moon,
+  Sun,
+  Triangle,
+  Wand,
+} from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,

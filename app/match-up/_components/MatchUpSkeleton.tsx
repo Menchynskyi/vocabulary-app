@@ -28,7 +28,10 @@ export function MatchUpSkeleton({
         {Array.from({ length: blockCount }).map((_, i) => (
           <Skeleton
             key={i}
-            className={cn("h-12 rounded-lg", skeletonWidths[i % skeletonWidths.length])}
+            className={cn(
+              "h-12 rounded-lg",
+              skeletonWidths[i % skeletonWidths.length],
+            )}
           />
         ))}
       </div>

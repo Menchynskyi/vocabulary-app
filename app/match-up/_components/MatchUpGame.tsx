@@ -47,7 +47,12 @@ export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
     variant: "word" | "translation";
   } | null>(null);
 
-  type BlockItem = { id: string; text: string; variant: "word" | "translation"; wordId: number };
+  type BlockItem = {
+    id: string;
+    text: string;
+    variant: "word" | "translation";
+    wordId: number;
+  };
   const allBlocksShuffled = useMemo(() => {
     const blocks: BlockItem[] = [];
     words.forEach((w) => {
@@ -87,7 +92,9 @@ export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
       const isWord = id.startsWith("word-");
       setActiveDrag({
         id,
-        text: isWord ? word.word : word.translation || word.meaning || word.example,
+        text: isWord
+          ? word.word
+          : word.translation || word.meaning || word.example,
         variant: isWord ? "word" : "translation",
       });
     },
@@ -220,16 +227,23 @@ export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
   return (
     <div className="flex w-full max-w-4xl flex-col gap-6 px-4 pb-10">
       <p className="flex items-center gap-2 text-muted-foreground">
-      <span>Matched: {matchedIds.size} / {words.length}</span>
+        <span>
+          Matched: {matchedIds.size} / {words.length}
+        </span>
         {initialLives > 1 && <span>· </span>}
         {initialLives > 1 && (
-          <span className="flex items-center gap-0.5" aria-label={`${lives} lives left`}>
+          <span
+            className="flex items-center gap-0.5"
+            aria-label={`${lives} lives left`}
+          >
             {Array.from({ length: initialLives }).map((_, i) => (
               <Heart
                 key={i}
                 className={cn(
                   "h-5 w-5",
-                  i < lives ? "fill-red-500 text-red-500" : "fill-none text-muted-foreground/40",
+                  i < lives
+                    ? "fill-red-500 text-red-500"
+                    : "fill-none text-muted-foreground/40",
                 )}
                 aria-hidden
               />
@@ -266,8 +280,7 @@ export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
               className={cn(
                 "cursor-grabbing rounded-lg border px-4 py-3 text-center shadow-lg",
                 "touch-none select-none",
-                activeDrag.variant === "word" &&
-                  "border-primary/50 bg-card",
+                activeDrag.variant === "word" && "border-primary/50 bg-card",
                 activeDrag.variant === "translation" &&
                   "border-muted-foreground/30 bg-muted",
               )}

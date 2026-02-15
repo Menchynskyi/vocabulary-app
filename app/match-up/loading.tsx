@@ -12,9 +12,6 @@ export default function Loading() {
   const value = Number(cookieStore.get(matchUpWordsCountCookie)?.value);
   const wordsCount = Number.isNaN(value)
     ? defaultMatchUpWordsCount
-    : Math.min(
-        matchUpWordsCountMax,
-        Math.max(matchUpWordsCountMin, value),
-      );
+    : Math.min(matchUpWordsCountMax, Math.max(matchUpWordsCountMin, value));
   return <MatchUpSkeleton wordsCount={wordsCount} />;
 }
