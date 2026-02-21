@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "./ui/Button";
+import { useKeyboardShortcuts } from "@/utils/keyboardShortcuts";
 
 type VocabularyModeStatusProps = {
   vocabularyMode?: VocabularyMode;
@@ -67,6 +68,22 @@ export function VocabularyModeStatus({
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [isPending]);
+
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        scope: "cards",
+        shortcut: "toggleVocabularyMode",
+        action: (e) => {
+          if (isPending) return;
+
+          e.preventDefault();
+          toggleVocabularyMode();
+        },
+      },
+    ],
+    deps: [isPending],
+  });
 
   return (
     <Button

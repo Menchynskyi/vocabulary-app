@@ -198,19 +198,8 @@ export function CommandMenu() {
           setOpen(false);
         },
       },
-      {
-        scope: "cards",
-        shortcut: "toggleVocabularyMode",
-        action: (e) => {
-          if (isToggleModePending) return;
-
-          e.preventDefault();
-          toggleVocabularyMode();
-          setOpen(false);
-        },
-      },
     ],
-    deps: [searchParams, toggleTheme, isToggleModePending],
+    deps: [searchParams, toggleTheme],
   });
 
   return (

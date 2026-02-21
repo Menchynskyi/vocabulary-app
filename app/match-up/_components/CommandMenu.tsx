@@ -147,19 +147,8 @@ export function CommandMenu() {
           setOpen(false);
         },
       },
-      {
-        scope: "matchup",
-        shortcut: "toggleVocabularyMode",
-        action: (e) => {
-          if (isToggleModePending) return;
-
-          e.preventDefault();
-          toggleVocabularyMode();
-          setOpen(false);
-        },
-      },
     ],
-    deps: [searchParams, toggleTheme, isToggleModePending],
+    deps: [searchParams, toggleTheme],
   });
 
   return (
