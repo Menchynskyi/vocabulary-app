@@ -33,6 +33,9 @@ const elementFlip = plugin(({ addUtilities }) => {
 });
 
 const config = {
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
