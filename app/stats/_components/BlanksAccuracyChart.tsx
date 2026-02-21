@@ -1,11 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { Spinner } from "@/components/ui/Spinner";
 import { formatDate } from "@/utils/dates";
 import { MoveLeft, MoveRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useTransition } from "react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 
 type BlanksAccuracyChartProps = {
@@ -26,6 +27,7 @@ export function BlanksAccuracyChart({
 }: BlanksAccuracyChartProps) {
   const { push } = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const domain = useMemo(() => {
     const min = Math.min(...data.map((d) => d.avgAccuracy));
@@ -36,7 +38,9 @@ export function BlanksAccuracyChart({
   const handleChangePage = (inc: number) => () => {
     const params = new URLSearchParams(searchParams);
     params.set("page", `${Number(params.get("page") || 1) + inc}`);
-    push(`/stats?${params.toString()}`);
+    startTransition(() => {
+      push(`/stats?${params.toString()}`);
+    });
   };
 
   if (data.length === 0) {
@@ -128,19 +132,27 @@ export function BlanksAccuracyChart({
           variant="outline"
           onClick={handleChangePage(1)}
           className="w-full min-w-32 sm:w-auto"
-          disabled={pagination.page === pagination.totalPages}
+          disabled={pagination.page === pagination.totalPages || isPending}
         >
-          <MoveLeft className="mr-2 h-4 w-4" />
+          {isPending ? (
+            <Spinner className="mr-2 h-4 w-4" />
+          ) : (
+            <MoveLeft className="mr-2 h-4 w-4" />
+          )}
           Earlier
         </Button>
         <Button
           variant="outline"
           onClick={handleChangePage(-1)}
-          disabled={pagination.page === 1}
+          disabled={pagination.page === 1 || isPending}
           className="w-full min-w-32 sm:w-auto"
         >
           Later
-          <MoveRight className="ml-2 h-4 w-4" />
+          {isPending ? (
+            <Spinner className="ml-2 h-4 w-4" />
+          ) : (
+            <MoveRight className="ml-2 h-4 w-4" />
+          )}
         </Button>
       </div>
     </>

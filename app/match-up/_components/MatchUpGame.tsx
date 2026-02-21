@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -36,6 +42,7 @@ function getWordIdFromBlockId(blockId: string): number {
 }
 
 export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [matchedIds, setMatchedIds] = useState<Set<number>>(new Set());
   const [lives, setLives] = useState(initialLives);
@@ -159,7 +166,9 @@ export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
   }, [initialLives]);
 
   const newSetOfWords = useCallback(() => {
-    router.refresh();
+    startTransition(() => {
+      router.refresh();
+    });
   }, [router]);
 
   useEffect(() => {
@@ -173,7 +182,7 @@ export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
     return (
       <div className="mt-16 flex flex-col sm:mt-36">
         <span className="mb-4 text-lg sm:text-2xl">No words to match</span>
-        <Button variant="secondary" onClick={() => router.refresh()}>
+        <Button loading={isPending} variant="secondary" onClick={newSetOfWords}>
           New set of words
         </Button>
       </div>
@@ -215,6 +224,7 @@ export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
           <Button
             aria-label="New set of words"
             className="w-full"
+            loading={isPending}
             onClick={newSetOfWords}
           >
             <span>New set of words</span>

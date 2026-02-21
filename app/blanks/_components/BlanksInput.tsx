@@ -16,6 +16,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useTransition,
 } from "react";
 import { HintButtons } from "./HintButtons";
 import { useIsMounted } from "@/utils/useIsMounted";
@@ -50,6 +51,7 @@ export function BlanksInput({
   const isMounted = useIsMounted();
   const { isDesktop } = useMediaQuery();
   const { isSignedIn } = useUser();
+  const [isPending, startTransition] = useTransition();
 
   const [value, setValue] = useState("");
   const [accuracy, setAccuracy] = useState(100);
@@ -69,7 +71,9 @@ export function BlanksInput({
   const handleClickNext = useCallback(() => {
     if (!areStringsEqualCaseInsensitive(value, pureString)) return;
 
-    push(`/blanks/${nextCursor}`);
+    startTransition(() => {
+      push(`/blanks/${nextCursor}`);
+    });
   }, [nextCursor, push, value, pureString]);
 
   const handleInputChange = (newValue: string) => {
@@ -222,6 +226,7 @@ export function BlanksInput({
             onClick={handleClickNext}
             className="mt-10 w-full"
             aria-label="Next word"
+            loading={isPending}
             variant="outline"
           >
             Next word

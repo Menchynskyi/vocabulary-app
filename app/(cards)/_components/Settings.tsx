@@ -20,9 +20,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/Tooltip";
 import {
-  cardsListLengthCookie,
+  cardsListLatestLengthCookie,
+  cardsListRandomLengthCookie,
   cardsListWeekModeLengthCookie,
-  defaultCardsListLength,
+  defaultCardsListLatestLength,
+  defaultCardsListRandomLength,
   defaultCardsListWeekModeLength,
 } from "@/constants/cards";
 import { Settings as SettingsIcon } from "lucide-react";
@@ -51,8 +53,17 @@ import { settingsButtonId } from "@/constants";
 export function Settings() {
   const { refresh } = useRouter();
   const ref = useRef<HTMLButtonElement | null>(null);
-  const [cardsListLength, setCardsListLength] = useState(() => {
-    return Number(getCookie(cardsListLengthCookie)) || defaultCardsListLength;
+  const [cardsListLatestLength, setCardsListLatestLength] = useState(() => {
+    return (
+      Number(getCookie(cardsListLatestLengthCookie)) ||
+      defaultCardsListLatestLength
+    );
+  });
+  const [cardsListRandomLength, setCardsListRandomLength] = useState(() => {
+    return (
+      Number(getCookie(cardsListRandomLengthCookie)) ||
+      defaultCardsListRandomLength
+    );
   });
   const [cardsListWeekModeLength, setCardsListWeekModeLength] = useState(() => {
     return (
@@ -65,7 +76,8 @@ export function Settings() {
   });
 
   const handleSaveSettings = () => {
-    const currentCardsListLength = getCookie(cardsListLengthCookie);
+    const currentCardsListLatestLength = getCookie(cardsListLatestLengthCookie);
+    const currentCardsListRandomLength = getCookie(cardsListRandomLengthCookie);
     const currentCardsListWeekModeLength = getCookie(
       cardsListWeekModeLengthCookie,
     );
@@ -74,12 +86,18 @@ export function Settings() {
     let isVoiceChanged = false;
     let isSettingsChanged = false;
 
-    const newCardsListLength = cardsListLength.toString();
+    const newCardsListLatestLength = cardsListLatestLength.toString();
+    const newCardsListRandomLength = cardsListRandomLength.toString();
     const newCardsListWeekModeLength = cardsListWeekModeLength.toString();
     const newVoiceName = selectedVoice;
 
-    if (currentCardsListLength !== newCardsListLength) {
-      setCookie(cardsListLengthCookie, newCardsListLength);
+    if (currentCardsListLatestLength !== newCardsListLatestLength) {
+      setCookie(cardsListLatestLengthCookie, newCardsListLatestLength);
+      isSettingsChanged = true;
+    }
+
+    if (currentCardsListRandomLength !== newCardsListRandomLength) {
+      setCookie(cardsListRandomLengthCookie, newCardsListRandomLength);
       isSettingsChanged = true;
     }
 
@@ -124,8 +142,13 @@ export function Settings() {
     <TooltipProvider delayDuration={200}>
       <Drawer
         onOpenChange={() => {
-          setCardsListLength(
-            Number(getCookie(cardsListLengthCookie)) || defaultCardsListLength,
+          setCardsListLatestLength(
+            Number(getCookie(cardsListLatestLengthCookie)) ||
+              defaultCardsListLatestLength,
+          );
+          setCardsListRandomLength(
+            Number(getCookie(cardsListRandomLengthCookie)) ||
+              defaultCardsListRandomLength,
           );
           setCardsListWeekModeLength(
             Number(getCookie(cardsListWeekModeLengthCookie)) ||
@@ -192,8 +215,31 @@ export function Settings() {
               </div>
 
               <div>
+                <Label htmlFor="latest-mode-card-limit">
+                  Latest mode card limit: {cardsListLatestLength}
+                </Label>
+                <Slider
+                  className="mt-2"
+                  id="latest-mode-card-limit"
+                  onPointerMove={(e) => {
+                    e.stopPropagation();
+                  }}
+                  defaultValue={[defaultCardsListLatestLength]}
+                  min={5}
+                  max={50}
+                  step={1}
+                  value={[cardsListLatestLength]}
+                  onValueChange={(value) => {
+                    if (value?.[0]) {
+                      setCardsListLatestLength(value[0]);
+                    }
+                  }}
+                />
+              </div>
+
+              <div>
                 <Label htmlFor="random-mode-card-limit">
-                  Random mode card limit: {cardsListLength}
+                  Random mode card limit: {cardsListRandomLength}
                 </Label>
                 <Slider
                   className="mt-2"
@@ -201,14 +247,14 @@ export function Settings() {
                   onPointerMove={(e) => {
                     e.stopPropagation();
                   }}
-                  defaultValue={[defaultCardsListLength]}
+                  defaultValue={[defaultCardsListRandomLength]}
                   min={5}
                   max={50}
                   step={1}
-                  value={[cardsListLength]}
+                  value={[cardsListRandomLength]}
                   onValueChange={(value) => {
                     if (value?.[0]) {
-                      setCardsListLength(value[0]);
+                      setCardsListRandomLength(value[0]);
                     }
                   }}
                 />

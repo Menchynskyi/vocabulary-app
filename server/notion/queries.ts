@@ -1,9 +1,11 @@
 "use server";
 
 import {
-  cardsListLengthCookie,
+  cardsListLatestLengthCookie,
+  cardsListRandomLengthCookie,
   cardsListWeekModeLengthCookie,
-  defaultCardsListLength,
+  defaultCardsListLatestLength,
+  defaultCardsListRandomLength,
   defaultCardsListWeekModeLength,
 } from "@/constants/cards";
 import notionClient from ".";
@@ -30,10 +32,17 @@ function getNumberOfWords(
   if (listLengthOverride !== undefined) return listLengthOverride;
 
   const cookieStore = cookies();
-  const cardsLength = Number(cookieStore.get(cardsListLengthCookie)?.value);
+  const cardsLengthLatestMode = Number(cookieStore.get(cardsListLatestLengthCookie)?.value);
+  const cardsLengthRandomMode = Number(cookieStore.get(cardsListRandomLengthCookie)?.value);
   const cardsLengthWeekMode = Number(
     cookieStore.get(cardsListWeekModeLengthCookie)?.value,
   );
+
+  if (mode === "latest") {
+    return !isNaN(cardsLengthLatestMode)
+      ? cardsLengthLatestMode
+      : defaultCardsListLatestLength;
+  }
 
   if (mode === "week") {
     return !isNaN(cardsLengthWeekMode)
@@ -41,7 +50,7 @@ function getNumberOfWords(
       : defaultCardsListWeekModeLength;
   }
 
-  return !isNaN(cardsLength) ? cardsLength : defaultCardsListLength;
+  return !isNaN(cardsLengthRandomMode) ? cardsLengthRandomMode : defaultCardsListRandomLength;
 }
 
 function filterValidWords(results: PageObjectResponse[]) {
