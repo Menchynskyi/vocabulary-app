@@ -54,7 +54,7 @@ function filterValidWords(results: PageObjectResponse[]) {
 }
 
 export async function getWords(
-  mode?: VocabularyMode,
+  mode = VocabularyMode.latest,
   listLengthOverride?: number,
 ) {
   const numberOfWords = getNumberOfWords(mode, listLengthOverride);

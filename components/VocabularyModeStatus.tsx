@@ -20,7 +20,7 @@ const MODES_DISPLAY_NAMES: Record<VocabularyMode, string> = {
 };
 
 export function VocabularyModeStatus({
-  vocabularyMode = VocabularyMode.random,
+  vocabularyMode = VocabularyMode.latest,
 }: VocabularyModeStatusProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
