@@ -23,88 +23,83 @@ import { EditWordData, VocabularyMode } from "@/types";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
-export async function getWords(
-  mode?: VocabularyMode,
+function getNumberOfWords(
+  mode: VocabularyMode | undefined,
   listLengthOverride?: number,
-) {
+): number {
+  if (listLengthOverride !== undefined) return listLengthOverride;
+
   const cookieStore = cookies();
   const cardsLength = Number(cookieStore.get(cardsListLengthCookie)?.value);
   const cardsLengthWeekMode = Number(
     cookieStore.get(cardsListWeekModeLengthCookie)?.value,
   );
 
-  const isWeekMode = mode === "week";
-
-  let _numberOfWords =
-    listLengthOverride !== undefined
-      ? listLengthOverride
-      : isWeekMode
-        ? defaultCardsListWeekModeLength
-        : defaultCardsListLength;
-
-  if (
-    listLengthOverride === undefined &&
-    !isNaN(cardsLength) &&
-    !isWeekMode
-  ) {
-    _numberOfWords = cardsLength;
+  if (mode === "week") {
+    return !isNaN(cardsLengthWeekMode)
+      ? cardsLengthWeekMode
+      : defaultCardsListWeekModeLength;
   }
-  if (
-    listLengthOverride === undefined &&
-    !isNaN(cardsLengthWeekMode) &&
-    isWeekMode
-  ) {
-    _numberOfWords = cardsLengthWeekMode;
-  }
+
+  return !isNaN(cardsLength) ? cardsLength : defaultCardsListLength;
+}
+
+function filterValidWords(results: PageObjectResponse[]) {
+  return results
+    .map(parseWordResponse)
+    .filter(
+      (word) =>
+        word.word && (word.translation || word.meaning || word.example),
+    );
+}
+
+export async function getWords(
+  mode?: VocabularyMode,
+  listLengthOverride?: number,
+) {
+  const numberOfWords = getNumberOfWords(mode, listLengthOverride);
+
+  if (mode === "latest") {
+    const response = await notionClient.databases.query({
+      database_id: notionVocabularyDatabaseId,
+      page_size: numberOfWords,
+      sorts: [{ property: "Created date", direction: "descending" }],
+    });
+  
+    return filterValidWords(response.results as PageObjectResponse[]).map(
+      (word, index) => ({ ...word, id: index + 1 }),
+    );
+  }  
 
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const isWeekMode = mode === "week";
+
+  const weekFilter = {
+    property: "Created date" as const,
+    date: { on_or_after: sevenDaysAgo.toISOString() },
+  };
 
   let response = await notionClient.databases.query({
     database_id: notionVocabularyDatabaseId,
     filter: isWeekMode
-      ? {
-          and: [
-            {
-              property: "Created date",
-              date: {
-                on_or_after: sevenDaysAgo.toISOString(),
-              },
-            },
-            {
-              or: generateFilter(),
-            },
-          ],
-        }
-      : {
-          or: generateFilter(),
-        },
+      ? { and: [weekFilter, { or: generateFilter() }] }
+      : { or: generateFilter() },
     sorts: generateSorts(),
   });
 
-  if (response.results.length < _numberOfWords) {
+  // Fallback: relax the filter if not enough results
+  if (response.results.length < numberOfWords) {
     response = await notionClient.databases.query({
       database_id: notionVocabularyDatabaseId,
-      filter: isWeekMode
-        ? {
-            property: "Created date",
-            date: {
-              on_or_after: sevenDaysAgo.toISOString(),
-            },
-          }
-        : undefined,
+      filter: isWeekMode ? weekFilter : undefined,
       sorts: generateSorts(),
     });
   }
 
   return generateRandomWords(
-    (response.results as PageObjectResponse[])
-      .map(parseWordResponse)
-      .filter(
-        (word) =>
-          word.word && (word.translation || word.meaning || word.example),
-      ),
-    _numberOfWords,
+    filterValidWords(response.results as PageObjectResponse[]),
+    numberOfWords,
   );
 }
 
@@ -117,13 +112,11 @@ export async function getLatestWord(nextCursor?: string) {
   });
 
   const word = parseWordResponse(response.results[0] as PageObjectResponse);
-
   return { word, nextCursor: response.next_cursor };
 }
 
 export async function getWordById(id: string) {
   const response = await notionClient.pages.retrieve({ page_id: id });
-
   return parseWordResponse(response as PageObjectResponse);
 }
 
@@ -140,34 +133,18 @@ export async function updateWord(
 
   const properties: UpdatePageParameters["properties"] = {};
 
-  if (data.word !== undefined) {
-    properties["Word"] = {
-      title: [{ text: { content: data.word } }],
-    };
-  }
-  if (data.translation !== undefined) {
-    properties["Translation"] = {
-      rich_text: [{ text: { content: data.translation } }],
-    };
-  }
-  if (data.meaning !== undefined) {
-    properties["Meaning"] = {
-      rich_text: [{ text: { content: data.meaning } }],
-    };
-  }
-  if (data.example !== undefined) {
-    properties["Example"] = {
-      rich_text: [{ text: { content: data.example } }],
-    };
-  }
+  if (data.word !== undefined)
+    properties["Word"] = { title: [{ text: { content: data.word } }] };
+  if (data.translation !== undefined)
+    properties["Translation"] = { rich_text: [{ text: { content: data.translation } }] };
+  if (data.meaning !== undefined)
+    properties["Meaning"] = { rich_text: [{ text: { content: data.meaning } }] };
+  if (data.example !== undefined)
+    properties["Example"] = { rich_text: [{ text: { content: data.example } }] };
 
-  await notionClient.pages.update({
-    page_id: id,
-    properties,
-  });
+  await notionClient.pages.update({ page_id: id, properties });
 
   revalidatePath("/");
   revalidatePath(`/edit-card/${id}`);
-
   return true;
 }

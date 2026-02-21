@@ -4,6 +4,7 @@ import {
   AudioLines,
   AudioWaveform,
   BarChart3,
+  Calendar,
   Laptop,
   Layers3,
   Moon,
@@ -22,7 +23,15 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/Command";
-import { useCallback, useMemo, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useTheme } from "next-themes";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -43,13 +52,19 @@ import {
 } from "@/utils/keyboardShortcuts";
 import { CommandMenuTrigger } from "@/components/CommandMenuButton";
 import { SignedIn } from "@clerk/nextjs";
+import { VocabularyMode } from "@/types";
+import { getNextVocabularyMode } from "@/utils/getNextVocabularyMode";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
   const searchParams = useSearchParams();
-  const { push } = useRouter();
+  const { push, replace } = useRouter();
+  const pathname = usePathname();
+
+  const [isToggleModePending, startTransition] = useTransition();
+  const pendingToggleModeResolveRef = useRef<(() => void) | null>(null);
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -65,6 +80,33 @@ export function CommandMenu() {
       description: `Changed to ${theme} mode`,
     });
   };
+
+  const toggleVocabularyMode = () => {
+    const params = new URLSearchParams(searchParams);
+    const currentMode = params.get("mode") as VocabularyMode;
+    const newMode = getNextVocabularyMode(currentMode);
+
+    const promise = new Promise<string>((resolve) => {
+      pendingToggleModeResolveRef.current = () => resolve(newMode);
+    });
+
+    toast.promise(promise, {
+      loading: "Toggling vocabulary mode...",
+      success: (mode) => `Toggled to ${mode} mode`,
+      error: "Failed to toggle mode",
+    });
+
+    startTransition(() => {
+      replace(`${pathname}?mode=${newMode}`);
+    });
+  };
+
+  useEffect(() => {
+    if (!isToggleModePending && pendingToggleModeResolveRef.current) {
+      pendingToggleModeResolveRef.current();
+      pendingToggleModeResolveRef.current = null;
+    }
+  }, [isToggleModePending]);
 
   const themeIcon = useMemo(() => {
     switch (theme) {
@@ -105,8 +147,19 @@ export function CommandMenu() {
           setOpen(false);
         },
       },
+      {
+        scope: "matchup",
+        shortcut: "toggleVocabularyMode",
+        action: (e) => {
+          if (isToggleModePending) return;
+
+          e.preventDefault();
+          toggleVocabularyMode();
+          setOpen(false);
+        },
+      },
     ],
-    deps: [searchParams, toggleTheme],
+    deps: [searchParams, toggleTheme, isToggleModePending],
   });
 
   return (
@@ -117,6 +170,13 @@ export function CommandMenu() {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Suggestions">
+            <CommandItem onSelect={closeAfterDecorator(toggleVocabularyMode)}>
+              <Calendar className="mr-2 h-4 w-4" />
+              <span>Toggle vocabulary mode</span>
+              <CommandShortcut className="hidden sm:block">
+                {getShortcutDisplayName("matchup", "toggleVocabularyMode")}
+              </CommandShortcut>
+            </CommandItem>
             <CommandItem onSelect={closeAfterDecorator(toggleTheme)}>
               {themeIcon}
               <span>{`Toggle theme`}</span>

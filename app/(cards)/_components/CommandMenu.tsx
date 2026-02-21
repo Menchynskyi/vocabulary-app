@@ -24,7 +24,15 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/Command";
-import { useCallback, useContext, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useTheme } from "next-themes";
 import { CardsDispatchContext } from "./CardsContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -47,6 +55,7 @@ import {
 } from "@/utils/keyboardShortcuts";
 import { CommandMenuTrigger } from "@/components/CommandMenuButton";
 import { SignedIn } from "@clerk/nextjs";
+import { getNextVocabularyMode } from "@/utils/getNextVocabularyMode";
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
@@ -56,6 +65,9 @@ export function CommandMenu() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace, push } = useRouter();
+
+  const [isToggleModePending, startTransition] = useTransition();
+  const pendingToggleModeResolveRef = useRef<(() => void) | null>(null);
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -81,20 +93,30 @@ export function CommandMenu() {
 
   const toggleVocabularyMode = () => {
     const params = new URLSearchParams(searchParams);
-    const isWeekMode = params.get("mode") === VocabularyMode.week;
+    const currentMode = params.get("mode") as VocabularyMode;
+    const newMode = getNextVocabularyMode(currentMode);
 
-    if (isWeekMode) {
-      params.delete("mode");
-    } else {
-      params.set("mode", VocabularyMode.week);
-    }
+    const promise = new Promise<string>((resolve) => {
+      pendingToggleModeResolveRef.current = () => resolve(newMode);
+    });
 
-    replace(`${pathname}?${params.toString()}`);
+    toast.promise(promise, {
+      loading: "Toggling vocabulary mode...",
+      success: (mode) => `Toggled to ${mode} mode`,
+      error: "Failed to toggle mode",
+    });
 
-    toast("Vocabulary mode toggled", {
-      description: `Changed to ${isWeekMode ? "random" : "week"} mode`,
+    startTransition(() => {
+      replace(`${pathname}?mode=${newMode}`);
     });
   };
+
+  useEffect(() => {
+    if (!isToggleModePending && pendingToggleModeResolveRef.current) {
+      pendingToggleModeResolveRef.current();
+      pendingToggleModeResolveRef.current = null;
+    }
+  }, [isToggleModePending]);
 
   const changeTheme = (theme: string) => {
     setTheme(theme);
@@ -180,13 +202,15 @@ export function CommandMenu() {
         scope: "cards",
         shortcut: "toggleVocabularyMode",
         action: (e) => {
+          if (isToggleModePending) return;
+
           e.preventDefault();
           toggleVocabularyMode();
           setOpen(false);
         },
       },
     ],
-    deps: [searchParams, toggleTheme],
+    deps: [searchParams, toggleTheme, isToggleModePending],
   });
 
   return (

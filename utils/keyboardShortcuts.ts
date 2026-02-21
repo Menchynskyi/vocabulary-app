@@ -28,6 +28,9 @@ type ShortcutsObject = {
     revealLetter: Shortcut;
     pronounceWord: Shortcut;
   };
+  matchup: {
+    toggleVocabularyMode: Shortcut;
+  }
 };
 
 export const shortcuts: ShortcutsObject = {
@@ -43,18 +46,25 @@ export const shortcuts: ShortcutsObject = {
     pronounceWord: { key: "p", withModifier: true, displayName: "P" },
     editWord: { key: "e", withModifier: true, displayName: "E" },
     toggleFlipMode: { key: "f", withModifier: true, displayName: "F" },
+    copyCard: { key: "b", withModifier: true, displayName: "B" },
     toggleVocabularyMode: {
       key: "i",
       withModifier: true,
       displayName: "I",
     },
-    copyCard: { key: "b", withModifier: true, displayName: "B" },
   },
   blanks: {
     nextWord: { key: "Enter", withModifier: true, displayName: "↵" },
     revealLetter: { key: "f", withModifier: true, displayName: "F" },
     pronounceWord: { key: "p", withModifier: true, displayName: "P" },
   },
+  matchup: {
+    toggleVocabularyMode: {
+      key: "i",
+      withModifier: true,
+      displayName: "I",
+    },
+  }
 };
 
 export type ShortcutsScope = keyof ShortcutsObject;

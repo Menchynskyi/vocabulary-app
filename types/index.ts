@@ -1,7 +1,9 @@
 export enum VocabularyMode {
   week = "week",
   random = "random",
+  latest = "latest",
 }
+
 
 export type WordObject = {
   id: number;

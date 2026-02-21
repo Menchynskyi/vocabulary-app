@@ -12,6 +12,7 @@ import {
   matchUpWordsCountMin,
 } from "@/constants/match-up";
 import { MatchUpGame } from "./_components/MatchUpGame";
+import { VocabularyModeStatus } from "@/components/VocabularyModeStatus";
 
 type MatchUpPageProps = {
   searchParams: {
@@ -38,5 +39,10 @@ export default async function MatchUpPage({ searchParams }: MatchUpPageProps) {
 
   const words = await getWords(searchParams?.mode, wordsCount);
 
-  return <MatchUpGame words={words} initialLives={lives} />;
+  return (
+    <>
+      <MatchUpGame words={words} initialLives={lives} />
+      <VocabularyModeStatus vocabularyMode={searchParams?.mode} />
+    </>
+  );
 }
