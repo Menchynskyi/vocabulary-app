@@ -23,7 +23,7 @@ A Next.js vocabulary learning app powered by Notion as a CMS, Clerk for authenti
 2. Create a [Notion integration](https://www.notion.so/my-integrations) and connect it to your database.
    See the [official guide](https://developers.notion.com/docs/create-a-notion-integration) for details.
 
-3. Copy the integration secret and database ID — you'll need them for environment variables.
+3. Copy the integration secret and database ID - you'll need them for environment variables.
 
 ### 2. Clerk
 
