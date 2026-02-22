@@ -121,6 +121,6 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 pnpm db:studio
 ```
 
-Open [https://local.drizzle.studio](https://local.drizzle.studio) to browse your database.
+Open [https://local.drizzle.studio](https://local.drizzle.studio) to browse your database
 
 > 💡 See the `scripts` section in `package.json` for all available commands.
