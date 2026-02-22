@@ -51,12 +51,12 @@ A Next.js vocabulary learning app powered by Notion as a CMS, Clerk for authenti
 ### Prerequisites
 
 * Node.js 18+
-* npm, yarn, or pnpm
+* [pnpm](https://pnpm.io/)
 
 ### 1. Install Dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 2. Configure Environment Variables
@@ -110,7 +110,7 @@ POSTGRES_DATABASE=your_postgres_database
 ### 3. Run the App
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
@@ -118,7 +118,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 ### 4. Database Studio (Optional)
 
 ```bash
-npm run db:studio
+pnpm db:studio
 ```
 
 Open [https://local.drizzle.studio](https://local.drizzle.studio) to browse your database.
