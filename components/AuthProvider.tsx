@@ -90,6 +90,7 @@ export function AuthProvider({ children, ...props }: NextClerkProviderProps) {
           menuList: "bg-background border border-muted rounded-md !shadow-md",
           providerIcon__google: "!invert-0",
           providerIcon__github: "dark:invert",
+          lastAuthenticationStrategyBadge: "bg-background text-foreground",
 
           socialButtonsBlockButton: clerkButtonVariants({
             variant: "secondary",
