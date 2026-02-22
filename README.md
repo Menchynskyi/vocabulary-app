@@ -73,7 +73,7 @@ Then fill in `.env.local`:
 ```bash
 # ─── Notion ───────────────────────────────────────
 NOTION_SECRET=your_notion_secret
-NOTION_VOCABULARY_DATABASE_ID=your_notion_vocabulary_database_id
+NOTION_VOCABULARY_DATA_SOURCE_ID=your_notion_vocabulary_data_source_id
 NEXT_PUBLIC_NOTION_VOCABULARY_TRANSLATION_LANGUAGE=UA
 
 # ─── URLs ─────────────────────────────────────────

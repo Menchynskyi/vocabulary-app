@@ -16,7 +16,7 @@
     "@clerk/nextjs": "^5.0.6",
     "@google-cloud/text-to-speech": "^5.2.0",
     "@hookform/resolvers": "^3.3.4",
-    "@notionhq/client": "^2.2.3",
+    "@notionhq/client": "^5.9.0",
     "@radix-ui/react-context-menu": "^2.1.5",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",

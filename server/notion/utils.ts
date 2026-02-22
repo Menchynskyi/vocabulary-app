@@ -16,7 +16,7 @@ const isUkrainianTranslation =
   process.env.NEXT_PUBLIC_NOTION_VOCABULARY_TRANSLATION_LANGUAGE === "UA";
 
 export const notionVocabularyDatabaseId =
-  process.env.NOTION_VOCABULARY_DATABASE_ID || "";
+  process.env.NOTION_VOCABULARY_DATA_SOURCE_ID || "";
 
 export function generateRandomWords(
   words: Omit<WordObject, "id">[],

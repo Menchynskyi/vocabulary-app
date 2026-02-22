@@ -69,8 +69,8 @@ export async function getWords(
   const numberOfWords = getNumberOfWords(mode, listLengthOverride);
 
   if (mode === "latest") {
-    const response = await notionClient.databases.query({
-      database_id: notionVocabularyDatabaseId,
+    const response = await notionClient.dataSources.query({
+      data_source_id: notionVocabularyDatabaseId,
       page_size: numberOfWords,
       sorts: [{ property: "Created date", direction: "descending" }],
     });
@@ -89,8 +89,8 @@ export async function getWords(
     date: { on_or_after: sevenDaysAgo.toISOString() },
   };
 
-  let response = await notionClient.databases.query({
-    database_id: notionVocabularyDatabaseId,
+  let response = await notionClient.dataSources.query({
+    data_source_id: notionVocabularyDatabaseId,
     filter: isWeekMode
       ? { and: [weekFilter, { or: generateFilter() }] }
       : { or: generateFilter() },
@@ -99,8 +99,8 @@ export async function getWords(
 
   // Fallback: relax the filter if not enough results
   if (response.results.length < numberOfWords) {
-    response = await notionClient.databases.query({
-      database_id: notionVocabularyDatabaseId,
+    response = await notionClient.dataSources.query({
+      data_source_id: notionVocabularyDatabaseId,
       filter: isWeekMode ? weekFilter : undefined,
       sorts: generateSorts(),
     });
@@ -113,8 +113,8 @@ export async function getWords(
 }
 
 export async function getLatestWord(nextCursor?: string) {
-  const response = await notionClient.databases.query({
-    database_id: notionVocabularyDatabaseId,
+  const response = await notionClient.dataSources.query({
+    data_source_id: notionVocabularyDatabaseId,
     page_size: 1,
     start_cursor: nextCursor,
     sorts: [{ property: "Created date", direction: "descending" }],
