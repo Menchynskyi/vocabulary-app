@@ -77,12 +77,36 @@ const extractJsonString = (raw: string) => {
 };
 
 const aiCooldownByUser = new Map<string, number>();
+const maxCooldownEntries = 5000;
+
+const pruneCooldownMap = (now: number) => {
+  for (const [key, cooldownUntil] of aiCooldownByUser) {
+    if (cooldownUntil <= now) {
+      aiCooldownByUser.delete(key);
+    }
+  }
+
+  if (aiCooldownByUser.size <= maxCooldownEntries) {
+    return;
+  }
+
+  const entriesToDelete = aiCooldownByUser.size - maxCooldownEntries;
+  let deleted = 0;
+  for (const key of aiCooldownByUser.keys()) {
+    aiCooldownByUser.delete(key);
+    deleted += 1;
+    if (deleted >= entriesToDelete) {
+      break;
+    }
+  }
+};
 
 const generateJson = async <T>(
   prompt: string,
   schema: { parse: (data: unknown) => T },
   cooldownKey: string,
 ) => {
+  pruneCooldownMap(Date.now());
   const cooldownUntil = aiCooldownByUser.get(cooldownKey) ?? 0;
   const remainingCooldownMs = cooldownUntil - Date.now();
   if (remainingCooldownMs > 0) {

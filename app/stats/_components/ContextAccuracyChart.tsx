@@ -74,21 +74,36 @@ export function ContextAccuracyChart({
             <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
+                  const accuracyEntry = payload.find(
+                    (item) => item.dataKey === "accuracy",
+                  );
+                  const avgEntry = payload.find(
+                    (item) => item.dataKey === "avgAccuracy",
+                  );
+                  const createdAt =
+                    accuracyEntry?.payload?.createdAt ??
+                    avgEntry?.payload?.createdAt;
+                  if (!accuracyEntry || !avgEntry || !createdAt) {
+                    return null;
+                  }
+
                   return (
                     <div className="rounded-lg border bg-background p-2 shadow-sm">
                       <div className="grid grid-cols-2 gap-5">
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">
-                            {formatDate(payload[1]?.payload.createdAt)}
+                            {formatDate(createdAt)}
                           </span>
-                          <span className="font-bold">{payload[1].value}</span>
+                          <span className="font-bold">
+                            {accuracyEntry.value}
+                          </span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">
                             avg
                           </span>
                           <span className="font-bold text-muted-foreground">
-                            {payload[0].value}
+                            {avgEntry.value}
                           </span>
                         </div>
                       </div>

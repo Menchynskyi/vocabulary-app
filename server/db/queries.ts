@@ -42,6 +42,7 @@ import {
   voiceNameCookie,
   voiceOptions,
 } from "@/constants/voice";
+import { assertCurrentUserCanUseAI } from "@/server/auth/queries";
 
 const userSettingsGames = [
   "cards",
@@ -99,6 +100,9 @@ const isVoiceName = (value: string): value is VoiceName =>
 
 const clampRange = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
+
+const isValidAccuracyScore = (value: number) =>
+  Number.isFinite(value) && Number.isInteger(value) && value >= 1 && value <= 100;
 
 const sanitizeCardsSettings = (settings: Partial<UserCardsSettings>) => {
   const parsedLatest = Number(settings.cardsListLatestLength);
@@ -527,17 +531,19 @@ export const getUserContextStats = async (pageNumber: number, size = 20) => {
 };
 
 export const createUserContextStats = async (accuracy: number) => {
-  const user = auth();
-
-  if (!user.userId) throw new Error("Unauthorized");
+  const userId = await assertCurrentUserCanUseAI();
+  if (!isValidAccuracyScore(accuracy)) {
+    throw new Error("Invalid context accuracy score");
+  }
+  const normalizedAccuracy = numberToDoublePrecision(accuracy);
 
   try {
     await db.transaction(async (tx) => {
       // Serialize writes per user to avoid race conditions in avg/attempt computation.
-      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${user.userId}))`);
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${userId}))`);
 
       const lastContextStats = await tx.query.contextStats.findFirst({
-        where: (model, { eq }) => eq(model.userId, user.userId),
+        where: (model, { eq }) => eq(model.userId, userId),
         orderBy: (model, { desc }) => desc(model.createdAt),
         columns: {
           avgAccuracy: true,
@@ -545,21 +551,21 @@ export const createUserContextStats = async (accuracy: number) => {
         },
       });
 
-      let avgAccuracy = accuracy;
+      let avgAccuracy = normalizedAccuracy;
       let attemptNumber = 1;
       if (lastContextStats) {
         avgAccuracy = numberToDoublePrecision(
-          (lastContextStats.avgAccuracy * lastContextStats.attemptNumber + accuracy) /
+          (lastContextStats.avgAccuracy * lastContextStats.attemptNumber + normalizedAccuracy) /
             (lastContextStats.attemptNumber + 1),
         );
         attemptNumber = lastContextStats.attemptNumber + 1;
       }
 
       await tx.insert(contextStats).values({
-        accuracy,
+        accuracy: normalizedAccuracy,
         avgAccuracy,
         attemptNumber,
-        userId: user.userId,
+        userId,
       });
     });
 
