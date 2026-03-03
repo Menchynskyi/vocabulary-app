@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -23,6 +24,8 @@ import { MatchUpBlock } from "./MatchUpBlock";
 import { Button } from "@/components/ui/Button";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { useRouter } from "next/navigation";
+import { createUserMatchUpStats } from "@/server/db/queries";
+import { numberToDoublePrecision } from "@/utils/numbers";
 
 type MatchUpGameProps = {
   words: WordObject[];
@@ -48,6 +51,7 @@ export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
   const [lives, setLives] = useState(initialLives);
   const [status, setStatus] = useState<"playing" | "won" | "lost">("playing");
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const hasRecordedAttempt = useRef(false);
   const [activeDrag, setActiveDrag] = useState<{
     id: string;
     text: string;
@@ -145,7 +149,7 @@ export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
         }, 500);
       }
     },
-    [status, words.length, matchedIds],
+    [status],
   );
 
   useEffect(() => {
@@ -159,6 +163,7 @@ export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
   }, [matchedIds.size, words.length, status]);
 
   const startOver = useCallback(() => {
+    hasRecordedAttempt.current = false;
     setMatchedIds(new Set());
     setLives(initialLives);
     setStatus("playing");
@@ -172,11 +177,37 @@ export function MatchUpGame({ words, initialLives }: MatchUpGameProps) {
   }, [router]);
 
   useEffect(() => {
+    hasRecordedAttempt.current = false;
     setMatchedIds(new Set());
     setLives(initialLives);
     setStatus("playing");
     setFeedback(null);
   }, [words, initialLives]);
+
+  useEffect(() => {
+    if (
+      (status !== "won" && status !== "lost") ||
+      hasRecordedAttempt.current ||
+      initialLives <= 0
+    ) {
+      return;
+    }
+
+    hasRecordedAttempt.current = true;
+    const mistakes = Math.max(0, initialLives - lives);
+    const accuracy = numberToDoublePrecision(
+      Math.max(0, (1 - mistakes / initialLives) * 100),
+    );
+
+    void createUserMatchUpStats({
+      accuracy,
+      mistakes,
+      initialLives,
+    }).catch((error) => {
+      hasRecordedAttempt.current = false;
+      console.error(error);
+    });
+  }, [status, initialLives, lives]);
 
   if (words.length === 0) {
     return (

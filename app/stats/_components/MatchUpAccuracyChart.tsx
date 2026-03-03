@@ -2,17 +2,25 @@
 
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
+import Link from "next/link";
 import { formatDate } from "@/utils/dates";
 import { MoveLeft, MoveRight } from "lucide-react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useTransition } from "react";
-import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis } from "recharts";
+import { useTransition } from "react";
+import {
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-type BlanksAccuracyChartProps = {
+type MatchUpAccuracyChartProps = {
   data: Array<{
     accuracy: number;
-    avgAccuracy: number;
+    mistakes: number;
+    initialLives: number;
     createdAt: Date;
   }>;
   pagination: {
@@ -22,20 +30,14 @@ type BlanksAccuracyChartProps = {
   pageParamKey?: string;
 };
 
-export function BlanksAccuracyChart({
+export function MatchUpAccuracyChart({
   data,
   pagination,
-  pageParamKey = "page",
-}: BlanksAccuracyChartProps) {
+  pageParamKey = "matchUpPage",
+}: MatchUpAccuracyChartProps) {
   const { push } = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-
-  const domain = useMemo(() => {
-    const min = Math.min(...data.map((d) => d.avgAccuracy));
-    const max = Math.max(...data.map((d) => d.avgAccuracy));
-    return [Math.max(0, min - 5), Math.min(100, max + 5)];
-  }, [data]);
 
   const handleChangePage = (inc: number) => () => {
     const params = new URLSearchParams(searchParams);
@@ -49,46 +51,49 @@ export function BlanksAccuracyChart({
     return (
       <div className="justify-center p-6 pt-2">
         <Link
-          href="/blanks"
+          href="/match-up"
           className="text-muted-foreground hover:text-primary hover:underline"
         >
-          Start filling in blanks to see your accuracy here
+          Start match-up attempts to see your accuracy here
         </Link>
       </div>
     );
   }
 
   return (
-    <>
-      <div className="h-[200px]">
+    <div className="p-2">
+      <div className="h-[260px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
             margin={{
-              top: 20,
+              top: 10,
               right: 20,
-              left: 20,
-              bottom: 20,
+              left: 10,
+              bottom: 10,
             }}
           >
             <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
+                  const point = payload[0]?.payload;
                   return (
                     <div className="rounded-lg border bg-background p-2 shadow-sm">
                       <div className="grid grid-cols-2 gap-5">
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">
-                            {formatDate(payload[1]?.payload.createdAt)}
+                            {formatDate(point.createdAt)}
                           </span>
-                          <span className="font-bold">{payload[1].value}</span>
+                          <span className="font-bold">
+                            {Math.round(point.accuracy)}%
+                          </span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">
-                            avg
+                            mistakes
                           </span>
                           <span className="font-bold text-muted-foreground">
-                            {payload[0].value}
+                            {point.mistakes} / {point.initialLives}
                           </span>
                         </div>
                       </div>
@@ -99,20 +104,12 @@ export function BlanksAccuracyChart({
                 return null;
               }}
             />
-            <YAxis domain={domain} hide />
-            <Line
-              type="monotone"
-              strokeWidth={2}
-              dataKey="avgAccuracy"
-              activeDot={{
-                r: 6,
-                style: { fill: "hsl(var(--primary))", opacity: 0.25 },
-              }}
-              style={{
-                stroke: "hsl(var(--primary))",
-                opacity: 0.25,
-              }}
+            <XAxis
+              dataKey="createdAt"
+              tickFormatter={(value: Date) => formatDate(new Date(value))}
+              minTickGap={20}
             />
+            <YAxis domain={[0, 100]} />
             <Line
               type="monotone"
               dataKey="accuracy"
@@ -129,7 +126,7 @@ export function BlanksAccuracyChart({
         </ResponsiveContainer>
       </div>
 
-      <div className="flex justify-between gap-2 p-6">
+      <div className="flex justify-between gap-2 px-4 pb-4 pt-2">
         <Button
           variant="outline"
           onClick={handleChangePage(1)}
@@ -157,6 +154,6 @@ export function BlanksAccuracyChart({
           )}
         </Button>
       </div>
-    </>
+    </div>
   );
 }

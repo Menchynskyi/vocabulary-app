@@ -11,7 +11,7 @@ export default function StatsLayout({ children }: StatsLayoutProps) {
       <Header>
         <CommandMenu />
       </Header>
-      <main className="mt-16 flex justify-center sm:mt-36">{children}</main>
+      <main className="my-12 flex justify-center max-sm:my-6">{children}</main>
     </>
   );
 }

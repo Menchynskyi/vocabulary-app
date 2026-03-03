@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Card } from "./Card";
 import { VocabularyMode, WordObject } from "@/types";
 import { CardsContext, CardsDispatchContext } from "./CardsContext";
@@ -14,6 +14,7 @@ import { playBufferAudio } from "@/utils/playBufferAudio";
 import { useKeyboardShortcuts } from "@/utils/keyboardShortcuts";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
+import { createUserCardsStats } from "@/server/db/queries";
 
 type CardsListProps = {
   cards: WordObject[];
@@ -32,6 +33,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
   const [cardAudio, setCardAudio] = useState<Array<Blob | null>>(
     Array(cards.length).fill(null),
   );
+  const hasRecordedCompletion = useRef(false);
 
   const isCompleted = currentCardIndex >= cards.length;
 
@@ -59,6 +61,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
   useEffect(() => {
     setCurrentCardIndex(0);
     setCardAudio(Array(cards.length).fill(null));
+    hasRecordedCompletion.current = false;
 
     const handleVoiceChange = () => {
       setCardAudio(Array(cards.length).fill(null));
@@ -71,6 +74,29 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
       );
     };
   }, [cards.length]);
+
+  useEffect(() => {
+    if (
+      !isCompleted ||
+      hasRecordedCompletion.current ||
+      !cards.length ||
+      !isSignedIn
+    ) {
+      return;
+    }
+
+    hasRecordedCompletion.current = true;
+
+    void createUserCardsStats(cards.length).catch((error) => {
+      hasRecordedCompletion.current = false;
+      console.error(error);
+    });
+  }, [isCompleted, cards.length, isSignedIn]);
+
+  const startOver = useCallback(() => {
+    hasRecordedCompletion.current = false;
+    setCurrentCardIndex(0);
+  }, []);
 
   const playWord = useCallback(
     async (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -228,7 +254,7 @@ export function CardsList({ cards, vocabularyMode }: CardsListProps) {
   return (
     <div className="mt-16 sm:mt-36">
       {isCompleted ? (
-        <CompletedList cards={cards} startOver={() => setCurrentCardIndex(0)} />
+        <CompletedList cards={cards} startOver={startOver} />
       ) : (
         <div className="flex flex-col items-center sm:flex-row">
           <Button
