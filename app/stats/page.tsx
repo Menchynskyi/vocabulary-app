@@ -195,7 +195,8 @@ export default async function Stats({ searchParams }: StatsProps) {
             Most popular game by month
           </h2>
           <p className="text-sm text-muted-foreground">
-            Record counts for cards, match-up, blanks, and context in the current year
+            Record counts for cards, match-up, blanks, and context in the
+            current year
           </p>
         </div>
         <Suspense fallback={<StatsSkeleton />}>

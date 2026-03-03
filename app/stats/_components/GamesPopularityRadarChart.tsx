@@ -47,10 +47,7 @@ export function GamesPopularityRadarChart({
 
   const hasAnyRecords = data.some(
     (item) =>
-      item.cards > 0 ||
-      item.matchUp > 0 ||
-      item.blanks > 0 ||
-      item.context > 0,
+      item.cards > 0 || item.matchUp > 0 || item.blanks > 0 || item.context > 0,
   );
 
   if (!hasAnyRecords) {
