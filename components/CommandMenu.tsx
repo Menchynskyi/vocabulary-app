@@ -1,13 +1,13 @@
 "use client";
 
 import {
+  AudioLines,
+  AudioWaveform,
   Laptop,
-  Layers3,
-  Link2,
   Moon,
+  SettingsIcon,
   Sun,
   Triangle,
-  Wand,
 } from "lucide-react";
 import {
   CommandDialog,
@@ -19,23 +19,58 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/Command";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { GithubIcon } from "@/components/icons/GithubIcon";
 import { NotionIcon } from "@/components/icons/NotionIcon";
+import { settingsButtonId } from "@/constants";
 import {
+  type ShortcutsScope,
+  type ScopeShortcuts,
   getShortcutDisplayName,
   useKeyboardShortcuts,
 } from "@/utils/keyboardShortcuts";
 import { CommandMenuTrigger } from "@/components/CommandMenuButton";
+import { SignedIn } from "@clerk/nextjs";
+import { navLinks } from "@/constants/navigation";
+import { useRandomVoice } from "@/hooks/useRandomVoice";
 
-export function CommandMenu() {
+type ShortcutRef = {
+  [S in ShortcutsScope]: { scope: S; shortcut: ScopeShortcuts<S> };
+}[ShortcutsScope];
+
+function getShortcutLabel(ref: ShortcutRef) {
+  return getShortcutDisplayName(
+    ref.scope as "global",
+    ref.shortcut as ScopeShortcuts<"global">,
+  );
+}
+
+export type PageCommand = {
+  icon: React.ReactNode;
+  label: string;
+  onSelect: () => void;
+  shortcut?: ShortcutRef;
+};
+
+type CommandMenuProps = {
+  pageCommands?: PageCommand[];
+  showVoice?: boolean;
+  showSettings?: boolean;
+};
+
+export function CommandMenu({
+  pageCommands,
+  showVoice,
+  showSettings,
+}: CommandMenuProps) {
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
-
+  const pathname = usePathname();
   const { push } = useRouter();
+  const { setRandomVoice } = useRandomVoice();
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -68,6 +103,30 @@ export function CommandMenu() {
     setOpen(false);
   };
 
+  const openSettings = () => {
+    document.getElementById(settingsButtonId)?.click();
+  };
+
+  const filteredNavLinks = navLinks.filter((link) => {
+    const isActive = link.isActive
+      ? link.isActive(pathname)
+      : pathname.startsWith(link.path);
+    return !isActive;
+  });
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key !== "Meta" && e.key !== "Control") {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
   useKeyboardShortcuts({
     shortcuts: [
       {
@@ -84,7 +143,6 @@ export function CommandMenu() {
         action: (e) => {
           e.preventDefault();
           toggleTheme();
-          setOpen(false);
         },
       },
     ],
@@ -99,6 +157,20 @@ export function CommandMenu() {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Suggestions">
+            {pageCommands?.map((cmd) => (
+              <CommandItem
+                key={cmd.label}
+                onSelect={closeAfterDecorator(cmd.onSelect)}
+              >
+                {cmd.icon}
+                <span>{cmd.label}</span>
+                {cmd.shortcut && (
+                  <CommandShortcut className="hidden sm:block">
+                    {getShortcutLabel(cmd.shortcut)}
+                  </CommandShortcut>
+                )}
+              </CommandItem>
+            ))}
             <CommandItem onSelect={closeAfterDecorator(toggleTheme)}>
               {themeIcon}
               <span>{`Toggle theme`}</span>
@@ -106,22 +178,52 @@ export function CommandMenu() {
                 {getShortcutDisplayName("global", "toggleTheme")}
               </CommandShortcut>
             </CommandItem>
+            {showSettings && (
+              <CommandItem onSelect={closeAfterDecorator(openSettings)}>
+                <SettingsIcon className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+                <CommandShortcut className="hidden sm:block">
+                  {getShortcutDisplayName("global", "toggleSettings")}
+                </CommandShortcut>
+              </CommandItem>
+            )}
           </CommandGroup>
+
+          {showVoice && (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading="Voice">
+                <CommandItem
+                  onSelect={closeAfterDecorator(setRandomVoice("en-US"))}
+                >
+                  <AudioWaveform className="mr-2 h-4 w-4" />
+                  <span>Set random US English voice</span>
+                </CommandItem>
+                <CommandItem
+                  onSelect={closeAfterDecorator(setRandomVoice("en-GB"))}
+                >
+                  <AudioLines className="mr-2 h-4 w-4" />
+                  <span>Set random GB English voice</span>
+                </CommandItem>
+              </CommandGroup>
+            </>
+          )}
 
           <CommandSeparator />
           <CommandGroup heading="Links">
-            <CommandItem onSelect={() => push("/")}>
-              <Layers3 className="mr-2 h-4 w-4" />
-              <span>Cards</span>
-            </CommandItem>
-            <CommandItem onSelect={() => push("/match-up")}>
-              <Link2 className="mr-2 h-4 w-4" />
-              <span>Match up</span>
-            </CommandItem>
-            <CommandItem onSelect={() => push("/blanks")}>
-              <Wand className="mr-2 h-4 w-4" />
-              <span>Blanks</span>
-            </CommandItem>
+            {filteredNavLinks.map((link) => {
+              const item = (
+                <CommandItem key={link.path} onSelect={() => push(link.path)}>
+                  <link.icon className="mr-2 h-4 w-4" />
+                  <span>{link.label}</span>
+                </CommandItem>
+              );
+              return link.authGated ? (
+                <SignedIn key={link.path}>{item}</SignedIn>
+              ) : (
+                item
+              );
+            })}
             <CommandItem
               onSelect={closeAfterDecorator(() =>
                 window.open(process.env.NEXT_PUBLIC_NOTION_PAGE_URL, "_blank"),

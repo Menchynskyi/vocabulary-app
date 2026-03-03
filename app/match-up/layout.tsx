@@ -1,7 +1,7 @@
 import { Header } from "@/components/Header";
 import { Settings } from "./_components/Settings";
 import { Suspense } from "react";
-import { CommandMenu } from "./_components/CommandMenu";
+import { MatchUpCommandMenu } from "./_components/MatchUpCommandMenu";
 
 type MatchUpLayoutProps = {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ export default function MatchUpLayout({ children }: MatchUpLayoutProps) {
     <>
       <Header>
         <Suspense>
-          <CommandMenu />
+          <MatchUpCommandMenu />
           <Settings />
         </Suspense>
       </Header>

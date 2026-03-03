@@ -1,6 +1,6 @@
 import { Header } from "@/components/Header";
 import { CardsProvider } from "./_components/CardsContext";
-import { CommandMenu } from "./_components/CommandMenu";
+import { CardsCommandMenu } from "./_components/CardsCommandMenu";
 import { Settings } from "./_components/Settings";
 import { Suspense } from "react";
 import { CardsSkeleton } from "./_components/CardsSkeleton";
@@ -18,7 +18,7 @@ export default function CardsLayout({
     <CardsProvider>
       <Header>
         <Suspense>
-          <CommandMenu />
+          <CardsCommandMenu />
         </Suspense>
         <Settings />
       </Header>

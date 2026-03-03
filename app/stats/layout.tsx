@@ -1,5 +1,5 @@
 import { Header } from "@/components/Header";
-import { CommandMenu } from "./_components/CommandMenu";
+import { CommandMenu } from "@/components/CommandMenu";
 
 type StatsLayoutProps = {
   children: React.ReactNode;

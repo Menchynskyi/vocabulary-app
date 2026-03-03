@@ -92,7 +92,8 @@ type UseKeyboardShortcutsParams<T extends ShortcutsScope> = {
     shortcut:
       | ScopeShortcuts<"global">
       | ScopeShortcuts<"cards">
-      | ScopeShortcuts<"blanks">;
+      | ScopeShortcuts<"blanks">
+      | ScopeShortcuts<"matchup">;
     action: (e: KeyboardEvent) => void;
   }>;
   deps?: DependencyList;
