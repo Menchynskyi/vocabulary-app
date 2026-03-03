@@ -44,6 +44,14 @@ A Next.js vocabulary learning app powered by Notion as a CMS, Clerk for authenti
 3. Add all environment variables (see [Environment Variables](#-environment-variables) below).
 4. Connect your forked/cloned repository and deploy.
 
+### 5. Gemini AI (Context game)
+
+1. Create a Gemini API key in [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Add the key to server env as `GEMINI_API_KEY`.
+3. Ensure billing/quota is configured for the key if you plan to use the Context game frequently.
+4. Restrict access per user via Clerk private metadata:
+   - set `privateMetadata.canUseAI = true` for users allowed to open/use Context.
+
 ---
 
 ## 🛠️ Local Development
@@ -86,6 +94,9 @@ GOOGLE_CLOUD_PRIVATE_KEY=your_google_cloud_private_key
 GOOGLE_CLOUD_CLIENT_EMAIL=your_google_cloud_client_email
 GOOGLE_CLOUD_PROJECT_ID=your_google_cloud_project_id
 
+# ─── Gemini AI (Context game) ─────────────────────
+GEMINI_API_KEY=your_gemini_api_key
+
 # ─── Clerk ────────────────────────────────────────
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 CLERK_SECRET_KEY=your_clerk_secret_key
@@ -106,6 +117,13 @@ POSTGRES_DATABASE=your_postgres_database
 ```
 
 </details>
+
+### AI Access & Safety Notes
+
+- Gemini requests are executed only in server actions under `server/ai`; the API key is never exposed to the client.
+- The Context page is auth-protected and also checks `privateMetadata.canUseAI` before using AI.
+- AI server actions additionally enforce `canUseAI` (defense in depth).
+- If Gemini returns quota/rate-limit errors, the app shows a retry countdown and avoids immediate repeated requests during cooldown.
 
 ### 3. Run the App
 

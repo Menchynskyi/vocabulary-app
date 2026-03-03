@@ -71,6 +71,26 @@ export const matchUpStats = createTable(
   },
 );
 
+export const contextStats = createTable(
+  "context_stats",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id", { length: 256 }).notNull(),
+    accuracy: doublePrecision("accuracy").notNull(),
+    avgAccuracy: doublePrecision("avg_accuracy").notNull(),
+    attemptNumber: integer("attempt_number").notNull(),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt"),
+  },
+  (table) => {
+    return {
+      userIdIndex: index("context_user_id_index").on(table.userId),
+    };
+  },
+);
+
 export const userSettings = createTable(
   "user_settings",
   {

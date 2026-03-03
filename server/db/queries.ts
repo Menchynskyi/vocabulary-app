@@ -2,7 +2,13 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from ".";
-import { blanksStats, cardsStats, matchUpStats, userSettings } from "./schema";
+import {
+  blanksStats,
+  cardsStats,
+  contextStats,
+  matchUpStats,
+  userSettings,
+} from "./schema";
 import { numberToDoublePrecision } from "@/utils/numbers";
 import { and, count, eq, gte, lt } from "drizzle-orm";
 import {
@@ -26,13 +32,24 @@ import {
   matchUpWordsCountMin,
 } from "@/constants/match-up";
 import {
+  contextWordsCountMax,
+  contextWordsCountMin,
+  defaultContextWordsCount,
+} from "@/constants/context";
+import {
   VoiceName,
   defaultVoiceOption,
   voiceNameCookie,
   voiceOptions,
 } from "@/constants/voice";
 
-const userSettingsGames = ["cards", "blanks", "match-up", "global"] as const;
+const userSettingsGames = [
+  "cards",
+  "blanks",
+  "match-up",
+  "context",
+  "global",
+] as const;
 
 type UserSettingsGame = (typeof userSettingsGames)[number];
 
@@ -55,10 +72,15 @@ type UserGlobalSettings = {
   voiceName: VoiceName;
 };
 
+type UserContextSettings = {
+  contextWordsCount: number;
+};
+
 export type AuthorizedUserSettings = {
   cards?: UserCardsSettings;
   blanks?: UserBlanksSettings;
   "match-up"?: UserMatchUpSettings;
+  context?: UserContextSettings;
   global?: UserGlobalSettings;
 };
 
@@ -66,6 +88,7 @@ export type UpsertAuthorizedUserSettingsInput = {
   cards?: Partial<UserCardsSettings>;
   blanks?: Partial<UserBlanksSettings>;
   "match-up"?: Partial<UserMatchUpSettings>;
+  context?: Partial<UserContextSettings>;
   global?: Partial<UserGlobalSettings>;
 };
 
@@ -126,17 +149,32 @@ const sanitizeGlobalSettings = (settings: Partial<UserGlobalSettings>) => {
   };
 };
 
+const sanitizeContextSettings = (settings: Partial<UserContextSettings>) => {
+  const parsedWordsCount = Number(settings.contextWordsCount);
+  return {
+    contextWordsCount: Number.isFinite(parsedWordsCount)
+      ? clampRange(parsedWordsCount, contextWordsCountMin, contextWordsCountMax)
+      : defaultContextWordsCount,
+  };
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
 const getSanitizedGameSettings = (
   game: UserSettingsGame,
   rawSettings: unknown,
-): UserCardsSettings | UserBlanksSettings | UserMatchUpSettings | UserGlobalSettings => {
+):
+  | UserCardsSettings
+  | UserBlanksSettings
+  | UserMatchUpSettings
+  | UserContextSettings
+  | UserGlobalSettings => {
   if (!isRecord(rawSettings)) {
     if (game === "cards") return sanitizeCardsSettings({});
     if (game === "blanks") return sanitizeBlanksSettings({});
     if (game === "match-up") return sanitizeMatchUpSettings({});
+    if (game === "context") return sanitizeContextSettings({});
     return sanitizeGlobalSettings({});
   }
 
@@ -148,6 +186,9 @@ const getSanitizedGameSettings = (
   }
   if (game === "match-up") {
     return sanitizeMatchUpSettings(rawSettings as Partial<UserMatchUpSettings>);
+  }
+  if (game === "context") {
+    return sanitizeContextSettings(rawSettings as Partial<UserContextSettings>);
   }
 
   return sanitizeGlobalSettings(rawSettings as Partial<UserGlobalSettings>);
@@ -191,6 +232,13 @@ export const getAuthorizedUserSettings = async (): Promise<AuthorizedUserSetting
       ) as UserMatchUpSettings;
       return;
     }
+    if (game === "context") {
+      normalized.context = getSanitizedGameSettings(
+        game,
+        row.settings,
+      ) as UserContextSettings;
+      return;
+    }
 
     normalized.global = getSanitizedGameSettings(game, row.settings) as UserGlobalSettings;
   });
@@ -223,6 +271,12 @@ export const upsertAuthorizedUserSettings = async (
     updates.push({
       game: "match-up",
       settings: sanitizeMatchUpSettings(input["match-up"]),
+    });
+  }
+  if (input.context) {
+    updates.push({
+      game: "context",
+      settings: sanitizeContextSettings(input.context),
     });
   }
   if (input.global) {
@@ -260,6 +314,7 @@ export const getEffectiveUserSettings = async (
     cards: UserCardsSettings;
     blanks: UserBlanksSettings;
     "match-up": UserMatchUpSettings;
+    context: UserContextSettings;
     global: UserGlobalSettings;
   },
 ) => {
@@ -293,6 +348,10 @@ export const getEffectiveUserSettings = async (
       matchUpWordsCount:
         dbSettings["match-up"]?.matchUpWordsCount ??
         cookieSettings["match-up"].matchUpWordsCount,
+    },
+    context: {
+      contextWordsCount:
+        dbSettings.context?.contextWordsCount ?? cookieSettings.context.contextWordsCount,
     },
     global: {
       voiceName: dbSettings.global?.voiceName ?? cookieSettings.global.voiceName,
@@ -354,6 +413,9 @@ export const getDefaultCookieLikeSettings = async (
             matchUpWordsCountMax,
           )
         : defaultMatchUpWordsCount,
+    },
+    context: {
+      contextWordsCount: defaultContextWordsCount,
     },
     global: {
       voiceName:
@@ -431,6 +493,75 @@ export const createUserBlanksStats = async (accuracy: number) => {
   } catch (error) {
     console.error(error);
     throw new Error("Failed to create user blanks stats");
+  }
+};
+
+export const getUserContextStats = async (pageNumber: number, size = 20) => {
+  const user = auth();
+
+  if (!user.userId) throw new Error("Unauthorized");
+
+  const totalUserContextStats = await db
+    .select({ count: count() })
+    .from(contextStats)
+    .where(eq(contextStats.userId, user.userId));
+
+  const totalPages = Math.ceil(totalUserContextStats[0].count / size);
+
+  const userContextStats = await db.query.contextStats.findMany({
+    where: (model, { eq }) => eq(model.userId, user.userId),
+    orderBy: (model, { desc }) => desc(model.createdAt),
+    columns: {
+      accuracy: true,
+      avgAccuracy: true,
+      createdAt: true,
+    },
+    limit: size,
+    offset: (pageNumber - 1) * size,
+  });
+
+  return {
+    data: [...userContextStats].reverse(),
+    totalPages,
+  };
+};
+
+export const createUserContextStats = async (accuracy: number) => {
+  const user = auth();
+
+  if (!user.userId) throw new Error("Unauthorized");
+
+  try {
+    const lastContextStats = await db.query.contextStats.findFirst({
+      where: (model, { eq }) => eq(model.userId, user.userId),
+      orderBy: (model, { desc }) => desc(model.createdAt),
+      columns: {
+        avgAccuracy: true,
+        attemptNumber: true,
+      },
+    });
+
+    let avgAccuracy = accuracy;
+    let attemptNumber = 1;
+    if (lastContextStats) {
+      avgAccuracy = numberToDoublePrecision(
+        (lastContextStats.avgAccuracy * lastContextStats.attemptNumber + accuracy) /
+          (lastContextStats.attemptNumber + 1),
+      );
+      attemptNumber = lastContextStats.attemptNumber + 1;
+    }
+
+    await db.insert(contextStats).values({
+      accuracy,
+      avgAccuracy,
+      attemptNumber,
+      userId: user.userId,
+    });
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to create user context stats");
   }
 };
 

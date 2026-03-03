@@ -30,7 +30,10 @@ type ShortcutsObject = {
   };
   matchup: {
     toggleVocabularyMode: Shortcut;
-  }
+  };
+  context: {
+    toggleVocabularyMode: Shortcut;
+  };
 };
 
 export const shortcuts: ShortcutsObject = {
@@ -64,7 +67,14 @@ export const shortcuts: ShortcutsObject = {
       withModifier: true,
       displayName: "I",
     },
-  }
+  },
+  context: {
+    toggleVocabularyMode: {
+      key: "i",
+      withModifier: true,
+      displayName: "I",
+    },
+  },
 };
 
 export type ShortcutsScope = keyof ShortcutsObject;
@@ -93,7 +103,8 @@ type UseKeyboardShortcutsParams<T extends ShortcutsScope> = {
       | ScopeShortcuts<"global">
       | ScopeShortcuts<"cards">
       | ScopeShortcuts<"blanks">
-      | ScopeShortcuts<"matchup">;
+      | ScopeShortcuts<"matchup">
+      | ScopeShortcuts<"context">;
     action: (e: KeyboardEvent) => void;
   }>;
   deps?: DependencyList;
