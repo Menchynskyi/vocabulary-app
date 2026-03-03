@@ -1,4 +1,4 @@
-import { BarChart3, Layers3, Link2, Wand } from "lucide-react";
+import { BarChart3, Layers3, Link2, MessageSquareText, Wand } from "lucide-react";
 import { type LucideIcon } from "lucide-react";
 
 export type NavLink = {
@@ -25,6 +25,12 @@ export const navLinks: NavLink[] = [
     path: "/blanks",
     label: "Blanks",
     icon: Wand,
+  },
+  {
+    path: "/context",
+    label: "Context",
+    icon: MessageSquareText,
+    authGated: true,
   },
   {
     path: "/stats",

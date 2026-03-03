@@ -20,6 +20,9 @@ importers:
       '@google-cloud/text-to-speech':
         specifier: ^5.2.0
         version: 5.2.0
+      '@google/generative-ai':
+        specifier: ^0.24.1
+        version: 0.24.1
       '@hookform/resolvers':
         specifier: ^3.3.4
         version: 3.3.4(react-hook-form@7.51.4(react@18.3.1))
@@ -530,6 +533,10 @@ packages:
   '@google-cloud/text-to-speech@5.2.0':
     resolution: {integrity: sha512-N05ecDkKOgiBcSZmJlWpqR6nb8HOPGjOlTp+sdY1tNlZYV8UwsseRcuEM32ReU8n95+cCp+q8D4YCucFJ/DSsA==}
     engines: {node: '>=14.0.0'}
+
+  '@google/generative-ai@0.24.1':
+    resolution: {integrity: sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==}
+    engines: {node: '>=18.0.0'}
 
   '@grpc/grpc-js@1.10.7':
     resolution: {integrity: sha512-ZMBVjSeDAz3tFSehyO6Pd08xZT1HfIwq3opbeM4cDlBh52gmwp0wVIPcQur53NN0ac68HMZ/7SF2rGRD5KmVmg==}
@@ -3685,6 +3692,8 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  '@google/generative-ai@0.24.1': {}
 
   '@grpc/grpc-js@1.10.7':
     dependencies:

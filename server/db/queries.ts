@@ -2,9 +2,15 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from ".";
-import { blanksStats, cardsStats, matchUpStats, userSettings } from "./schema";
+import {
+  blanksStats,
+  cardsStats,
+  contextStats,
+  matchUpStats,
+  userSettings,
+} from "./schema";
 import { numberToDoublePrecision } from "@/utils/numbers";
-import { and, count, eq, gte, lt } from "drizzle-orm";
+import { and, count, eq, gte, lt, sql } from "drizzle-orm";
 import {
   cardsListLatestLengthCookie,
   cardsListRandomLengthCookie,
@@ -26,13 +32,25 @@ import {
   matchUpWordsCountMin,
 } from "@/constants/match-up";
 import {
+  contextWordsCountMax,
+  contextWordsCountMin,
+  defaultContextWordsCount,
+} from "@/constants/context";
+import {
   VoiceName,
   defaultVoiceOption,
   voiceNameCookie,
   voiceOptions,
 } from "@/constants/voice";
+import { assertCurrentUserCanUseAI } from "@/server/auth/queries";
 
-const userSettingsGames = ["cards", "blanks", "match-up", "global"] as const;
+const userSettingsGames = [
+  "cards",
+  "blanks",
+  "match-up",
+  "context",
+  "global",
+] as const;
 
 type UserSettingsGame = (typeof userSettingsGames)[number];
 
@@ -55,10 +73,15 @@ type UserGlobalSettings = {
   voiceName: VoiceName;
 };
 
+type UserContextSettings = {
+  contextWordsCount: number;
+};
+
 export type AuthorizedUserSettings = {
   cards?: UserCardsSettings;
   blanks?: UserBlanksSettings;
   "match-up"?: UserMatchUpSettings;
+  context?: UserContextSettings;
   global?: UserGlobalSettings;
 };
 
@@ -66,6 +89,7 @@ export type UpsertAuthorizedUserSettingsInput = {
   cards?: Partial<UserCardsSettings>;
   blanks?: Partial<UserBlanksSettings>;
   "match-up"?: Partial<UserMatchUpSettings>;
+  context?: Partial<UserContextSettings>;
   global?: Partial<UserGlobalSettings>;
 };
 
@@ -76,6 +100,9 @@ const isVoiceName = (value: string): value is VoiceName =>
 
 const clampRange = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
+
+const isValidAccuracyScore = (value: number) =>
+  Number.isFinite(value) && Number.isInteger(value) && value >= 1 && value <= 100;
 
 const sanitizeCardsSettings = (settings: Partial<UserCardsSettings>) => {
   const parsedLatest = Number(settings.cardsListLatestLength);
@@ -126,17 +153,32 @@ const sanitizeGlobalSettings = (settings: Partial<UserGlobalSettings>) => {
   };
 };
 
+const sanitizeContextSettings = (settings: Partial<UserContextSettings>) => {
+  const parsedWordsCount = Number(settings.contextWordsCount);
+  return {
+    contextWordsCount: Number.isFinite(parsedWordsCount)
+      ? clampRange(parsedWordsCount, contextWordsCountMin, contextWordsCountMax)
+      : defaultContextWordsCount,
+  };
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
 const getSanitizedGameSettings = (
   game: UserSettingsGame,
   rawSettings: unknown,
-): UserCardsSettings | UserBlanksSettings | UserMatchUpSettings | UserGlobalSettings => {
+):
+  | UserCardsSettings
+  | UserBlanksSettings
+  | UserMatchUpSettings
+  | UserContextSettings
+  | UserGlobalSettings => {
   if (!isRecord(rawSettings)) {
     if (game === "cards") return sanitizeCardsSettings({});
     if (game === "blanks") return sanitizeBlanksSettings({});
     if (game === "match-up") return sanitizeMatchUpSettings({});
+    if (game === "context") return sanitizeContextSettings({});
     return sanitizeGlobalSettings({});
   }
 
@@ -148,6 +190,9 @@ const getSanitizedGameSettings = (
   }
   if (game === "match-up") {
     return sanitizeMatchUpSettings(rawSettings as Partial<UserMatchUpSettings>);
+  }
+  if (game === "context") {
+    return sanitizeContextSettings(rawSettings as Partial<UserContextSettings>);
   }
 
   return sanitizeGlobalSettings(rawSettings as Partial<UserGlobalSettings>);
@@ -191,6 +236,13 @@ export const getAuthorizedUserSettings = async (): Promise<AuthorizedUserSetting
       ) as UserMatchUpSettings;
       return;
     }
+    if (game === "context") {
+      normalized.context = getSanitizedGameSettings(
+        game,
+        row.settings,
+      ) as UserContextSettings;
+      return;
+    }
 
     normalized.global = getSanitizedGameSettings(game, row.settings) as UserGlobalSettings;
   });
@@ -223,6 +275,12 @@ export const upsertAuthorizedUserSettings = async (
     updates.push({
       game: "match-up",
       settings: sanitizeMatchUpSettings(input["match-up"]),
+    });
+  }
+  if (input.context) {
+    updates.push({
+      game: "context",
+      settings: sanitizeContextSettings(input.context),
     });
   }
   if (input.global) {
@@ -260,6 +318,7 @@ export const getEffectiveUserSettings = async (
     cards: UserCardsSettings;
     blanks: UserBlanksSettings;
     "match-up": UserMatchUpSettings;
+    context: UserContextSettings;
     global: UserGlobalSettings;
   },
 ) => {
@@ -293,6 +352,10 @@ export const getEffectiveUserSettings = async (
       matchUpWordsCount:
         dbSettings["match-up"]?.matchUpWordsCount ??
         cookieSettings["match-up"].matchUpWordsCount,
+    },
+    context: {
+      contextWordsCount:
+        dbSettings.context?.contextWordsCount ?? cookieSettings.context.contextWordsCount,
     },
     global: {
       voiceName: dbSettings.global?.voiceName ?? cookieSettings.global.voiceName,
@@ -354,6 +417,9 @@ export const getDefaultCookieLikeSettings = async (
             matchUpWordsCountMax,
           )
         : defaultMatchUpWordsCount,
+    },
+    context: {
+      contextWordsCount: defaultContextWordsCount,
     },
     global: {
       voiceName:
@@ -431,6 +497,82 @@ export const createUserBlanksStats = async (accuracy: number) => {
   } catch (error) {
     console.error(error);
     throw new Error("Failed to create user blanks stats");
+  }
+};
+
+export const getUserContextStats = async (pageNumber: number, size = 20) => {
+  const user = auth();
+
+  if (!user.userId) throw new Error("Unauthorized");
+
+  const totalUserContextStats = await db
+    .select({ count: count() })
+    .from(contextStats)
+    .where(eq(contextStats.userId, user.userId));
+
+  const totalPages = Math.ceil(totalUserContextStats[0].count / size);
+
+  const userContextStats = await db.query.contextStats.findMany({
+    where: (model, { eq }) => eq(model.userId, user.userId),
+    orderBy: (model, { desc }) => desc(model.createdAt),
+    columns: {
+      accuracy: true,
+      avgAccuracy: true,
+      createdAt: true,
+    },
+    limit: size,
+    offset: (pageNumber - 1) * size,
+  });
+
+  return {
+    data: [...userContextStats].reverse(),
+    totalPages,
+  };
+};
+
+export const createUserContextStats = async (accuracy: number) => {
+  const userId = await assertCurrentUserCanUseAI();
+  if (!isValidAccuracyScore(accuracy)) {
+    throw new Error("Invalid context accuracy score");
+  }
+  const normalizedAccuracy = numberToDoublePrecision(accuracy);
+
+  try {
+    await db.transaction(async (tx) => {
+      // Serialize writes per user to avoid race conditions in avg/attempt computation.
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${userId}))`);
+
+      const lastContextStats = await tx.query.contextStats.findFirst({
+        where: (model, { eq }) => eq(model.userId, userId),
+        orderBy: (model, { desc }) => desc(model.createdAt),
+        columns: {
+          avgAccuracy: true,
+          attemptNumber: true,
+        },
+      });
+
+      let avgAccuracy = normalizedAccuracy;
+      let attemptNumber = 1;
+      if (lastContextStats) {
+        avgAccuracy = numberToDoublePrecision(
+          (lastContextStats.avgAccuracy * lastContextStats.attemptNumber + normalizedAccuracy) /
+            (lastContextStats.attemptNumber + 1),
+        );
+        attemptNumber = lastContextStats.attemptNumber + 1;
+      }
+
+      await tx.insert(contextStats).values({
+        accuracy: normalizedAccuracy,
+        avgAccuracy,
+        attemptNumber,
+        userId,
+      });
+    });
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to create user context stats");
   }
 };
 
@@ -593,7 +735,7 @@ export const getUserGamesMonthlyUsageByYear = async (year: number) => {
   const startOfYear = new Date(year, 0, 1);
   const startOfNextYear = new Date(year + 1, 0, 1);
 
-  const [blanksRows, cardsRows, matchUpRows] = await Promise.all([
+  const [blanksRows, cardsRows, matchUpRows, contextRows] = await Promise.all([
     db.query.blanksStats.findMany({
       where: and(
         eq(blanksStats.userId, user.userId),
@@ -618,6 +760,14 @@ export const getUserGamesMonthlyUsageByYear = async (year: number) => {
       ),
       columns: { createdAt: true },
     }),
+    db.query.contextStats.findMany({
+      where: and(
+        eq(contextStats.userId, user.userId),
+        gte(contextStats.createdAt, startOfYear),
+        lt(contextStats.createdAt, startOfNextYear),
+      ),
+      columns: { createdAt: true },
+    }),
   ]);
 
   const monthly = Array.from({ length: 12 }).map((_, month) => ({
@@ -625,6 +775,7 @@ export const getUserGamesMonthlyUsageByYear = async (year: number) => {
     blanks: 0,
     cards: 0,
     matchUp: 0,
+    context: 0,
   }));
 
   blanksRows.forEach((row) => {
@@ -636,6 +787,9 @@ export const getUserGamesMonthlyUsageByYear = async (year: number) => {
   matchUpRows.forEach((row) => {
     monthly[row.createdAt.getMonth()].matchUp += 1;
   });
+  contextRows.forEach((row) => {
+    monthly[row.createdAt.getMonth()].context += 1;
+  });
 
   return monthly;
 };
@@ -645,7 +799,7 @@ export const getUserGamesUsageYears = async () => {
 
   if (!user.userId) throw new Error("Unauthorized");
 
-  const [blanksRows, cardsRows, matchUpRows] = await Promise.all([
+  const [blanksRows, cardsRows, matchUpRows, contextRows] = await Promise.all([
     db.query.blanksStats.findMany({
       where: (model, { eq }) => eq(model.userId, user.userId!),
       columns: { createdAt: true },
@@ -658,6 +812,10 @@ export const getUserGamesUsageYears = async () => {
       where: (model, { eq }) => eq(model.userId, user.userId!),
       columns: { createdAt: true },
     }),
+    db.query.contextStats.findMany({
+      where: (model, { eq }) => eq(model.userId, user.userId!),
+      columns: { createdAt: true },
+    }),
   ]);
 
   const currentYear = new Date().getFullYear();
@@ -666,6 +824,7 @@ export const getUserGamesUsageYears = async () => {
   blanksRows.forEach((row) => availableYears.add(row.createdAt.getFullYear()));
   cardsRows.forEach((row) => availableYears.add(row.createdAt.getFullYear()));
   matchUpRows.forEach((row) => availableYears.add(row.createdAt.getFullYear()));
+  contextRows.forEach((row) => availableYears.add(row.createdAt.getFullYear()));
 
   return [...availableYears].sort((a, b) => a - b);
 };

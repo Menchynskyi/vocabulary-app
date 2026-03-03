@@ -15,6 +15,13 @@
       "when": 1772537147500,
       "tag": "0001_add_user_game_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1772557327144,
+      "tag": "0002_watery_bishop",
+      "breakpoints": true
     }
   ]
 }
