@@ -735,7 +735,7 @@ export const getUserGamesMonthlyUsageByYear = async (year: number) => {
   const startOfYear = new Date(year, 0, 1);
   const startOfNextYear = new Date(year + 1, 0, 1);
 
-  const [blanksRows, cardsRows, matchUpRows] = await Promise.all([
+  const [blanksRows, cardsRows, matchUpRows, contextRows] = await Promise.all([
     db.query.blanksStats.findMany({
       where: and(
         eq(blanksStats.userId, user.userId),
@@ -760,6 +760,14 @@ export const getUserGamesMonthlyUsageByYear = async (year: number) => {
       ),
       columns: { createdAt: true },
     }),
+    db.query.contextStats.findMany({
+      where: and(
+        eq(contextStats.userId, user.userId),
+        gte(contextStats.createdAt, startOfYear),
+        lt(contextStats.createdAt, startOfNextYear),
+      ),
+      columns: { createdAt: true },
+    }),
   ]);
 
   const monthly = Array.from({ length: 12 }).map((_, month) => ({
@@ -767,6 +775,7 @@ export const getUserGamesMonthlyUsageByYear = async (year: number) => {
     blanks: 0,
     cards: 0,
     matchUp: 0,
+    context: 0,
   }));
 
   blanksRows.forEach((row) => {
@@ -778,6 +787,9 @@ export const getUserGamesMonthlyUsageByYear = async (year: number) => {
   matchUpRows.forEach((row) => {
     monthly[row.createdAt.getMonth()].matchUp += 1;
   });
+  contextRows.forEach((row) => {
+    monthly[row.createdAt.getMonth()].context += 1;
+  });
 
   return monthly;
 };
@@ -787,7 +799,7 @@ export const getUserGamesUsageYears = async () => {
 
   if (!user.userId) throw new Error("Unauthorized");
 
-  const [blanksRows, cardsRows, matchUpRows] = await Promise.all([
+  const [blanksRows, cardsRows, matchUpRows, contextRows] = await Promise.all([
     db.query.blanksStats.findMany({
       where: (model, { eq }) => eq(model.userId, user.userId!),
       columns: { createdAt: true },
@@ -800,6 +812,10 @@ export const getUserGamesUsageYears = async () => {
       where: (model, { eq }) => eq(model.userId, user.userId!),
       columns: { createdAt: true },
     }),
+    db.query.contextStats.findMany({
+      where: (model, { eq }) => eq(model.userId, user.userId!),
+      columns: { createdAt: true },
+    }),
   ]);
 
   const currentYear = new Date().getFullYear();
@@ -808,6 +824,7 @@ export const getUserGamesUsageYears = async () => {
   blanksRows.forEach((row) => availableYears.add(row.createdAt.getFullYear()));
   cardsRows.forEach((row) => availableYears.add(row.createdAt.getFullYear()));
   matchUpRows.forEach((row) => availableYears.add(row.createdAt.getFullYear()));
+  contextRows.forEach((row) => availableYears.add(row.createdAt.getFullYear()));
 
   return [...availableYears].sort((a, b) => a - b);
 };

@@ -20,6 +20,7 @@ type GamesPopularityRadarChartProps = {
     cards: number;
     matchUp: number;
     blanks: number;
+    context: number;
   }>;
   year: number;
   previousYear: number | null;
@@ -45,7 +46,11 @@ export function GamesPopularityRadarChart({
   };
 
   const hasAnyRecords = data.some(
-    (item) => item.cards > 0 || item.matchUp > 0 || item.blanks > 0,
+    (item) =>
+      item.cards > 0 ||
+      item.matchUp > 0 ||
+      item.blanks > 0 ||
+      item.context > 0,
   );
 
   if (!hasAnyRecords) {
@@ -55,7 +60,7 @@ export function GamesPopularityRadarChart({
           href="/"
           className="text-muted-foreground hover:text-primary hover:underline"
         >
-          Play cards, match-up, or blanks to compare monthly popularity
+          Play cards, match-up, blanks, or context to compare monthly popularity
         </Link>
       </div>
     );
@@ -78,13 +83,16 @@ export function GamesPopularityRadarChart({
                   const blanks = payload.find(
                     (item) => item.dataKey === "blanks",
                   );
+                  const context = payload.find(
+                    (item) => item.dataKey === "context",
+                  );
 
                   return (
                     <div className="rounded-lg border bg-background p-2 shadow-sm">
                       <div className="mb-1 text-[0.70rem] uppercase text-muted-foreground">
                         {label}
                       </div>
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-4 gap-4">
                         <div className="flex flex-col">
                           <span className="text-[0.70rem] uppercase text-muted-foreground">
                             cards
@@ -105,6 +113,14 @@ export function GamesPopularityRadarChart({
                           </span>
                           <span className="font-bold">
                             {blanks?.value ?? 0}
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[0.70rem] uppercase text-muted-foreground">
+                            context
+                          </span>
+                          <span className="font-bold">
+                            {context?.value ?? 0}
                           </span>
                         </div>
                       </div>
@@ -137,6 +153,13 @@ export function GamesPopularityRadarChart({
               dataKey="blanks"
               stroke="hsl(var(--muted-foreground))"
               fill="hsl(var(--muted-foreground))"
+              fillOpacity={0.35}
+            />
+            <Radar
+              name="Context"
+              dataKey="context"
+              stroke="hsl(262.1 83.3% 57.8%)"
+              fill="hsl(262.1 83.3% 57.8%)"
               fillOpacity={0.35}
             />
           </RadarChart>
