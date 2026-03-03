@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import {
   Drawer,
@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/Select";
 import { Label } from "@/components/ui/Label";
 import {
+  VoiceName,
   defaultVoiceOption,
   voiceChangeCustomEventName,
   voiceNameCookie,
@@ -43,6 +44,11 @@ import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 import { blanksDifficultyCookie } from "@/constants/blanks";
 import { settingsButtonId } from "@/constants";
 import { BlanksDifficulty } from "@/types";
+import { useAuth } from "@clerk/nextjs";
+import {
+  getAuthorizedUserSettings,
+  upsertAuthorizedUserSettings,
+} from "@/server/db/queries";
 
 const difficultyOptions = [
   {
@@ -65,6 +71,7 @@ const difficultyOptions = [
 
 export function Settings() {
   const { refresh } = useRouter();
+  const { isSignedIn } = useAuth();
   const ref = useRef<HTMLButtonElement | null>(null);
   const [blanksDifficulty, setBlanksDifficulty] = useState(() => {
     const difficulty = getCookie(blanksDifficultyCookie);
@@ -73,15 +80,50 @@ export function Settings() {
       difficultyOptions[0].value
     );
   });
-  const [selectedVoice, setSelectedVoice] = useState(() => {
-    return getCookie(voiceNameCookie) || defaultVoiceOption.name;
+  const [selectedVoice, setSelectedVoice] = useState<VoiceName>(() => {
+    return (getCookie(voiceNameCookie) as VoiceName) || defaultVoiceOption.name;
   });
 
   const difficulty = difficultyOptions.find(
     (item) => item.value === blanksDifficulty,
   )?.label;
 
-  const handleSaveSettings = () => {
+  const loadSettings = useCallback(async () => {
+    const fallbackDifficulty =
+      difficultyOptions.find(
+        (item) => item.label === getCookie(blanksDifficultyCookie),
+      )?.value || difficultyOptions[0].value;
+    const fallbackVoice = getCookie(voiceNameCookie) || defaultVoiceOption.name;
+
+    if (!isSignedIn) {
+      setBlanksDifficulty(fallbackDifficulty);
+      setSelectedVoice(fallbackVoice as VoiceName);
+      return;
+    }
+
+    try {
+      const settings = await getAuthorizedUserSettings();
+      const dbDifficulty = settings.blanks?.blanksDifficulty;
+      setBlanksDifficulty(
+        difficultyOptions.find((item) => item.label === dbDifficulty)?.value ||
+          fallbackDifficulty,
+      );
+      setSelectedVoice(
+        (settings.global?.voiceName as VoiceName | undefined) ??
+          (fallbackVoice as VoiceName),
+      );
+    } catch (error) {
+      console.error(error);
+      setBlanksDifficulty(fallbackDifficulty);
+      setSelectedVoice(fallbackVoice as VoiceName);
+    }
+  }, [isSignedIn]);
+
+  useEffect(() => {
+    void loadSettings();
+  }, [loadSettings]);
+
+  const handleSaveSettings = async () => {
     const currentBlanksDifficulty = getCookie(blanksDifficultyCookie);
     const currentVoiceName = getCookie(voiceNameCookie);
 
@@ -89,21 +131,56 @@ export function Settings() {
     let isSettingsChanged = false;
 
     const newBlanksDifficulty = difficulty;
-    const newVoiceName = selectedVoice;
+    const newVoiceName: VoiceName = selectedVoice;
 
-    if (currentBlanksDifficulty !== newBlanksDifficulty) {
-      setCookie(blanksDifficultyCookie, newBlanksDifficulty);
-      isSettingsChanged = true;
-    }
+    if (isSignedIn) {
+      try {
+        const settings = await getAuthorizedUserSettings();
+        const currentDbDifficulty = settings.blanks?.blanksDifficulty;
+        const currentDbVoiceName = settings.global?.voiceName;
 
-    if (currentVoiceName !== newVoiceName) {
-      const customVoiceChangeEvent = new CustomEvent(
-        voiceChangeCustomEventName,
-      );
-      document.dispatchEvent(customVoiceChangeEvent);
+        if (currentDbDifficulty !== newBlanksDifficulty) {
+          isSettingsChanged = true;
+        }
+        if ((currentDbVoiceName ?? defaultVoiceOption.name) !== newVoiceName) {
+          const customVoiceChangeEvent = new CustomEvent(
+            voiceChangeCustomEventName,
+          );
+          document.dispatchEvent(customVoiceChangeEvent);
+          isVoiceChanged = true;
+        }
 
-      setCookie(voiceNameCookie, newVoiceName);
-      isVoiceChanged = true;
+        if (isSettingsChanged || isVoiceChanged) {
+          await upsertAuthorizedUserSettings({
+            blanks: {
+              blanksDifficulty:
+                newBlanksDifficulty || difficultyOptions[0].label,
+            },
+            global: {
+              voiceName: newVoiceName,
+            },
+          });
+        }
+      } catch (error) {
+        console.error(error);
+        toast("Failed to save settings");
+        return;
+      }
+    } else {
+      if (currentBlanksDifficulty !== newBlanksDifficulty) {
+        setCookie(blanksDifficultyCookie, newBlanksDifficulty);
+        isSettingsChanged = true;
+      }
+
+      if (currentVoiceName !== newVoiceName) {
+        const customVoiceChangeEvent = new CustomEvent(
+          voiceChangeCustomEventName,
+        );
+        document.dispatchEvent(customVoiceChangeEvent);
+
+        setCookie(voiceNameCookie, newVoiceName);
+        isVoiceChanged = true;
+      }
     }
 
     if (isSettingsChanged || isVoiceChanged) {
@@ -131,15 +208,10 @@ export function Settings() {
   return (
     <TooltipProvider delayDuration={200}>
       <Drawer
-        onOpenChange={() => {
-          const difficulty = getCookie(blanksDifficultyCookie);
-          setBlanksDifficulty(
-            difficultyOptions.find((item) => item.label === difficulty)
-              ?.value || 1,
-          );
-          setSelectedVoice(
-            getCookie(voiceNameCookie) || defaultVoiceOption.name,
-          );
+        onOpenChange={(open) => {
+          if (open) {
+            void loadSettings();
+          }
         }}
       >
         <Tooltip>
@@ -179,7 +251,7 @@ export function Settings() {
                 <Select
                   value={selectedVoice}
                   onValueChange={(value) => {
-                    setSelectedVoice(value);
+                    setSelectedVoice(value as VoiceName);
                   }}
                 >
                   <SelectTrigger id="voice" className="mt-2 w-full">
@@ -227,7 +299,12 @@ export function Settings() {
                 </Button>
               </DrawerClose>
               <DrawerClose asChild>
-                <Button aria-label="Save settings" onClick={handleSaveSettings}>
+                <Button
+                  aria-label="Save settings"
+                  onClick={() => {
+                    void handleSaveSettings();
+                  }}
+                >
                   Save
                 </Button>
               </DrawerClose>

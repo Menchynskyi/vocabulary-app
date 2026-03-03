@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import {
   Drawer,
@@ -37,9 +37,15 @@ import {
 import { settingsButtonId } from "@/constants";
 import { useKeyboardShortcuts } from "@/utils/keyboardShortcuts";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
+import { useAuth } from "@clerk/nextjs";
+import {
+  getAuthorizedUserSettings,
+  upsertAuthorizedUserSettings,
+} from "@/server/db/queries";
 
 export function Settings() {
   const { refresh } = useRouter();
+  const { isSignedIn } = useAuth();
   const ref = useRef<HTMLButtonElement | null>(null);
   const [lives, setLives] = useState(() => {
     const value = Number(getCookie(matchUpLivesCookie));
@@ -54,21 +60,80 @@ export function Settings() {
       : Math.min(matchUpWordsCountMax, Math.max(matchUpWordsCountMin, value));
   });
 
-  const handleSaveSettings = () => {
+  const loadSettings = useCallback(async () => {
+    const livesValue = Number(getCookie(matchUpLivesCookie));
+    const fallbackLives = Number.isNaN(livesValue)
+      ? defaultMatchUpLives
+      : Math.min(matchUpLivesMax, Math.max(matchUpLivesMin, livesValue));
+    const wordsValue = Number(getCookie(matchUpWordsCountCookie));
+    const fallbackWordsCount = Number.isNaN(wordsValue)
+      ? defaultMatchUpWordsCount
+      : Math.min(
+          matchUpWordsCountMax,
+          Math.max(matchUpWordsCountMin, wordsValue),
+        );
+
+    if (!isSignedIn) {
+      setLives(fallbackLives);
+      setWordsCount(fallbackWordsCount);
+      return;
+    }
+
+    try {
+      const settings = await getAuthorizedUserSettings();
+      setLives(settings["match-up"]?.matchUpLives ?? fallbackLives);
+      setWordsCount(
+        settings["match-up"]?.matchUpWordsCount ?? fallbackWordsCount,
+      );
+    } catch (error) {
+      console.error(error);
+      setLives(fallbackLives);
+      setWordsCount(fallbackWordsCount);
+    }
+  }, [isSignedIn]);
+
+  useEffect(() => {
+    void loadSettings();
+  }, [loadSettings]);
+
+  const handleSaveSettings = async () => {
     const currentLives = getCookie(matchUpLivesCookie);
     const currentWordsCount = getCookie(matchUpWordsCountCookie);
     const newLives = lives.toString();
     const newWordsCount = wordsCount.toString();
     let changed = false;
 
-    if (currentLives !== newLives) {
-      setCookie(matchUpLivesCookie, newLives);
-      changed = true;
+    if (isSignedIn) {
+      try {
+        const settings = await getAuthorizedUserSettings();
+        if (
+          settings["match-up"]?.matchUpLives !== lives ||
+          settings["match-up"]?.matchUpWordsCount !== wordsCount
+        ) {
+          changed = true;
+          await upsertAuthorizedUserSettings({
+            "match-up": {
+              matchUpLives: lives,
+              matchUpWordsCount: wordsCount,
+            },
+          });
+        }
+      } catch (error) {
+        console.error(error);
+        toast("Failed to save settings");
+        return;
+      }
+    } else {
+      if (currentLives !== newLives) {
+        setCookie(matchUpLivesCookie, newLives);
+        changed = true;
+      }
+      if (currentWordsCount !== newWordsCount) {
+        setCookie(matchUpWordsCountCookie, newWordsCount);
+        changed = true;
+      }
     }
-    if (currentWordsCount !== newWordsCount) {
-      setCookie(matchUpWordsCountCookie, newWordsCount);
-      changed = true;
-    }
+
     if (changed) {
       toast("Settings saved successfully");
       refresh();
@@ -91,25 +156,10 @@ export function Settings() {
   return (
     <TooltipProvider delayDuration={200}>
       <Drawer
-        onOpenChange={() => {
-          const livesValue = Number(getCookie(matchUpLivesCookie));
-          setLives(
-            Number.isNaN(livesValue)
-              ? defaultMatchUpLives
-              : Math.min(
-                  matchUpLivesMax,
-                  Math.max(matchUpLivesMin, livesValue),
-                ),
-          );
-          const wordsValue = Number(getCookie(matchUpWordsCountCookie));
-          setWordsCount(
-            Number.isNaN(wordsValue)
-              ? defaultMatchUpWordsCount
-              : Math.min(
-                  matchUpWordsCountMax,
-                  Math.max(matchUpWordsCountMin, wordsValue),
-                ),
-          );
+        onOpenChange={(open) => {
+          if (open) {
+            void loadSettings();
+          }
         }}
       >
         <Tooltip>
@@ -192,7 +242,12 @@ export function Settings() {
                 </Button>
               </DrawerClose>
               <DrawerClose asChild>
-                <Button aria-label="Save settings" onClick={handleSaveSettings}>
+                <Button
+                  aria-label="Save settings"
+                  onClick={() => {
+                    void handleSaveSettings();
+                  }}
+                >
                   Save
                 </Button>
               </DrawerClose>

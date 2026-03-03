@@ -1,18 +1,12 @@
 import { VocabularyMode } from "@/types";
 import { getWords } from "@/server/notion/queries";
 import { cookies } from "next/headers";
-import {
-  defaultMatchUpLives,
-  defaultMatchUpWordsCount,
-  matchUpLivesCookie,
-  matchUpLivesMax,
-  matchUpLivesMin,
-  matchUpWordsCountCookie,
-  matchUpWordsCountMax,
-  matchUpWordsCountMin,
-} from "@/constants/match-up";
 import { MatchUpGame } from "./_components/MatchUpGame";
 import { VocabularyModeStatus } from "@/components/VocabularyModeStatus";
+import {
+  getDefaultCookieLikeSettings,
+  getEffectiveUserSettings,
+} from "@/server/db/queries";
 
 type MatchUpPageProps = {
   searchParams: {
@@ -21,21 +15,11 @@ type MatchUpPageProps = {
 };
 
 export default async function MatchUpPage({ searchParams }: MatchUpPageProps) {
-  const cookieStore = cookies();
-  const livesValue = Number(cookieStore.get(matchUpLivesCookie)?.value);
-  const lives = Number.isNaN(livesValue)
-    ? defaultMatchUpLives
-    : Math.min(matchUpLivesMax, Math.max(matchUpLivesMin, livesValue));
-
-  const wordsCountValue = Number(
-    cookieStore.get(matchUpWordsCountCookie)?.value,
-  );
-  const wordsCount = Number.isNaN(wordsCountValue)
-    ? defaultMatchUpWordsCount
-    : Math.min(
-        matchUpWordsCountMax,
-        Math.max(matchUpWordsCountMin, wordsCountValue),
-      );
+  const cookieStore = await cookies();
+  const fallbackSettings = await getDefaultCookieLikeSettings(cookieStore);
+  const settings = await getEffectiveUserSettings(fallbackSettings);
+  const lives = settings["match-up"].matchUpLives;
+  const wordsCount = settings["match-up"].matchUpWordsCount;
 
   const words = await getWords(searchParams?.mode, wordsCount);
 

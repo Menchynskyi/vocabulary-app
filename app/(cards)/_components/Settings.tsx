@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import {
   Drawer,
@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/Select";
 import { Label } from "@/components/ui/Label";
 import {
+  VoiceName,
   defaultVoiceOption,
   voiceChangeCustomEventName,
   voiceNameCookie,
@@ -49,9 +50,15 @@ import {
 import { useKeyboardShortcuts } from "@/utils/keyboardShortcuts";
 import { KeyboardShortcut } from "@/components/KeyboardShortcut";
 import { settingsButtonId } from "@/constants";
+import { useAuth } from "@clerk/nextjs";
+import {
+  getAuthorizedUserSettings,
+  upsertAuthorizedUserSettings,
+} from "@/server/db/queries";
 
 export function Settings() {
   const { refresh } = useRouter();
+  const { isSignedIn } = useAuth();
   const ref = useRef<HTMLButtonElement | null>(null);
   const [cardsListLatestLength, setCardsListLatestLength] = useState(() => {
     return (
@@ -71,49 +78,155 @@ export function Settings() {
       defaultCardsListWeekModeLength
     );
   });
-  const [selectedVoice, setSelectedVoice] = useState(() => {
-    return getCookie(voiceNameCookie) || defaultVoiceOption.name;
+  const [selectedVoice, setSelectedVoice] = useState<VoiceName>(() => {
+    return (getCookie(voiceNameCookie) as VoiceName) || defaultVoiceOption.name;
   });
 
-  const handleSaveSettings = () => {
-    const currentCardsListLatestLength = getCookie(cardsListLatestLengthCookie);
-    const currentCardsListRandomLength = getCookie(cardsListRandomLengthCookie);
-    const currentCardsListWeekModeLength = getCookie(
-      cardsListWeekModeLengthCookie,
+  const loadSettings = useCallback(async () => {
+    const fallbackCardsListLatestLength =
+      Number(getCookie(cardsListLatestLengthCookie)) ||
+      defaultCardsListLatestLength;
+    const fallbackCardsListRandomLength =
+      Number(getCookie(cardsListRandomLengthCookie)) ||
+      defaultCardsListRandomLength;
+    const fallbackCardsListWeekModeLength =
+      Number(getCookie(cardsListWeekModeLengthCookie)) ||
+      defaultCardsListWeekModeLength;
+    const fallbackVoice = getCookie(voiceNameCookie) || defaultVoiceOption.name;
+
+    if (!isSignedIn) {
+      setCardsListLatestLength(fallbackCardsListLatestLength);
+      setCardsListRandomLength(fallbackCardsListRandomLength);
+      setCardsListWeekModeLength(fallbackCardsListWeekModeLength);
+      setSelectedVoice(fallbackVoice as VoiceName);
+      return;
+    }
+
+    try {
+      const settings = await getAuthorizedUserSettings();
+      setCardsListLatestLength(
+        settings.cards?.cardsListLatestLength ?? fallbackCardsListLatestLength,
+      );
+      setCardsListRandomLength(
+        settings.cards?.cardsListRandomLength ?? fallbackCardsListRandomLength,
+      );
+      setCardsListWeekModeLength(
+        settings.cards?.cardsListWeekModeLength ??
+          fallbackCardsListWeekModeLength,
+      );
+      setSelectedVoice(
+        (settings.global?.voiceName as VoiceName | undefined) ??
+          (fallbackVoice as VoiceName),
+      );
+    } catch (error) {
+      console.error(error);
+      setCardsListLatestLength(fallbackCardsListLatestLength);
+      setCardsListRandomLength(fallbackCardsListRandomLength);
+      setCardsListWeekModeLength(fallbackCardsListWeekModeLength);
+      setSelectedVoice(fallbackVoice as VoiceName);
+    }
+  }, [isSignedIn]);
+
+  useEffect(() => {
+    void loadSettings();
+  }, [loadSettings]);
+
+  const handleSaveSettings = async () => {
+    const currentCardsListLatestLength = Number(
+      getCookie(cardsListLatestLengthCookie),
     );
-    const currentVoiceName = getCookie(voiceNameCookie);
+    const currentCardsListRandomLength = Number(
+      getCookie(cardsListRandomLengthCookie),
+    );
+    const currentCardsListWeekModeLength = Number(
+      getCookie(cardsListWeekModeLengthCookie),
+    );
+    const currentVoiceName = getCookie(voiceNameCookie)?.toString();
 
     let isVoiceChanged = false;
     let isSettingsChanged = false;
 
-    const newCardsListLatestLength = cardsListLatestLength.toString();
-    const newCardsListRandomLength = cardsListRandomLength.toString();
-    const newCardsListWeekModeLength = cardsListWeekModeLength.toString();
-    const newVoiceName = selectedVoice;
+    const newCardsListLatestLength = cardsListLatestLength;
+    const newCardsListRandomLength = cardsListRandomLength;
+    const newCardsListWeekModeLength = cardsListWeekModeLength;
+    const newVoiceName: VoiceName = selectedVoice;
 
-    if (currentCardsListLatestLength !== newCardsListLatestLength) {
-      setCookie(cardsListLatestLengthCookie, newCardsListLatestLength);
-      isSettingsChanged = true;
-    }
+    if (isSignedIn) {
+      try {
+        const settings = await getAuthorizedUserSettings();
+        const currentCardsDb = settings.cards;
+        const currentGlobalDb = settings.global;
 
-    if (currentCardsListRandomLength !== newCardsListRandomLength) {
-      setCookie(cardsListRandomLengthCookie, newCardsListRandomLength);
-      isSettingsChanged = true;
-    }
+        if (
+          currentCardsDb?.cardsListLatestLength !== newCardsListLatestLength ||
+          currentCardsDb?.cardsListRandomLength !== newCardsListRandomLength ||
+          currentCardsDb?.cardsListWeekModeLength !== newCardsListWeekModeLength
+        ) {
+          isSettingsChanged = true;
+        }
 
-    if (currentCardsListWeekModeLength !== newCardsListWeekModeLength) {
-      setCookie(cardsListWeekModeLengthCookie, newCardsListWeekModeLength);
-      isSettingsChanged = true;
-    }
+        if (
+          (currentGlobalDb?.voiceName ?? defaultVoiceOption.name) !==
+          newVoiceName
+        ) {
+          const customVoiceChangeEvent = new CustomEvent(
+            voiceChangeCustomEventName,
+          );
+          document.dispatchEvent(customVoiceChangeEvent);
+          isVoiceChanged = true;
+        }
 
-    if (currentVoiceName !== newVoiceName) {
-      const customVoiceChangeEvent = new CustomEvent(
-        voiceChangeCustomEventName,
-      );
-      document.dispatchEvent(customVoiceChangeEvent);
+        if (isSettingsChanged || isVoiceChanged) {
+          await upsertAuthorizedUserSettings({
+            cards: {
+              cardsListLatestLength: newCardsListLatestLength,
+              cardsListRandomLength: newCardsListRandomLength,
+              cardsListWeekModeLength: newCardsListWeekModeLength,
+            },
+            global: {
+              voiceName: newVoiceName,
+            },
+          });
+        }
+      } catch (error) {
+        console.error(error);
+        toast("Failed to save settings");
+        return;
+      }
+    } else {
+      if (currentCardsListLatestLength !== newCardsListLatestLength) {
+        setCookie(
+          cardsListLatestLengthCookie,
+          newCardsListLatestLength.toString(),
+        );
+        isSettingsChanged = true;
+      }
 
-      setCookie(voiceNameCookie, newVoiceName);
-      isVoiceChanged = true;
+      if (currentCardsListRandomLength !== newCardsListRandomLength) {
+        setCookie(
+          cardsListRandomLengthCookie,
+          newCardsListRandomLength.toString(),
+        );
+        isSettingsChanged = true;
+      }
+
+      if (currentCardsListWeekModeLength !== newCardsListWeekModeLength) {
+        setCookie(
+          cardsListWeekModeLengthCookie,
+          newCardsListWeekModeLength.toString(),
+        );
+        isSettingsChanged = true;
+      }
+
+      if (currentVoiceName !== newVoiceName) {
+        const customVoiceChangeEvent = new CustomEvent(
+          voiceChangeCustomEventName,
+        );
+        document.dispatchEvent(customVoiceChangeEvent);
+
+        setCookie(voiceNameCookie, newVoiceName);
+        isVoiceChanged = true;
+      }
     }
 
     if (isSettingsChanged || isVoiceChanged) {
@@ -141,22 +254,10 @@ export function Settings() {
   return (
     <TooltipProvider delayDuration={200}>
       <Drawer
-        onOpenChange={() => {
-          setCardsListLatestLength(
-            Number(getCookie(cardsListLatestLengthCookie)) ||
-              defaultCardsListLatestLength,
-          );
-          setCardsListRandomLength(
-            Number(getCookie(cardsListRandomLengthCookie)) ||
-              defaultCardsListRandomLength,
-          );
-          setCardsListWeekModeLength(
-            Number(getCookie(cardsListWeekModeLengthCookie)) ||
-              defaultCardsListWeekModeLength,
-          );
-          setSelectedVoice(
-            getCookie(voiceNameCookie) || defaultVoiceOption.name,
-          );
+        onOpenChange={(open) => {
+          if (open) {
+            void loadSettings();
+          }
         }}
       >
         <Tooltip>
@@ -196,7 +297,7 @@ export function Settings() {
                 <Select
                   value={selectedVoice}
                   onValueChange={(value) => {
-                    setSelectedVoice(value);
+                    setSelectedVoice(value as VoiceName);
                   }}
                 >
                   <SelectTrigger id="voice" className="mt-2 w-full">
@@ -289,7 +390,12 @@ export function Settings() {
                 </Button>
               </DrawerClose>
               <DrawerClose asChild>
-                <Button aria-label="Save settings" onClick={handleSaveSettings}>
+                <Button
+                  aria-label="Save settings"
+                  onClick={() => {
+                    void handleSaveSettings();
+                  }}
+                >
                   Save
                 </Button>
               </DrawerClose>

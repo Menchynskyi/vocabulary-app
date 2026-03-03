@@ -2,9 +2,367 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from ".";
-import { blanksStats, cardsStats, matchUpStats } from "./schema";
+import { blanksStats, cardsStats, matchUpStats, userSettings } from "./schema";
 import { numberToDoublePrecision } from "@/utils/numbers";
 import { and, count, eq, gte, lt } from "drizzle-orm";
+import {
+  cardsListLatestLengthCookie,
+  cardsListRandomLengthCookie,
+  cardsListWeekModeLengthCookie,
+  defaultCardsListLatestLength,
+  defaultCardsListRandomLength,
+  defaultCardsListWeekModeLength,
+} from "@/constants/cards";
+import { BlanksDifficulty } from "@/types";
+import { blanksDifficultyCookie } from "@/constants/blanks";
+import {
+  defaultMatchUpLives,
+  defaultMatchUpWordsCount,
+  matchUpLivesCookie,
+  matchUpLivesMax,
+  matchUpLivesMin,
+  matchUpWordsCountCookie,
+  matchUpWordsCountMax,
+  matchUpWordsCountMin,
+} from "@/constants/match-up";
+import {
+  VoiceName,
+  defaultVoiceOption,
+  voiceNameCookie,
+  voiceOptions,
+} from "@/constants/voice";
+
+const userSettingsGames = ["cards", "blanks", "match-up", "global"] as const;
+
+type UserSettingsGame = (typeof userSettingsGames)[number];
+
+type UserCardsSettings = {
+  cardsListLatestLength: number;
+  cardsListRandomLength: number;
+  cardsListWeekModeLength: number;
+};
+
+type UserBlanksSettings = {
+  blanksDifficulty: BlanksDifficulty;
+};
+
+type UserMatchUpSettings = {
+  matchUpLives: number;
+  matchUpWordsCount: number;
+};
+
+type UserGlobalSettings = {
+  voiceName: VoiceName;
+};
+
+export type AuthorizedUserSettings = {
+  cards?: UserCardsSettings;
+  blanks?: UserBlanksSettings;
+  "match-up"?: UserMatchUpSettings;
+  global?: UserGlobalSettings;
+};
+
+export type UpsertAuthorizedUserSettingsInput = {
+  cards?: Partial<UserCardsSettings>;
+  blanks?: Partial<UserBlanksSettings>;
+  "match-up"?: Partial<UserMatchUpSettings>;
+  global?: Partial<UserGlobalSettings>;
+};
+
+const validBlanksDifficultyValues = new Set(Object.values(BlanksDifficulty));
+const validVoiceNames = new Set(voiceOptions.map((item) => item.name));
+const isVoiceName = (value: string): value is VoiceName =>
+  validVoiceNames.has(value as VoiceName);
+
+const clampRange = (value: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, value));
+
+const sanitizeCardsSettings = (settings: Partial<UserCardsSettings>) => {
+  const parsedLatest = Number(settings.cardsListLatestLength);
+  const parsedRandom = Number(settings.cardsListRandomLength);
+  const parsedWeek = Number(settings.cardsListWeekModeLength);
+
+  return {
+    cardsListLatestLength: Number.isFinite(parsedLatest)
+      ? clampRange(parsedLatest, 5, 50)
+      : defaultCardsListLatestLength,
+    cardsListRandomLength: Number.isFinite(parsedRandom)
+      ? clampRange(parsedRandom, 5, 50)
+      : defaultCardsListRandomLength,
+    cardsListWeekModeLength: Number.isFinite(parsedWeek)
+      ? clampRange(parsedWeek, 5, 50)
+      : defaultCardsListWeekModeLength,
+  };
+};
+
+const sanitizeBlanksSettings = (settings: Partial<UserBlanksSettings>) => {
+  const blanksDifficulty = settings.blanksDifficulty;
+  return {
+    blanksDifficulty:
+      blanksDifficulty && validBlanksDifficultyValues.has(blanksDifficulty)
+        ? blanksDifficulty
+        : BlanksDifficulty.Easy,
+  };
+};
+
+const sanitizeMatchUpSettings = (settings: Partial<UserMatchUpSettings>) => {
+  const parsedLives = Number(settings.matchUpLives);
+  const parsedWordsCount = Number(settings.matchUpWordsCount);
+
+  return {
+    matchUpLives: Number.isFinite(parsedLives)
+      ? clampRange(parsedLives, matchUpLivesMin, matchUpLivesMax)
+      : defaultMatchUpLives,
+    matchUpWordsCount: Number.isFinite(parsedWordsCount)
+      ? clampRange(parsedWordsCount, matchUpWordsCountMin, matchUpWordsCountMax)
+      : defaultMatchUpWordsCount,
+  };
+};
+
+const sanitizeGlobalSettings = (settings: Partial<UserGlobalSettings>) => {
+  const voiceName = settings.voiceName;
+  return {
+    voiceName: voiceName && isVoiceName(voiceName) ? voiceName : defaultVoiceOption.name,
+  };
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const getSanitizedGameSettings = (
+  game: UserSettingsGame,
+  rawSettings: unknown,
+): UserCardsSettings | UserBlanksSettings | UserMatchUpSettings | UserGlobalSettings => {
+  if (!isRecord(rawSettings)) {
+    if (game === "cards") return sanitizeCardsSettings({});
+    if (game === "blanks") return sanitizeBlanksSettings({});
+    if (game === "match-up") return sanitizeMatchUpSettings({});
+    return sanitizeGlobalSettings({});
+  }
+
+  if (game === "cards") {
+    return sanitizeCardsSettings(rawSettings as Partial<UserCardsSettings>);
+  }
+  if (game === "blanks") {
+    return sanitizeBlanksSettings(rawSettings as Partial<UserBlanksSettings>);
+  }
+  if (game === "match-up") {
+    return sanitizeMatchUpSettings(rawSettings as Partial<UserMatchUpSettings>);
+  }
+
+  return sanitizeGlobalSettings(rawSettings as Partial<UserGlobalSettings>);
+};
+
+export const getAuthorizedUserSettings = async (): Promise<AuthorizedUserSettings> => {
+  const user = auth();
+
+  if (!user.userId) throw new Error("Unauthorized");
+
+  const rows = await db.query.userSettings.findMany({
+    where: (model, { and, eq, inArray }) =>
+      and(eq(model.userId, user.userId), inArray(model.game, [...userSettingsGames])),
+    columns: {
+      game: true,
+      settings: true,
+    },
+  });
+
+  const normalized: AuthorizedUserSettings = {};
+
+  rows.forEach((row) => {
+    const game = row.game as UserSettingsGame;
+    if (!userSettingsGames.includes(game)) return;
+
+    if (game === "cards") {
+      normalized.cards = getSanitizedGameSettings(game, row.settings) as UserCardsSettings;
+      return;
+    }
+    if (game === "blanks") {
+      normalized.blanks = getSanitizedGameSettings(
+        game,
+        row.settings,
+      ) as UserBlanksSettings;
+      return;
+    }
+    if (game === "match-up") {
+      normalized["match-up"] = getSanitizedGameSettings(
+        game,
+        row.settings,
+      ) as UserMatchUpSettings;
+      return;
+    }
+
+    normalized.global = getSanitizedGameSettings(game, row.settings) as UserGlobalSettings;
+  });
+
+  return normalized;
+};
+
+export const upsertAuthorizedUserSettings = async (
+  input: UpsertAuthorizedUserSettingsInput,
+) => {
+  const user = auth();
+
+  if (!user.userId) throw new Error("Unauthorized");
+
+  const updates: Array<{ game: UserSettingsGame; settings: Record<string, unknown> }> = [];
+
+  if (input.cards) {
+    updates.push({
+      game: "cards",
+      settings: sanitizeCardsSettings(input.cards),
+    });
+  }
+  if (input.blanks) {
+    updates.push({
+      game: "blanks",
+      settings: sanitizeBlanksSettings(input.blanks),
+    });
+  }
+  if (input["match-up"]) {
+    updates.push({
+      game: "match-up",
+      settings: sanitizeMatchUpSettings(input["match-up"]),
+    });
+  }
+  if (input.global) {
+    updates.push({
+      game: "global",
+      settings: sanitizeGlobalSettings(input.global),
+    });
+  }
+
+  if (!updates.length) return true;
+
+  await Promise.all(
+    updates.map(({ game, settings }) =>
+      db
+        .insert(userSettings)
+        .values({
+          userId: user.userId!,
+          game,
+          settings,
+        })
+        .onConflictDoUpdate({
+          target: [userSettings.userId, userSettings.game],
+          set: {
+            settings,
+          },
+        }),
+    ),
+  );
+
+  return true;
+};
+
+export const getEffectiveUserSettings = async (
+  cookieSettings: {
+    cards: UserCardsSettings;
+    blanks: UserBlanksSettings;
+    "match-up": UserMatchUpSettings;
+    global: UserGlobalSettings;
+  },
+) => {
+  const user = auth();
+
+  if (!user.userId) {
+    return cookieSettings;
+  }
+
+  const dbSettings = await getAuthorizedUserSettings();
+
+  return {
+    cards: {
+      cardsListLatestLength:
+        dbSettings.cards?.cardsListLatestLength ??
+        cookieSettings.cards.cardsListLatestLength,
+      cardsListRandomLength:
+        dbSettings.cards?.cardsListRandomLength ??
+        cookieSettings.cards.cardsListRandomLength,
+      cardsListWeekModeLength:
+        dbSettings.cards?.cardsListWeekModeLength ??
+        cookieSettings.cards.cardsListWeekModeLength,
+    },
+    blanks: {
+      blanksDifficulty:
+        dbSettings.blanks?.blanksDifficulty ?? cookieSettings.blanks.blanksDifficulty,
+    },
+    "match-up": {
+      matchUpLives:
+        dbSettings["match-up"]?.matchUpLives ?? cookieSettings["match-up"].matchUpLives,
+      matchUpWordsCount:
+        dbSettings["match-up"]?.matchUpWordsCount ??
+        cookieSettings["match-up"].matchUpWordsCount,
+    },
+    global: {
+      voiceName: dbSettings.global?.voiceName ?? cookieSettings.global.voiceName,
+    },
+  };
+};
+
+export const getDefaultCookieLikeSettings = async (
+  cookiesStoreOrPromise:
+    | {
+        get: (key: string) => { value?: string } | undefined;
+      }
+    | Promise<{
+        get: (key: string) => { value?: string } | undefined;
+      }>,
+) => {
+  const cookiesStore = await cookiesStoreOrPromise;
+  const cardsListLatestLengthValue = Number(
+    cookiesStore.get(cardsListLatestLengthCookie)?.value,
+  );
+  const cardsListRandomLengthValue = Number(
+    cookiesStore.get(cardsListRandomLengthCookie)?.value,
+  );
+  const cardsListWeekModeLengthValue = Number(
+    cookiesStore.get(cardsListWeekModeLengthCookie)?.value,
+  );
+  const matchUpLivesValue = Number(cookiesStore.get(matchUpLivesCookie)?.value);
+  const matchUpWordsCountValue = Number(cookiesStore.get(matchUpWordsCountCookie)?.value);
+  const blanksDifficultyValue = cookiesStore.get(blanksDifficultyCookie)?.value;
+  const voiceNameValue = cookiesStore.get(voiceNameCookie)?.value;
+
+  return {
+    cards: {
+      cardsListLatestLength: Number.isFinite(cardsListLatestLengthValue)
+        ? clampRange(cardsListLatestLengthValue, 5, 50)
+        : defaultCardsListLatestLength,
+      cardsListRandomLength: Number.isFinite(cardsListRandomLengthValue)
+        ? clampRange(cardsListRandomLengthValue, 5, 50)
+        : defaultCardsListRandomLength,
+      cardsListWeekModeLength: Number.isFinite(cardsListWeekModeLengthValue)
+        ? clampRange(cardsListWeekModeLengthValue, 5, 50)
+        : defaultCardsListWeekModeLength,
+    },
+    blanks: {
+      blanksDifficulty:
+        blanksDifficultyValue &&
+        validBlanksDifficultyValues.has(blanksDifficultyValue as BlanksDifficulty)
+          ? (blanksDifficultyValue as BlanksDifficulty)
+          : BlanksDifficulty.Easy,
+    },
+    "match-up": {
+      matchUpLives: Number.isFinite(matchUpLivesValue)
+        ? clampRange(matchUpLivesValue, matchUpLivesMin, matchUpLivesMax)
+        : defaultMatchUpLives,
+      matchUpWordsCount: Number.isFinite(matchUpWordsCountValue)
+        ? clampRange(
+            matchUpWordsCountValue,
+            matchUpWordsCountMin,
+            matchUpWordsCountMax,
+          )
+        : defaultMatchUpWordsCount,
+    },
+    global: {
+      voiceName:
+        voiceNameValue && isVoiceName(voiceNameValue)
+          ? voiceNameValue
+          : defaultVoiceOption.name,
+    },
+  };
+};
 
 export const getUserBlanksStats = async (pageNumber: number, size = 20) => {
   const user = auth();

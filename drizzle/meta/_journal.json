@@ -8,6 +8,13 @@
       "when": 1772534987218,
       "tag": "0000_add_game_stats",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1772537147500,
+      "tag": "0001_add_user_game_settings",
+      "breakpoints": true
     }
   ]
 }

@@ -7,6 +7,8 @@ import {
   varchar,
   integer,
   index,
+  jsonb,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const createTable = pgTableCreator((name) => `vocabulary_${name}`);
@@ -65,6 +67,29 @@ export const matchUpStats = createTable(
   (table) => {
     return {
       userIdIndex: index("match_up_user_id_index").on(table.userId),
+    };
+  },
+);
+
+export const userSettings = createTable(
+  "user_settings",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id", { length: 256 }).notNull(),
+    game: varchar("game", { length: 50 }).notNull(),
+    settings: jsonb("settings").notNull().default(sql`'{}'::jsonb`),
+    createdAt: timestamp("created_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    updatedAt: timestamp("updatedAt"),
+  },
+  (table) => {
+    return {
+      userIdIndex: index("user_settings_user_id_index").on(table.userId),
+      userGameUniqueIndex: uniqueIndex("user_settings_user_game_unique_index").on(
+        table.userId,
+        table.game,
+      ),
     };
   },
 );
