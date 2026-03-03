@@ -25,5 +25,5 @@ export const assertCurrentUserCanUseAI = async () => {
     throw createAiAccessDeniedError();
   }
 
-  return true;
+  return user.userId;
 };

@@ -10,7 +10,7 @@ import {
   userSettings,
 } from "./schema";
 import { numberToDoublePrecision } from "@/utils/numbers";
-import { and, count, eq, gte, lt } from "drizzle-orm";
+import { and, count, eq, gte, lt, sql } from "drizzle-orm";
 import {
   cardsListLatestLengthCookie,
   cardsListRandomLengthCookie,
@@ -532,30 +532,35 @@ export const createUserContextStats = async (accuracy: number) => {
   if (!user.userId) throw new Error("Unauthorized");
 
   try {
-    const lastContextStats = await db.query.contextStats.findFirst({
-      where: (model, { eq }) => eq(model.userId, user.userId),
-      orderBy: (model, { desc }) => desc(model.createdAt),
-      columns: {
-        avgAccuracy: true,
-        attemptNumber: true,
-      },
-    });
+    await db.transaction(async (tx) => {
+      // Serialize writes per user to avoid race conditions in avg/attempt computation.
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${user.userId}))`);
 
-    let avgAccuracy = accuracy;
-    let attemptNumber = 1;
-    if (lastContextStats) {
-      avgAccuracy = numberToDoublePrecision(
-        (lastContextStats.avgAccuracy * lastContextStats.attemptNumber + accuracy) /
-          (lastContextStats.attemptNumber + 1),
-      );
-      attemptNumber = lastContextStats.attemptNumber + 1;
-    }
+      const lastContextStats = await tx.query.contextStats.findFirst({
+        where: (model, { eq }) => eq(model.userId, user.userId),
+        orderBy: (model, { desc }) => desc(model.createdAt),
+        columns: {
+          avgAccuracy: true,
+          attemptNumber: true,
+        },
+      });
 
-    await db.insert(contextStats).values({
-      accuracy,
-      avgAccuracy,
-      attemptNumber,
-      userId: user.userId,
+      let avgAccuracy = accuracy;
+      let attemptNumber = 1;
+      if (lastContextStats) {
+        avgAccuracy = numberToDoublePrecision(
+          (lastContextStats.avgAccuracy * lastContextStats.attemptNumber + accuracy) /
+            (lastContextStats.attemptNumber + 1),
+        );
+        attemptNumber = lastContextStats.attemptNumber + 1;
+      }
+
+      await tx.insert(contextStats).values({
+        accuracy,
+        avgAccuracy,
+        attemptNumber,
+        userId: user.userId,
+      });
     });
 
     return true;

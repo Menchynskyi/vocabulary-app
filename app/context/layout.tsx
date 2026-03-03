@@ -16,7 +16,9 @@ export default function ContextLayout({ children }: ContextLayoutProps) {
           <Settings />
         </Suspense>
       </Header>
-      <main className="my-12 flex justify-center max-sm:my-6 max-sm:mb-12">{children}</main>
+      <main className="my-12 flex justify-center max-sm:my-6 max-sm:mb-12">
+        {children}
+      </main>
     </>
   );
 }

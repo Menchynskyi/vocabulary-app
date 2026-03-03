@@ -76,15 +76,20 @@ const extractJsonString = (raw: string) => {
   throw new Error("Failed to extract JSON from AI response");
 };
 
-let aiCooldownUntil = 0;
+const aiCooldownByUser = new Map<string, number>();
 
 const generateJson = async <T>(
   prompt: string,
   schema: { parse: (data: unknown) => T },
+  cooldownKey: string,
 ) => {
-  const remainingCooldownMs = aiCooldownUntil - Date.now();
+  const cooldownUntil = aiCooldownByUser.get(cooldownKey) ?? 0;
+  const remainingCooldownMs = cooldownUntil - Date.now();
   if (remainingCooldownMs > 0) {
     throw createAiRateLimitError(Math.ceil(remainingCooldownMs / 1000));
+  }
+  if (cooldownUntil) {
+    aiCooldownByUser.delete(cooldownKey);
   }
 
   try {
@@ -102,7 +107,7 @@ const generateJson = async <T>(
   } catch (error) {
     if (isAiRateLimitError(error)) {
       const retryAfterSeconds = getAiRetryAfterSeconds(error) ?? 30;
-      aiCooldownUntil = Date.now() + retryAfterSeconds * 1000;
+      aiCooldownByUser.set(cooldownKey, Date.now() + retryAfterSeconds * 1000);
       throw createAiRateLimitError(retryAfterSeconds);
     }
 
@@ -117,7 +122,7 @@ export const generateContextRound = async ({
   words: ContextSourceWord[];
   mode: VocabularyMode;
 }): Promise<ContextRoundPayload> => {
-  await assertCurrentUserCanUseAI();
+  const userId = await assertCurrentUserCanUseAI();
 
   const sanitizedWords = words.map((word) =>
     contextWordSchema.parse({
@@ -132,6 +137,7 @@ export const generateContextRound = async ({
   const result = await generateJson(
     buildContextGenerationPrompt(mode, sanitizedWords),
     contextGenerationResultSchema,
+    userId,
   );
 
   const validWordIds = new Set(sanitizedWords.map((word) => word.id));
@@ -153,7 +159,7 @@ export const evaluateContextAnswers = async ({
 }: {
   items: ContextEvaluationInput[];
 }): Promise<ContextEvaluationPayload> => {
-  await assertCurrentUserCanUseAI();
+  const userId = await assertCurrentUserCanUseAI();
 
   const sanitizedItems = items.map((item) =>
     contextEvaluationInputSchema.parse(item),
@@ -162,6 +168,7 @@ export const evaluateContextAnswers = async ({
   const result = await generateJson(
     buildContextEvaluationPrompt({ items: sanitizedItems }),
     contextEvaluationResultSchema,
+    userId,
   );
 
   if (result.items.length !== sanitizedItems.length) {
