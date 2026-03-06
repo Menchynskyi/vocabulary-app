@@ -102,7 +102,7 @@ export function ContextGame({ rounds }: ContextGameProps) {
           })),
         });
         setRetryAfterSeconds(null);
-        setResult(evaluation)
+        setResult(evaluation);
         if (isValidAccuracyScore(evaluation.score)) {
           createUserContextStats(evaluation.score).catch((error) => {
             console.error(error);

@@ -1,1 +1,7 @@
 pnpm run lint --fix
+pnpm run lint
+
+if ! git diff --quiet; then
+  echo "Lint auto-fixed files. Please review and stage changes, then commit again."
+  exit 1
+fi
