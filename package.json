@@ -8,7 +8,8 @@
     "db:studio": "drizzle-kit studio",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prepare": "husky"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.0.6",
@@ -58,6 +59,7 @@
     "eslint-config-next": "14.2.3",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
+    "husky": "^9.1.7",
     "pg": "^8.11.5",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",

@@ -32,6 +32,7 @@ export const contextEvaluationInputSchema = z.object({
   userAnswer: z.string().min(1),
   sentence: z.string().min(1),
   sentenceWithBlank: z.string().min(1),
+  usedHint: z.boolean(),
 });
 
 const contextEvaluationResultItemSchema = z.object({
@@ -94,6 +95,8 @@ Rules:
 - Compare answers case-insensitively.
 - Provide fair scoring from 1 to 100 where 100 means all correct.
 - If only minor spelling error exists, score should still decrease.
+- If user used hints, reduce score accordingly (relative to answers quality).
+- If usedHint is true for an item, mention hint usage in that item's explanation.
 - Keep summary short and informative (max 2-3 short sentences).
 - For each item return a corrected sentence with the expected answer highlighted using <hl>expected answer</hl>.
 - explanation must be concise and specific.

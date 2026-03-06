@@ -38,6 +38,7 @@ export type ContextEvaluationInput = {
   userAnswer: string;
   sentence: string;
   sentenceWithBlank: string;
+  usedHint: boolean;
 };
 
 export type ContextEvaluationPayload = {

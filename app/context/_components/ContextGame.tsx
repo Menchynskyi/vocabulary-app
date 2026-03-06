@@ -16,7 +16,7 @@ import {
   isAiAccessDeniedError,
 } from "@/utils/aiErrors";
 import { RetryCountdownMessage } from "./RetryCountdownMessage";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, Sparkles } from "lucide-react";
 
 export type ContextRoundView = {
   wordId: number;
@@ -98,10 +98,11 @@ export function ContextGame({ rounds }: ContextGameProps) {
             userAnswer: answers[index].trim(),
             sentence: round.sentence,
             sentenceWithBlank: round.sentenceWithBlank,
+            usedHint: revealedHints[index],
           })),
         });
         setRetryAfterSeconds(null);
-        setResult(evaluation);
+        setResult(evaluation)
         if (isValidAccuracyScore(evaluation.score)) {
           createUserContextStats(evaluation.score).catch((error) => {
             console.error(error);
@@ -129,6 +130,19 @@ export function ContextGame({ rounds }: ContextGameProps) {
     setRevealedHints(Array.from({ length: rounds.length }).map(() => false));
   };
 
+  const getResultLabel = (isCorrect: boolean, usedHint: boolean) => {
+    if (isCorrect && usedHint) {
+      return "Correct, but used a hint";
+    }
+    if (isCorrect) {
+      return "Correct";
+    }
+    if (usedHint) {
+      return "Needs improvement, and used a hint";
+    }
+    return "Needs improvement";
+  };
+
   if (result) {
     return (
       <div className="mx-4 mt-6 w-full max-w-4xl rounded-md border bg-background p-4 sm:mt-8 sm:p-6">
@@ -149,7 +163,7 @@ export function ContextGame({ rounds }: ContextGameProps) {
                     : "text-amber-600",
                 )}
               >
-                {item.isCorrect ? "Correct" : "Needs improvement"}
+                {getResultLabel(item.isCorrect, revealedHints[index] ?? false)}
               </p>
               <p className="mt-2 text-sm">
                 {renderHighlightedSentence(item.correctedSentenceWithHighlight)}
@@ -204,6 +218,7 @@ export function ContextGame({ rounds }: ContextGameProps) {
                 onChange={(event) => onChangeAnswer(index, event.target.value)}
                 placeholder="Type missing word or expression"
                 aria-label={`Answer ${index + 1}`}
+                disabled={isPending || isRefreshPending}
               />
             </div>
             {!!round.hint && !revealedHints[index] && (
@@ -213,6 +228,7 @@ export function ContextGame({ rounds }: ContextGameProps) {
                 size="sm"
                 className="mt-2 h-8 rounded-full border-dashed px-3 text-xs text-muted-foreground hover:text-foreground"
                 aria-label={`Show hint for sentence ${index + 1}`}
+                disabled={isPending || isRefreshPending}
                 onClick={() =>
                   setRevealedHints((prev) =>
                     prev.map((isRevealed, itemIndex) =>
@@ -256,6 +272,7 @@ export function ContextGame({ rounds }: ContextGameProps) {
           aria-label="Submit context answers"
           className="w-full sm:w-auto"
         >
+          {!isPending && <Sparkles className="mr-1.5 h-4 w-4" />}
           Submit answers
         </Button>
       </div>
