@@ -36,7 +36,7 @@ const isValidAccuracyScore = (score: number) =>
   score >= 1 &&
   score <= 100;
 
-const renderHighlightedSentence = (value: string) => {
+const renderHighlightedSentence = (value: string, isCorrect: boolean) => {
   const parts = value.split(/(<hl>.*?<\/hl>)/g).filter(Boolean);
 
   return parts.map((part, index) => {
@@ -49,7 +49,12 @@ const renderHighlightedSentence = (value: string) => {
     return (
       <span
         key={`${highlighted}-${index}`}
-        className="rounded bg-primary/10 px-1"
+        className={cn(
+          "rounded px-1 font-medium",
+          isCorrect
+            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+            : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+        )}
       >
         {highlighted}
       </span>
@@ -165,12 +170,25 @@ export function ContextGame({ rounds }: ContextGameProps) {
               >
                 {getResultLabel(item.isCorrect, revealedHints[index] ?? false)}
               </p>
+              {!item.isCorrect && (
+                <p className="mt-2 text-sm">
+                  <span className="text-muted-foreground">Your answer: </span>
+                  <span className="font-medium text-red-600 line-through dark:text-red-400">
+                    {answers[index]}
+                  </span>
+                </p>
+              )}
               <p className="mt-2 text-sm">
-                {renderHighlightedSentence(item.correctedSentenceWithHighlight)}
+                {renderHighlightedSentence(
+                  item.correctedSentenceWithHighlight,
+                  item.isCorrect,
+                )}
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {item.explanation}
-              </p>
+              {!item.isCorrect && !!item.explanation && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {item.explanation}
+                </p>
+              )}
             </div>
           ))}
         </div>
